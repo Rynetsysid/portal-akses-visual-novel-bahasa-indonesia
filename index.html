@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Akses Arsip Data Game</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* Global Reset untuk GitHub Pages */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    :root {
+      --primary: #ea580c;
+      --primary-hover: #c2410c;
+      --primary-light: #ffedd5;
+      --primary-border: #fed7aa;
+      --success: #16a34a;
+      --success-hover: #15803d;
+      --success-bg: #dcfce7;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-card: #ffffff;
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-soft: 0 10px 25px -5px rgba(234, 88, 12, 0.08);
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* CONTAINER UTAMA */
+    .portal-container {
+      max-width: 580px;
+      width: 100%;
+      margin: 20px auto;
+      padding: 24px 20px;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      line-height: 1.6;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    /* POP-UP LOADING OVERLAY */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      opacity: 1;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .loading-box {
+      background: var(--bg-card);
+      border: 1px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      text-align: center;
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.25);
+      max-width: 320px;
+      width: 85%;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--primary-light);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .loading-subtext {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* CHIBI MASCOT HEADER */
+    .hero-chibi {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .hero-chibi-img {
+      max-height: 180px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.12));
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .hero-chibi-img:hover {
+      transform: scale(1.06) rotate(-2deg);
+    }
+
+    .portal-title {
+      text-align: center;
+      color: var(--primary);
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin: 0 0 24px 0;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+
+    /* WIDGET STATISTIK */
+    .stats-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--primary-light);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(255, 122, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 122, 0, 0.08);
+    }
+
+    .stat-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* TAB SWITCHER */
+    .portal-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: #f1f5f9;
+      padding: 6px;
+      border-radius: var(--radius-md);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      font-size: 0.88rem;
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* FORM CARD */
+    .portal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .portal-field {
+      margin-bottom: 18px;
+    }
+
+    .portal-field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .portal-field input, 
+    .portal-field select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #cbd5e1;
+      background: var(--bg-card);
+      color: #0f172a;
+      box-sizing: border-box;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .portal-field input:focus, 
+    .portal-field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3.5px rgba(234, 88, 12, 0.15);
+    }
+
+    .portal-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #ff7a00, #ea580c);
+      color: #ffffff;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.98rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+    }
+
+    .portal-btn:hover:not(:disabled) { 
+      background: linear-gradient(135deg, #e66e00, #c2410c);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
+    }
+
+    .portal-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .portal-btn:disabled { 
+      background: #cbd5e1 !important; 
+      cursor: not-allowed; 
+      box-shadow: none !important; 
+      transform: none !important;
+    }
+
+    /* BOT HONEYPOT TRAP */
+    .trap-field {
+      display: none !important;
+      visibility: hidden !important;
+    }
+
+    .badge-info {
+      display: block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid var(--primary-light);
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    /* DESAIN CARD WHATSAPP & PAYMENT BARU */
+    .wa-card-custom {
+      margin-top: 16px;
+      padding: 18px 16px;
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+
+    .payment-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #166534;
+      margin-bottom: 10px;
+    }
+
+    .payment-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .pay-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-decoration: none !important;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .pay-saweria {
+      background: #faae2b;
+      color: #4a2800 !important;
+    }
+
+    .pay-saweria:hover {
+      background: #e0981e;
+      transform: translateY(-1px);
+    }
+    
+    .pay-shopeepay {
+      background: #ffffff !important;
+      color: #ee4d2d !important;
+      border: 1.5px solid #ee4d2d !important;
+    }
+
+    .pay-shopeepay:hover {
+      background: #fff5f3 !important;
+      border-color: #d73a1c !important;
+      color: #d73a1c !important;
+      transform: translateY(-1px);
+    }
+
+    .pay-icon-img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .confirm-wa-box {
+      border-top: 1px dashed #a7f3d0;
+      padding-top: 12px;
+      margin-top: 10px;
+    }
+
+    .confirm-text {
+      font-size: 0.82rem;
+      color: #15803d;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .confirm-note {
+      font-size: 0.76rem;
+      color: #166534;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+
+    .wa-btn-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 0.88rem;
+      border-radius: var(--radius-sm);
+      text-decoration: none !important;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+      transition: all 0.2s ease;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .wa-btn-link:hover {
+      background: linear-gradient(135deg, #20ba5a, #0e7065);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 211, 102, 0.35);
+    }
+
+    .wa-icon-svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* CATATAN MIMIN */
+    .mimin-note-box {
+      margin-top: 18px;
+      padding: 14px 16px;
+      background: #fffbebf5;
+      border-left: 4px solid #f59e0b;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      color: #78350f;
+      line-height: 1.5;
+    }
+
+    .mimin-note-title {
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: #92400e;
+    }
+
+    /* BOX PASSWORD ZIP */
+    .pass-box-highlight {
+      background: #ffffff;
+      border: 1.5px dashed #f59e0b;
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      margin-top: 8px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pass-key-code {
+      background: #f1f5f9;
+      color: var(--danger);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 800;
+      font-size: 0.95rem;
+      border: 1px solid #cbd5e1;
+      user-select: all;
+    }
+
+    .copy-btn {
+      background: #f59e0b;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .copy-btn:hover {
+      background: #d97706;
+    }
+
+    .copy-btn:active {
+      transform: scale(0.96);
+    }
+
+    #portalMsg {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+      line-height: 1.4;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .msg-success { 
+      background: var(--success-bg); 
+      color: var(--success-hover); 
+      border: 1px solid #bbf7d0; 
+    }
+
+    .msg-error { 
+      background: var(--danger-bg); 
+      color: var(--danger); 
+      border: 1px solid #fecaca; 
+    }
+
+    #downloadArea { 
+      display: none; 
+      margin-top: 20px; 
+      text-align: center; 
+      animation: fadeIn 0.4s ease;
+    }
+
+    .download-btn {
+      display: inline-block;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--success), var(--success-hover));
+      color: #ffffff !important;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(22, 163, 74, 0.4);
+    }
+
+    /* TRUST & PRIVACY ALERT BOX */
+    .trust-alert-box {
+      margin-top: 20px;
+      padding: 16px 18px;
+      background: #fff7ed;
+      border: 1.5px solid var(--primary-light);
+      border-radius: 14px;
+    }
+
+    .trust-alert-title {
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed var(--primary-border);
+      padding-bottom: 8px;
+    }
+
+    .trust-alert-list {
+      margin: 0 0 14px 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.82rem;
+      color: #7c2d12;
+    }
+
+    .trust-alert-list li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+
+    .trust-alert-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .trust-alert-list li::before {
+      content: "📌";
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 0.78rem;
+    }
+
+    .trust-wa-action {
+      padding-top: 10px;
+      border-top: 1px dashed var(--primary-border);
+      text-align: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!--POP-UP LOADING MODAL-->
+  <div aria-live="polite" class="loading-overlay" id="loadingModal">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <div class="loading-text">Memuat Data Portal...</div>
+      <div class="loading-subtext">Mohon tunggu sebentar ya ~</div>
+    </div>
+  </div>
+
+  <!--CONTAINER UTAMA-->
+  <div class="portal-container">
+    <div class="hero-chibi">
+      <img alt="Hime Arikawa Chibi Mascot" class="hero-chibi-img" src="https://blogger.googleusercontent.com/img/a/AVvXsEhZvDLBbNOd89RJyMk2UrAPvVl_ruymkH8hMU5ycLaEbmQdf6tqJoJhblVJ3eCawhT1GcI5VJZGc_x2eYEKqJfeU1qSy4jrDJ5k6TScV5770lB5JOh-0Pu2eZIDVChDIB5-7flXaI5NsoSJAK8XnT2jnDkp-N9o66aDvukA3nA8TnVJOUoeav_lYS9tCosc" />
+    </div>
+
+    <h2 class="portal-title">Akses Link Arsip Data Game</h2>
+
+    <div class="stats-box">
+      <div class="stat-card">
+        <div class="stat-value" id="valTotalUser">...</div>
+        <div class="stat-label">Total User Terdaftar</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value" id="valQuotaFree">...</div>
+        <div class="stat-label">Kuota Gratis Terpakai</div>
+      </div>
+    </div>
+
+    <div class="portal-tabs" role="tablist">
+      <button aria-selected="true" class="tab-btn active" id="tabFreeBtn" onclick="switchTab('FREE')" role="tab" type="button">🎁 Akses Gratis</button>
+      <button aria-selected="false" class="tab-btn" id="tabPremBtn" onclick="switchTab('PREMIUM')" role="tab" type="button">👑 Akses Premium (5k)</button>
+    </div>
+
+    <div class="portal-card">
+      <form id="portalForm" onsubmit="event.preventDefault(); submitClaim();">
+
+        <!--BOT HONEYPOT TRAP-->
+        <div class="trap-field">
+          <input autocomplete="off" id="websiteUrlTrap" name="website_url" tabindex="-1" type="text" />
+        </div>
+
+        <div class="portal-field">
+          <label for="selectGame">Pilih Game / Visual Novel:</label>
+          <select id="selectGame" required="">
+            <option value="">-- Memuat daftar game... --</option>
+          </select>
+        </div>
+
+        <div class="portal-field">
+          <label for="emailUser">Alamat Email (@gmail.com):</label>
+          <input autocomplete="email" id="emailUser" placeholder="contoh: namamu@gmail.com" required="" type="email" />
+        </div>
+
+        <div id="freeInfoArea">
+          <span class="badge-info">📌 Syarat Gratis: Akses Jangka Pendek | Batas Maksimal 3 User Aktif</span>
+        </div>
+
+        <div id="premInfoArea" style="display: none;">
+          <span class="badge-info" style="background: rgb(240, 249, 255); border-color: rgb(186, 230, 253); color: #0369a1;">👑 Keuntungan Premium: Akses Jangka Panjang!</span>
+
+          <div class="portal-field" style="margin-top: 14px;">
+            <label for="kodeAkses">Kode Akses Premium:</label>
+            <input autocomplete="off" id="kodeAkses" type="text" />
+          </div>
+
+          <!--KOTAK PAYMENT & WA MIMIN-->
+          <div class="wa-card-custom">
+            <div class="payment-title">Dapatkan kode akses dengan:</div>
+            
+            <div class="payment-grid">
+              <!--SAWERIA BUTTON-->
+              <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
+                Saweria
+              </a>
+
+              <!--SHOPEEPAY BUTTON-->
+              <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
+                ShopeePay
+              </button>
+            </div>
+
+            <div class="confirm-wa-box">
+              <div class="confirm-text">Konfirmasi Via Wa Mimin untuk mendapatkan kode akses</div>
+              <div class="confirm-note">arigatou gozaimasu~</div>
+              
+              <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" target="_blank">
+                <svg class="wa-icon-svg" viewBox="0 0 24 24">
+                  <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
+                </svg>
+                Konfirmasi via WA Mimin
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!--CATATAN MIMIN-->
+        <div class="mimin-note-box">
+          <div class="mimin-note-title">
+            <span>💡</span> Catatan Mimin:
+          </div>
+          1. Pastikan email yang diinputkan adalah email aktif. Jika email salah, akses tidak akan terverifikasi.<br />
+          2. Semua file arsip (.zip) dilindungi kata sandi:
+          <div class="pass-box-highlight">
+            <span>🔒 Password File Zip:</span>
+            <span class="pass-key-code" id="passText1">pass_rynet_key</span>
+            <button class="copy-btn" onclick="copyPassword('passText1', this)" type="button">Salin</button>
+          </div>
+        </div>
+
+        <button class="portal-btn" id="btnSubmit" style="margin-top: 18px;" type="submit">Buka Link Akses</button>
+      </form>
+
+      <div aria-live="assertive" id="portalMsg"></div>
+
+      <!--AREA DOWNLOAD (MUNCUL JIKA BERHASIL)-->
+      <div id="downloadArea">
+        <hr style="border: 0; border-top: 1px solid var(--primary-border); margin: 24px 0px;" />
+        <p style="color: #334155; font-size: 0.95rem; font-weight: 600; margin-bottom: 14px;">
+          🎉 Verifikasi Berhasil! Akses Google Drive Anda telah terbuka:
+        </p>
+
+        <a class="download-btn" href="javascript:void(0)" id="finalDriveBtn" onclick="handleDriveClick()">📁 Buka Folder Google Drive</a>
+
+        <div class="mimin-note-box" style="margin-top: 24px; text-align: left;">
+          <div class="mimin-note-title">
+            <span>🔑</span> Password Ekstrak File Game:
+          </div>
+          Gunakan password di bawah ini saat membuka/mengekstrak file ZIP di Google Drive:
+          <div class="pass-box-highlight">
+            <span class="pass-key-code" id="passText2">pass_rynet_key</span>
+            <button class="copy-btn" onclick="copyPassword('passText2', this)" type="button">Salin Password</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--TRUST & INFORMASI PRIVASI-->
+    <div class="trust-alert-box">
+      <div class="trust-alert-title">
+        <span>🛡️</span> Informasi &amp; Jaminan Keamanan Portal
+      </div>
+      <ul class="trust-alert-list">
+        <li>Portal akses ini disediakan untuk manajemen data link arsip mencegah terjadinya bot tracking yang merusak situs.</li>
+        <li>Mimin menjamin seluruh enkripsi komunikasi aman dan privat untuk semua user.</li>
+        <li>Mimin bertanggung jawab atas data email kalian dan murni hanya digunakan sebagai daftar akses Google Drive, tidak ada maksud untuk melakukan hacking.</li>
+      </ul>
+      <div class="trust-wa-action">
+        <span style="color: #92400e; display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">Jika kalian masih ragu, kalian boleh tanyakan langsung ke official WA Mimin:</span>
+        <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" style="font-size: 0.82rem; padding: 8px 16px;" target="_blank">
+          <svg class="wa-icon-svg" style="height: 15px; width: 15px;" viewBox="0 0 24 24">
+            <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
+          </svg>
+          Laporkan Masalah / Tanyakan Informasi
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!--SCRIPT LOGIKA FRONTEND-->
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
+
+    let currentTab = "FREE";
+    let userIp = "Unknown";
+    let userCountry = "Unknown";
+    let pageLoadTime = 0;
+    let rawDriveUrl = ""; 
+    let activeEmail = "";
+    let activeGameId = "";
+    let urlTokenParam = "";
+
+    function copyPassword(elementId, btnElem) {
+      const textElement = document.getElementById(elementId);
+      if (!textElement) return;
+      const text = textElement.innerText;
+      
+      if (!navigator.clipboard) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand("copy");
+          showCopyFeedback(btnElem);
+        } catch (err) {
+          console.error("Fallback salin gagal: ", err);
+        }
+        document.body.removeChild(textarea);
+        return;
+      }
+
+      navigator.clipboard.writeText(text).then(() => {
+        showCopyFeedback(btnElem);
+      }).catch(err => {
+        console.error("Gagal menyalin text: ", err);
+      });
+    }
+
+    function showCopyFeedback(btnElem) {
+      const originalHTML = btnElem.innerHTML;
+      btnElem.innerHTML = "&#10003; Tersalin!";
+      btnElem.style.background = "#16a34a";
+      setTimeout(() => {
+        btnElem.innerHTML = originalHTML;
+        btnElem.style.background = "#f59e0b";
+      }, 2000);
+    }
+
+    function copyShopeePay(btnElem) {
+      const shopeeNum = "085175409246";
+      
+      const copyAction = () => {
+        const originalHTML = btnElem.innerHTML;
+        btnElem.innerHTML = "&#10003; Disalin!";
+        btnElem.style.background = "#16a34a";
+        alert("Nomor ShopeePay (" + shopeeNum + ") berhasil disalin!");
+        setTimeout(() => {
+          btnElem.innerHTML = originalHTML;
+          btnElem.style.background = "#ee4d2d";
+        }, 2000);
+      };
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shopeeNum).then(copyAction).catch(() => {
+          fallbackCopyText(shopeeNum, copyAction);
+        });
+      } else {
+        fallbackCopyText(shopeeNum, copyAction);
+      }
+    }
+
+    function fallbackCopyText(text, callback) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        if (callback) callback();
+      } catch (err) {
+        console.error("Fallback copy failed", err);
+      }
+      document.body.removeChild(textarea);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      pageLoadTime = Date.now();
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      urlTokenParam = urlParams.get('token') || "";
+
+      if (!urlTokenParam) {
+        showMsg("⚠️ Akses Ditolak: Harap lewati WCaptcha di halaman postingan terlebih dahulu!", false);
+        const submitBtn = document.getElementById("btnSubmit");
+        if (submitBtn) submitBtn.disabled = true;
+        hideLoadingModal();
+        return;
+      }
+
+      loadInitData();
+      fetchUserGeo();
+    });
+
+    function hideLoadingModal() {
+      const modal = document.getElementById("loadingModal");
+      if (modal) {
+        modal.style.opacity = "0";
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, 300);
+      }
+    }
+
+    function switchTab(type) {
+      currentTab = type;
+      
+      const freeBtn = document.getElementById("tabFreeBtn");
+      const premBtn = document.getElementById("tabPremBtn");
+
+      if (freeBtn && premBtn) {
+        freeBtn.className = type === "FREE" ? "tab-btn active" : "tab-btn";
+        premBtn.className = type === "PREMIUM" ? "tab-btn active" : "tab-btn";
+
+        freeBtn.setAttribute("aria-selected", type === "FREE");
+        premBtn.setAttribute("aria-selected", type === "PREMIUM");
+      }
+
+      document.getElementById("freeInfoArea").style.display = type === "FREE" ? "block" : "none";
+      document.getElementById("premInfoArea").style.display = type === "PREMIUM" ? "block" : "none";
+      document.getElementById("kodeAkses").required = (type === "PREMIUM");
+    }
+
+    function loadInitData() {
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ 
+          action: "get_init_data",
+          token: urlTokenParam 
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const select = document.getElementById("selectGame");
+          select.innerHTML = '<option value="">-- Pilih Game / Visual Novel --</option>';
+
+          if (Array.isArray(data.games)) {
+            data.games.forEach(g => {
+              const opt = document.createElement("option");
+              opt.value = String(g.id).trim();
+              opt.textContent = g.title;
+              select.appendChild(opt);
+            });
+          }
+
+          if (data.lockedGameId) {
+            const targetGameId = String(data.lockedGameId).trim();
+            const isMatchFound = Array.from(select.options).some(opt => opt.value === targetGameId);
+
+            if (isMatchFound) {
+              select.value = targetGameId;
+              select.disabled = true;
+            }
+          }
+
+          if (data.stats) {
+            document.getElementById("valTotalUser").innerText = (data.stats.totalUser || 0) + " User";
+            document.getElementById("valQuotaFree").innerText = (data.stats.freeToday || 0) + " / " + (data.stats.maxFree || 3);
+          }
+        } else {
+          showMsg("⚠️ Akses Ditolak: " + (data.message || "Token tidak valid atau telah kadaluarsa!"), false);
+          document.getElementById("btnSubmit").disabled = true;
+          document.getElementById("selectGame").innerHTML = '<option value="">Akses Tidak Valid</option>';
+        }
+      })
+      .catch(err => {
+        console.error("Error Load Init Data:", err);
+        showMsg("Gagal terhubung ke server. Silakan muat ulang halaman.", false);
+      })
+      .finally(() => {
+        hideLoadingModal();
+      });
+    }
+
+    function fetchUserGeo() {
+      fetch("https://ipapi.co/json/")
+        .then(res => res.json())
+        .then(data => {
+          if (data.ip) userIp = data.ip;
+          if (data.country_code) userCountry = data.country_code;
+        })
+        .catch(() => {
+          fetch("https://api.ipify.org?format=json")
+            .then(r => r.json())
+            .then(d => { if (d.ip) userIp = d.ip; })
+            .catch(err => console.error("Error IP Fetch:", err));
+        });
+    }
+
+    function submitClaim() {
+      if (!urlTokenParam) {
+        showMsg("Gagal: Sesi Anda tidak valid. Silakan lewati WCaptcha di halaman postingan!", false);
+        return;
+      }
+
+      const select = document.getElementById("selectGame");
+      const gameId = select.value;
+      const email = document.getElementById("emailUser").value.trim().toLowerCase();
+      const kode = document.getElementById("kodeAkses").value.trim();
+      const botTrap = document.getElementById("websiteUrlTrap").value;
+      const btn = document.getElementById("btnSubmit");
+      const submitDuration = Date.now() - pageLoadTime;
+
+      if (!gameId) {
+        showMsg("Silakan pilih game terlebih dahulu!", false);
+        return;
+      }
+
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+      if (!emailRegex.test(email)) {
+        showMsg("Email wajib menggunakan alamat @gmail.com yang valid!", false);
+        return;
+      }
+
+      if (currentTab === "PREMIUM" && !kode) {
+        showMsg("Kode Akses Premium wajib diisi!", false);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Memproses Verifikasi...";
+
+      const payload = {
+        action: "claim_access",
+        token: urlTokenParam,
+        tipeAkses: currentTab,
+        emailUser: email,
+        idGame: gameId,
+        ipPublic: userIp,
+        userCountry: userCountry,
+        kodeAkses: kode,
+        botTrap: botTrap,
+        submitDuration: submitDuration
+      };
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.innerText = "Buka Link Akses";
+
+        if (data.success) {
+          showMsg(data.message, true);
+          document.getElementById("portalForm").style.display = "none";
+          document.getElementById("downloadArea").style.display = "block";
+
+          rawDriveUrl = data.driveUrl;
+          activeEmail = email;
+          activeGameId = gameId;
+        } else {
+          showMsg(data.message, false);
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.innerText = "Buka Link Akses";
+        showMsg("Terjadi kesalahan koneksi atau server.", false);
+        console.error("Error Claim:", err);
+      });
+    }
+
+    function handleDriveClick() {
+      if (!rawDriveUrl) {
+        alert("Akses link sudah dibuka/di-reset. Silakan lakukan verifikasi ulang jika ingin membuka kembali.");
+        return;
+      }
+
+      const targetUrl = rawDriveUrl;
+      rawDriveUrl = ""; 
+
+      const trackPayload = {
+        action: "track_click",
+        emailUser: activeEmail,
+        idGame: activeGameId,
+        ipPublic: userIp,
+        userCountry: userCountry
+      };
+
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(SCRIPT_URL, JSON.stringify(trackPayload));
+      } else {
+        fetch(SCRIPT_URL, { 
+          method: "POST", 
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(trackPayload) 
+        }).catch(err => console.error("Track click error:", err));
+      }
+
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+
+      const dlBtn = document.getElementById("finalDriveBtn");
+      if (dlBtn) {
+        dlBtn.style.display = "none";
+      }
+
+      showMsg("✅ Link Google Drive telah dibuka di tab baru.", true);
+    }
+
+    function showMsg(text, isSuccess) {
+      const msg = document.getElementById("portalMsg");
+      if (!msg) return;
+      msg.innerHTML = text;
+      msg.className = isSuccess ? "msg-success" : "msg-error";
+      msg.style.display = "block";
+    }
+  </script>
+</body>
+</html>
