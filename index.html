@@ -29,7 +29,7 @@
       justify-content: center;
       font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-      /* KONSEP: Latar Belakang Default (Mobile) */
+      /* Latar Belakang Default (Mobile) */
       background-image: url('mobile_bg.webp');
       background-size: cover;
       background-position: center;
@@ -37,7 +37,7 @@
       background-attachment: fixed;
     }
 
-    /* KONSEP: Responsive Breakpoint untuk Desktop */
+    /* Responsive Breakpoint untuk Desktop */
     @media (min-width: 768px) {
       body {
         background-image: url('desktop_bg.webp');
@@ -348,7 +348,7 @@
       line-height: 1.4;
     }
 
-    /* DESAIN CARD WHATSAPP & PAYMENT BARU */
+    /* CARD WHATSAPP & PAYMENT */
     .wa-card-custom {
       margin-top: 16px;
       padding: 18px 16px;
@@ -706,11 +706,11 @@
         </div>
 
         <div id="freeInfoArea">
-          <span class="badge-info">📌 Syarat Gratis: Akses Jangka Pendek | Batas Maksimal 3 User Aktif</span>
+          <span class="badge-info">📌 Syarat Gratis: Batas Klaim 1 Game / Hari | Akses Jangka Pendek</span>
         </div>
 
         <div id="premInfoArea" style="display: none;">
-          <span class="badge-info" style="background: rgb(240, 249, 255); border-color: rgb(186, 230, 253); color: #0369a1;">👑 Keuntungan Premium: Akses Jangka Panjang!</span>
+          <span class="badge-info" style="background: rgb(240, 249, 255); border-color: rgb(186, 230, 253); color: #0369a1;">👑 Keuntungan Premium: Akses Jangka Panjang & Batas Klaim 3 Game / Hari!</span>
 
           <div class="portal-field" style="margin-top: 14px;">
             <label for="kodeAkses">Kode Akses Premium:</label>
@@ -736,7 +736,7 @@
             </div>
 
             <div class="confirm-wa-box">
-              <div class="confirm-text">Konfirmasi Via Wa Mimin untuk mendapatkan kode akses</div>
+              <div class="confirm-text">Konfirmasi Via WA Mimin untuk mendapatkan kode akses</div>
               <div class="confirm-note">arigatou gozaimasu~</div>
               
               <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" target="_blank">
@@ -949,7 +949,7 @@
       document.getElementById("kodeAkses").required = (type === "PREMIUM");
     }
 
-    // MEMUAT DATA AWAL + DUKUNGAN TIMER COUNTDOWN
+    // MEMUAT DATA AWAL (DROPDOWN TIDAK DIKUNCI)
     function loadInitData() {
       fetch(SCRIPT_URL, {
         method: "POST",
@@ -974,15 +974,9 @@
             });
           }
 
-          if (data.lockedGameId) {
-            const targetGameId = String(data.lockedGameId).trim();
-            const isMatchFound = Array.from(select.options).some(opt => opt.value === targetGameId);
-
-            if (isMatchFound) {
-              select.value = targetGameId;
-              select.disabled = true;
-            }
-          }
+          // PERUBAHAN UTAMA: Game ID dari token TIDAK LAGI mengunci dropdown.
+          // User bebas memilih game apa saja!
+          select.disabled = false;
 
           if (data.stats) {
             document.getElementById("valTotalUser").innerText = (data.stats.totalUser || 0) + " User";
