@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Akses Visual Novel</title>
+  <title>Portal Akses Arsip Data Game</title>
   
   <!-- Favicon -->
   <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -151,9 +151,30 @@
       color: var(--primary);
       font-size: 1.45rem;
       font-weight: 800;
-      margin: 0 0 24px 0;
+      margin: 0 0 16px 0;
       letter-spacing: -0.02em;
       text-transform: uppercase;
+    }
+
+    /* BADGE TOKEN STATUS & TIMER COUNTDOWN */
+    .token-status-box {
+      display: none;
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 0.88rem;
+      color: #166534;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(22, 163, 74, 0.08);
+    }
+
+    .token-timer {
+      font-weight: 800;
+      color: #dc2626;
+      font-size: 1.05rem;
     }
 
     /* WIDGET STATISTIK */
@@ -268,6 +289,13 @@
     .portal-field select:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3.5px rgba(234, 88, 12, 0.15);
+    }
+
+    .portal-field input:disabled,
+    .portal-field select:disabled {
+      background-color: #f1f5f9;
+      color: #64748b;
+      cursor: not-allowed;
     }
 
     .portal-btn {
@@ -618,7 +646,7 @@
 </head>
 <body>
 
-  <!--POP-UP LOADING MODAL-->
+  <!-- POP-UP LOADING MODAL -->
   <div aria-live="polite" class="loading-overlay" id="loadingModal">
     <div class="loading-box">
       <div class="spinner"></div>
@@ -627,13 +655,18 @@
     </div>
   </div>
 
-  <!--CONTAINER UTAMA-->
+  <!-- CONTAINER UTAMA -->
   <div class="portal-container">
     <div class="hero-chibi">
       <img alt="Hime Arikawa Chibi Mascot" class="hero-chibi-img" src="https://blogger.googleusercontent.com/img/a/AVvXsEhZvDLBbNOd89RJyMk2UrAPvVl_ruymkH8hMU5ycLaEbmQdf6tqJoJhblVJ3eCawhT1GcI5VJZGc_x2eYEKqJfeU1qSy4jrDJ5k6TScV5770lB5JOh-0Pu2eZIDVChDIB5-7flXaI5NsoSJAK8XnT2jnDkp-N9o66aDvukA3nA8TnVJOUoeav_lYS9tCosc" />
     </div>
 
-    <h2 class="portal-title">Akses Link Arsip Data Visual Novel</h2>
+    <h2 class="portal-title">Akses Link Arsip Data Game</h2>
+
+    <!-- BADGE INFORMASI TOKEN & TIMER -->
+    <div class="token-status-box" id="tokenStatusBox">
+      🟢 <strong>Token Terverifikasi:</strong> Sesi aktif berakhir dalam <span class="token-timer" id="timerDisplay">05:00</span>
+    </div>
 
     <div class="stats-box">
       <div class="stat-card">
@@ -655,7 +688,7 @@
     <div class="portal-card">
       <form id="portalForm" onsubmit="event.preventDefault(); submitClaim();">
 
-        <!--BOT HONEYPOT TRAP-->
+        <!-- BOT HONEYPOT TRAP -->
         <div class="trap-field">
           <input autocomplete="off" id="websiteUrlTrap" name="website_url" tabindex="-1" type="text" />
         </div>
@@ -684,18 +717,18 @@
             <input autocomplete="off" id="kodeAkses" type="text" />
           </div>
 
-          <!--KOTAK PAYMENT & WA MIMIN-->
+          <!-- KOTAK PAYMENT & WA MIMIN -->
           <div class="wa-card-custom">
             <div class="payment-title">Dapatkan kode akses dengan:</div>
             
             <div class="payment-grid">
-              <!--SAWERIA BUTTON-->
+              <!-- SAWERIA BUTTON -->
               <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank">
                 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
                 Saweria
               </a>
 
-              <!--SHOPEEPAY BUTTON-->
+              <!-- SHOPEEPAY BUTTON -->
               <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
                 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
                 ShopeePay
@@ -716,7 +749,7 @@
           </div>
         </div>
 
-        <!--CATATAN MIMIN-->
+        <!-- CATATAN MIMIN -->
         <div class="mimin-note-box">
           <div class="mimin-note-title">
             <span>💡</span> Catatan Mimin:
@@ -735,7 +768,7 @@
 
       <div aria-live="assertive" id="portalMsg"></div>
 
-      <!--AREA DOWNLOAD (MUNCUL JIKA BERHASIL)-->
+      <!-- AREA DOWNLOAD (MUNCUL JIKA BERHASIL) -->
       <div id="downloadArea">
         <hr style="border: 0; border-top: 1px solid var(--primary-border); margin: 24px 0px;" />
         <p style="color: #334155; font-size: 0.95rem; font-weight: 600; margin-bottom: 14px;">
@@ -757,7 +790,7 @@
       </div>
     </div>
 
-    <!--TRUST & INFORMASI PRIVASI-->
+    <!-- TRUST & INFORMASI PRIVASI -->
     <div class="trust-alert-box">
       <div class="trust-alert-title">
         <span>🛡️</span> Informasi &amp; Jaminan Keamanan Portal
@@ -779,7 +812,7 @@
     </div>
   </div>
 
-  <!--SCRIPT LOGIKA FRONTEND-->
+  <!-- SCRIPT LOGIKA FRONTEND -->
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
 
@@ -791,6 +824,7 @@
     let activeEmail = "";
     let activeGameId = "";
     let urlTokenParam = "";
+    let countdownInterval = null;
 
     function copyPassword(elementId, btnElem) {
       const textElement = document.getElementById(elementId);
@@ -877,9 +911,7 @@
       urlTokenParam = urlParams.get('token') || "";
 
       if (!urlTokenParam) {
-        showMsg("⚠️ Akses Ditolak: Harap lewati WCaptcha di halaman postingan terlebih dahulu!", false);
-        const submitBtn = document.getElementById("btnSubmit");
-        if (submitBtn) submitBtn.disabled = true;
+        lockPortalState("⚠️ Akses Ditolak: Anda belum menyelesaikan verifikasi WCaptcha di postingan blog!");
         hideLoadingModal();
         return;
       }
@@ -917,6 +949,7 @@
       document.getElementById("kodeAkses").required = (type === "PREMIUM");
     }
 
+    // MEMUAT DATA AWAL + DUKUNGAN TIMER COUNTDOWN
     function loadInitData() {
       fetch(SCRIPT_URL, {
         method: "POST",
@@ -955,10 +988,16 @@
             document.getElementById("valTotalUser").innerText = (data.stats.totalUser || 0) + " User";
             document.getElementById("valQuotaFree").innerText = (data.stats.freeToday || 0) + " / " + (data.stats.maxFree || 3);
           }
+
+          // Inisialisasi Timer 5 Menit berbasis Token Timestamp
+          if (data.tokenTimestamp) {
+            startCountdownTimer(data.tokenTimestamp);
+          } else {
+            startCountdownTimer(Date.now());
+          }
+
         } else {
-          showMsg("⚠️ Akses Ditolak: " + (data.message || "Token tidak valid atau telah kadaluarsa!"), false);
-          document.getElementById("btnSubmit").disabled = true;
-          document.getElementById("selectGame").innerHTML = '<option value="">Akses Tidak Valid</option>';
+          lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid atau sudah kadaluwarsa!"));
         }
       })
       .catch(err => {
@@ -968,6 +1007,60 @@
       .finally(() => {
         hideLoadingModal();
       });
+    }
+
+    // HITUNG MUNDUR REAL-TIME TOKEN (5 MENIT MAX)
+    function startCountdownTimer(tokenTimestamp) {
+      const maxDuration = 5 * 60 * 1000; // 5 Menit
+      const expiryTime = tokenTimestamp + maxDuration;
+      const statusBox = document.getElementById("tokenStatusBox");
+      const timerDisplay = document.getElementById("timerDisplay");
+
+      if (statusBox) statusBox.style.display = "block";
+
+      function updateTimer() {
+        const now = Date.now();
+        const remaining = expiryTime - now;
+
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+          if (timerDisplay) timerDisplay.innerText = "00:00";
+          lockPortalState("⏰ Sesi WCaptcha telah kadaluwarsa (Batas waktu 5 Menit habis). Silakan ulang dari blog!");
+          return;
+        }
+
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        const formatted = String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+
+        if (timerDisplay) timerDisplay.innerText = formatted;
+      }
+
+      updateTimer();
+      countdownInterval = setInterval(updateTimer, 1000);
+    }
+
+    // MENGUNCI FORM & MENAMPILKAN PESAN DITOLAK
+    function lockPortalState(errorMessage) {
+      showMsg(errorMessage, false);
+      
+      const submitBtn = document.getElementById("btnSubmit");
+      const selectGame = document.getElementById("selectGame");
+      const emailUser = document.getElementById("emailUser");
+      const kodeAkses = document.getElementById("kodeAkses");
+
+      if (submitBtn) submitBtn.disabled = true;
+      if (selectGame) selectGame.disabled = true;
+      if (emailUser) emailUser.disabled = true;
+      if (kodeAkses) kodeAkses.disabled = true;
+
+      const statusBox = document.getElementById("tokenStatusBox");
+      if (statusBox) {
+        statusBox.style.background = "#fee2e2";
+        statusBox.style.borderColor = "#fecaca";
+        statusBox.style.color = "#dc2626";
+        statusBox.innerHTML = "🔴 <strong>Akses Terkunci:</strong> Silakan verifikasi ulang melalui tombol download di blog.";
+      }
     }
 
     function fetchUserGeo() {
@@ -1042,6 +1135,7 @@
         btn.innerText = "Buka Link Akses";
 
         if (data.success) {
+          if (countdownInterval) clearInterval(countdownInterval);
           showMsg(data.message, true);
           document.getElementById("portalForm").style.display = "none";
           document.getElementById("downloadArea").style.display = "block";
