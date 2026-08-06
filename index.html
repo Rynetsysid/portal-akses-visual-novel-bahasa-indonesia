@@ -812,7 +812,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT LOGIKA FRONTEND -->
+  <!-- SCRIPT LOGIKA FRONTEND INTEGRATED WITH GAS BACKEND -->
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
 
@@ -823,7 +823,6 @@
     let rawDriveUrl = ""; 
     let activeEmail = "";
     let activeGameId = "";
-    let urlTokenParam = "";
     let countdownInterval = null;
 
     function copyPassword(elementId, btnElem) {
@@ -904,20 +903,85 @@
       document.body.removeChild(textarea);
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
+    // =========================================================================
+    // INITIALIZATION & LIFECYCLE MANAGEMENT (SKENARIO A & B)
+    // =========================================================================
+    document.addEventListener("DOMContentLoaded", async function() {
       pageLoadTime = Date.now();
       
       const urlParams = new URLSearchParams(window.location.search);
-      urlTokenParam = urlParams.get('token') || "";
+      const token = urlParams.get('token');
+      const sessionData = sessionStorage.getItem('portal_session');
 
-      if (!urlTokenParam) {
-        lockPortalState("⚠️ Akses Ditolak: Anda belum menyelesaikan verifikasi WCaptcha di postingan blog!");
-        hideLoadingModal();
+      // SKENARIO B: PAGE REFRESH (SessionStorage Tersedia)
+      if (sessionData) {
+        try {
+          const parsed = JSON.parse(sessionData);
+          const remainingMs = parsed.targetTime - Date.now();
+
+          if (remainingMs > 0) {
+            // Hapus token dari URL jika tersisa
+            if (token) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            populateGames(parsed.games);
+            updateStatsUI(parsed.stats);
+            startCountdownTimer(parsed.targetTime);
+            fetchUserGeo();
+            hideLoadingModal();
+            return;
+          } else {
+            // Sesi habis
+            sessionStorage.removeItem('portal_session');
+            lockPortalState("⏰ Sesi aktif telah habis. Silakan verifikasi ulang melalui Blogspot.");
+            hideLoadingModal();
+            return;
+          }
+        } catch (e) {
+          sessionStorage.removeItem('portal_session');
+        }
+      }
+
+      // SKENARIO A: KUNJUNGAN PERTAMA (Dengan Token URL)
+      if (token) {
+        try {
+          // Validasi Token ke GAS Backend
+          const res = await fetch(`${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}`);
+          const data = await res.json();
+
+          if (data.status === "success" || data.success) {
+            const durationMs = (data.durationSeconds || 300) * 1000;
+            const targetTime = Date.now() + durationMs;
+
+            // Simpan ke sessionStorage
+            sessionStorage.setItem('portal_session', JSON.stringify({
+              games: data.games || [],
+              stats: data.stats || {},
+              targetTime: targetTime
+            }));
+
+            // Hapus parameter token dari Address Bar Browser
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            populateGames(data.games);
+            updateStatsUI(data.stats);
+            startCountdownTimer(targetTime);
+            fetchUserGeo();
+          } else {
+            lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid atau sudah digunakan!"));
+          }
+        } catch (err) {
+          console.error("Error Validasi Token:", err);
+          lockPortalState("⚠️ Gagal terhubung ke server verifikasi. Silakan coba lagi nanti.");
+        } finally {
+          hideLoadingModal();
+        }
         return;
       }
 
-      loadInitData();
-      fetchUserGeo();
+      // AKSES TANPA TOKEN & TANPA SESI
+      lockPortalState("⚠️ Akses Ditolak: Anda belum menyelesaikan verifikasi WCaptcha di postingan blog!");
+      hideLoadingModal();
     });
 
     function hideLoadingModal() {
@@ -928,6 +992,31 @@
           modal.style.display = "none";
         }, 300);
       }
+    }
+
+    function populateGames(games) {
+      const select = document.getElementById("selectGame");
+      if (!select) return;
+      
+      select.innerHTML = '<option value="">-- Pilih Game / Visual Novel --</option>';
+      if (Array.isArray(games)) {
+        games.forEach(g => {
+          const opt = document.createElement("option");
+          opt.value = String(g.id).trim();
+          opt.textContent = g.title;
+          select.appendChild(opt);
+        });
+      }
+      select.disabled = false;
+    }
+
+    function updateStatsUI(stats) {
+      if (!stats) return;
+      const elTotal = document.getElementById("valTotalUser");
+      const elQuota = document.getElementById("valQuotaFree");
+      
+      if (elTotal) elTotal.innerText = (stats.totalUser || 0) + " User";
+      if (elQuota) elQuota.innerText = (stats.freeToday || 0) + " / " + (stats.maxFree || 3);
     }
 
     function switchTab(type) {
@@ -949,77 +1038,21 @@
       document.getElementById("kodeAkses").required = (type === "PREMIUM");
     }
 
-    // MEMUAT DATA AWAL (DROPDOWN TIDAK DIKUNCI)
-    function loadInitData() {
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ 
-          action: "get_init_data",
-          token: urlTokenParam 
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          const select = document.getElementById("selectGame");
-          select.innerHTML = '<option value="">-- Pilih Game / Visual Novel --</option>';
-
-          if (Array.isArray(data.games)) {
-            data.games.forEach(g => {
-              const opt = document.createElement("option");
-              opt.value = String(g.id).trim();
-              opt.textContent = g.title;
-              select.appendChild(opt);
-            });
-          }
-
-          // PERUBAHAN UTAMA: Game ID dari token TIDAK LAGI mengunci dropdown.
-          // User bebas memilih game apa saja!
-          select.disabled = false;
-
-          if (data.stats) {
-            document.getElementById("valTotalUser").innerText = (data.stats.totalUser || 0) + " User";
-            document.getElementById("valQuotaFree").innerText = (data.stats.freeToday || 0) + " / " + (data.stats.maxFree || 3);
-          }
-
-          // Inisialisasi Timer 5 Menit berbasis Token Timestamp
-          if (data.tokenTimestamp) {
-            startCountdownTimer(data.tokenTimestamp);
-          } else {
-            startCountdownTimer(Date.now());
-          }
-
-        } else {
-          lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid atau sudah kadaluwarsa!"));
-        }
-      })
-      .catch(err => {
-        console.error("Error Load Init Data:", err);
-        showMsg("Gagal terhubung ke server. Silakan muat ulang halaman.", false);
-      })
-      .finally(() => {
-        hideLoadingModal();
-      });
-    }
-
-    // HITUNG MUNDUR REAL-TIME TOKEN (5 MENIT MAX)
-    function startCountdownTimer(tokenTimestamp) {
-      const maxDuration = 5 * 60 * 1000; // 5 Menit
-      const expiryTime = tokenTimestamp + maxDuration;
+    // HITUNG MUNDUR TIMER BERBASIS TARGET TIMESTAMP (RESILIENT TERHADAP REFRESH)
+    function startCountdownTimer(targetTime) {
       const statusBox = document.getElementById("tokenStatusBox");
       const timerDisplay = document.getElementById("timerDisplay");
 
       if (statusBox) statusBox.style.display = "block";
 
       function updateTimer() {
-        const now = Date.now();
-        const remaining = expiryTime - now;
+        const remaining = targetTime - Date.now();
 
         if (remaining <= 0) {
           clearInterval(countdownInterval);
+          sessionStorage.removeItem('portal_session');
           if (timerDisplay) timerDisplay.innerText = "00:00";
-          lockPortalState("⏰ Sesi WCaptcha telah kadaluwarsa (Batas waktu 5 Menit habis). Silakan ulang dari blog!");
+          lockPortalState("⏰ Sesi WCaptcha telah kadaluwarsa. Silakan lewati captcha dari blog kembali!");
           return;
         }
 
@@ -1031,6 +1064,7 @@
       }
 
       updateTimer();
+      if (countdownInterval) clearInterval(countdownInterval);
       countdownInterval = setInterval(updateTimer, 1000);
     }
 
@@ -1073,11 +1107,6 @@
     }
 
     function submitClaim() {
-      if (!urlTokenParam) {
-        showMsg("Gagal: Sesi Anda tidak valid. Silakan lewati WCaptcha di halaman postingan!", false);
-        return;
-      }
-
       const select = document.getElementById("selectGame");
       const gameId = select.value;
       const email = document.getElementById("emailUser").value.trim().toLowerCase();
@@ -1107,7 +1136,6 @@
 
       const payload = {
         action: "claim_access",
-        token: urlTokenParam,
         tipeAkses: currentTab,
         emailUser: email,
         idGame: gameId,
@@ -1130,6 +1158,7 @@
 
         if (data.success) {
           if (countdownInterval) clearInterval(countdownInterval);
+          sessionStorage.removeItem('portal_session'); // Bersihkan sesi lokal
           showMsg(data.message, true);
           document.getElementById("portalForm").style.display = "none";
           document.getElementById("downloadArea").style.display = "block";
