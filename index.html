@@ -719,11 +719,11 @@
         </div>
 
         <div id="freeInfoArea">
-          <span class="badge-info">📌 Syarat Gratis: Akses Jangka Pendek</span>
+          <span class="badge-info">📌 Syarat Gratis: Akses Jangka Pendek!</span>
         </div>
 
         <div id="premInfoArea" style="display: none;">
-          <span class="badge-info" style="background: rgb(240, 249, 255); border-color: rgb(186, 230, 253); color: #0369a1;">👑 Keuntungan Premium: Akses Jangka Panjang</span>
+          <span class="badge-info" style="background: rgb(240, 249, 255); border-color: rgb(186, 230, 253); color: #0369a1;">👑 Keuntungan Premium: Akses Jangka Panjang!</span>
 
           <div class="portal-field" style="margin-top: 14px;">
             <label for="kodeAkses">Kode Akses Premium:</label>
@@ -1042,7 +1042,7 @@
     }
 
     // =========================================================================
-    // DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME)
+    // DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME) [UPDATED & FIXED]
     // =========================================================================
     function onCategoryChange() {
       const categorySelect = document.getElementById("selectCategory");
@@ -1060,15 +1060,23 @@
 
       // Filter Game berdasarkan Kategori yang dipilih
       const filteredGames = masterGamesData.filter(g => {
-        if (!g.kategori) {
-          // Fallback pencocokan manual via ID jika kolom Kategori belum diisi di Sheet
-          const gameId = String(g.id).toUpperCase();
-          if (selectedCategory === "RPG" && gameId.includes("RPG")) return true;
-          if (selectedCategory === "RVN" && gameId.includes("RVN")) return true;
-          if (selectedCategory === "VN" && gameId.includes("VN") && !gameId.includes("RVN")) return true;
-          return false;
+        const cat = g.kategori ? String(g.kategori).trim().toUpperCase() : "";
+        const gameId = String(g.id || "").toUpperCase();
+
+        // 1. Cek berdasarkan nilai Kolom Kategori dari Spreadsheet
+        if (cat) {
+          if (selectedCategory === "RPG" && (cat === "RPG" || cat.includes("ROLE"))) return true;
+          if (selectedCategory === "RVN" && (cat === "RVN" || cat.includes("RAISING"))) return true;
+          if (selectedCategory === "VN" && (cat === "VN" || cat === "VISUAL NOVEL")) return true;
+          if (cat === selectedCategory) return true;
         }
-        return String(g.kategori).trim().toUpperCase() === selectedCategory;
+
+        // 2. Fallback jika Kolom Kategori di Sheet Kosong (Cek via Prefix ID Game)
+        if (selectedCategory === "RPG" && gameId.includes("RPG")) return true;
+        if (selectedCategory === "RVN" && gameId.includes("RVN")) return true;
+        if (selectedCategory === "VN" && gameId.includes("VN") && !gameId.includes("RVN")) return true;
+
+        return false;
       });
 
       if (filteredGames.length === 0) {
@@ -1084,7 +1092,7 @@
       filteredGames.forEach(g => {
         const opt = document.createElement("option");
         opt.value = String(g.id).trim();
-        opt.textContent = g.title;
+        opt.textContent = g.title || g.namaGame || g.id;
         gameSelect.appendChild(opt);
       });
     }
