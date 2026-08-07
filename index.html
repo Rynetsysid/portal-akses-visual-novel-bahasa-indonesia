@@ -694,7 +694,7 @@
           <input autocomplete="off" id="websiteUrlTrap" name="website_url" tabindex="-1" type="text" />
         </div>
 
-        <!-- 1. PILIH KATEGORI ARSIP (DROPDOWN UTAMA) -->
+        <!-- 1. PILIH KATEGORI ARSIP -->
         <div class="portal-field">
           <label for="selectCategory">Pilih Kategori Arsip:</label>
           <select id="selectCategory" onchange="onCategoryChange()" required="">
@@ -705,7 +705,7 @@
           </select>
         </div>
 
-        <!-- 2. PILIH GAME / VISUAL NOVEL (DEPENDENT DROPDOWN - TERKUNCI AWAL) -->
+        <!-- 2. PILIH GAME / VISUAL NOVEL -->
         <div class="portal-field">
           <label for="selectGame">Pilih Game / Visual Novel:</label>
           <select id="selectGame" disabled required="">
@@ -727,7 +727,8 @@
 
           <div class="portal-field" style="margin-top: 14px;">
             <label for="kodeAkses">Kode Akses Premium:</label>
-            <input autocomplete="off" id="kodeAkses" type="text" />
+            <!-- FIX: Added id="kodeAkses" attribute -->
+            <input autocomplete="off" id="kodeAkses" placeholder="Masukkan kode akses premium" type="text" />
           </div>
 
           <!-- KOTAK PAYMENT & WA MIMIN -->
@@ -838,7 +839,7 @@
     let activeGameId = "";
     let activeToken = ""; 
     let countdownInterval = null;
-    let masterGamesData = []; // VARIABEL PENAMPUNG MASTER DATA GAME UNTUK DEPENDENT DROPDOWN
+    let masterGamesData = [];
 
     // PERINGATAN REFRESH HALAMAN
     window.addEventListener("beforeunload", function (e) {
@@ -875,26 +876,14 @@
       const text = textElement.innerText;
       
       if (!navigator.clipboard) {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-          document.execCommand("copy");
-          showCopyFeedback(btnElem);
-        } catch (err) {
-          console.error("Fallback salin gagal: ", err);
-        }
-        document.body.removeChild(textarea);
+        fallbackCopyText(text, () => showCopyFeedback(btnElem));
         return;
       }
 
       navigator.clipboard.writeText(text).then(() => {
         showCopyFeedback(btnElem);
-      }).catch(err => {
-        console.error("Gagal menyalin text: ", err);
+      }).catch(() => {
+        fallbackCopyText(text, () => showCopyFeedback(btnElem));
       });
     }
 
@@ -969,7 +958,6 @@
               window.history.replaceState({}, document.title, window.location.pathname);
             }
             
-            // Simpan Master Games Data
             masterGamesData = sessionData.games || [];
             
             updateStatsUI(sessionData.stats);
@@ -1042,14 +1030,13 @@
     }
 
     // =========================================================================
-    // DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME) [UPDATED & FIXED]
+    // DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME)
     // =========================================================================
     function onCategoryChange() {
       const categorySelect = document.getElementById("selectCategory");
       const gameSelect = document.getElementById("selectGame");
       const selectedCategory = categorySelect.value.trim().toUpperCase();
 
-      // Reset Dropdown Game
       gameSelect.innerHTML = "";
 
       if (!selectedCategory) {
@@ -1058,12 +1045,10 @@
         return;
       }
 
-      // Filter Game berdasarkan Kategori yang dipilih
       const filteredGames = masterGamesData.filter(g => {
         const cat = g.kategori ? String(g.kategori).trim().toUpperCase() : "";
         const gameId = String(g.id || "").toUpperCase();
 
-        // 1. Cek berdasarkan nilai Kolom Kategori dari Spreadsheet
         if (cat) {
           if (selectedCategory === "RPG" && (cat === "RPG" || cat.includes("ROLE"))) return true;
           if (selectedCategory === "RVN" && (cat === "RVN" || cat.includes("RAISING"))) return true;
@@ -1071,7 +1056,6 @@
           if (cat === selectedCategory) return true;
         }
 
-        // 2. Fallback jika Kolom Kategori di Sheet Kosong (Cek via Prefix ID Game)
         if (selectedCategory === "RPG" && gameId.includes("RPG")) return true;
         if (selectedCategory === "RVN" && gameId.includes("RVN")) return true;
         if (selectedCategory === "VN" && gameId.includes("VN") && !gameId.includes("RVN")) return true;
@@ -1085,7 +1069,6 @@
         return;
       }
 
-      // Isi Dropdown Game dengan hasil filter
       gameSelect.disabled = false;
       gameSelect.innerHTML = '<option value="">-- Pilih Game / Visual Novel --</option>';
       
@@ -1122,7 +1105,11 @@
 
       document.getElementById("freeInfoArea").style.display = type === "FREE" ? "block" : "none";
       document.getElementById("premInfoArea").style.display = type === "PREMIUM" ? "block" : "none";
-      document.getElementById("kodeAkses").required = (type === "PREMIUM");
+      
+      const kodeElem = document.getElementById("kodeAkses");
+      if (kodeElem) {
+        kodeElem.required = (type === "PREMIUM");
+      }
     }
 
     function startCountdownTimer(targetTime) {
@@ -1200,7 +1187,10 @@
       const categoryVal = selectCategory.value;
       const gameId = selectGame.value;
       const email = document.getElementById("emailUser").value.trim().toLowerCase();
-      const kode = document.getElementById("kodeAkses").value.trim();
+      
+      const kodeInput = document.getElementById("kodeAkses");
+      const kode = kodeInput ? kodeInput.value.trim() : "";
+      
       const botTrap = document.getElementById("websiteUrlTrap").value;
       const btn = document.getElementById("btnSubmit");
       const submitDuration = Date.now() - pageLoadTime;
@@ -1215,6 +1205,7 @@
         return;
       }
 
+      // Regex diperluas agar mendukung email dengan karakter '+' (e.g. user+tag@gmail.com)
       const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
       if (!emailRegex.test(email)) {
         showMsg("Email wajib menggunakan alamat @gmail.com yang valid!", false);
