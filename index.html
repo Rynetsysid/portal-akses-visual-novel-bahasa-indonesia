@@ -812,7 +812,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT LOGIKA FRONTEND INTEGRATED WITH GAS BACKEND -->
+  <!-- SCRIPT LOGIKA FRONTEND INTEGRATED WITH GAS BACKEND V4.2 -->
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
 
@@ -833,6 +833,27 @@
         e.returnValue = "";
       }
     });
+
+    // MEMBANTU MENGELOLA STORAGE DENGAN FALLBACK LOKAL TERPERCAYA
+    function saveSessionData(data) {
+      const strData = JSON.stringify(data);
+      try { localStorage.setItem('portal_session', strData); } catch(e){}
+      try { sessionStorage.setItem('portal_session', strData); } catch(e){}
+    }
+
+    function getSessionData() {
+      let data = null;
+      try { data = localStorage.getItem('portal_session'); } catch(e){}
+      if (!data) {
+        try { data = sessionStorage.getItem('portal_session'); } catch(e){}
+      }
+      return data ? JSON.parse(data) : null;
+    }
+
+    function removeSessionData() {
+      try { localStorage.removeItem('portal_session'); } catch(e){}
+      try { sessionStorage.removeItem('portal_session'); } catch(e){}
+    }
 
     function copyPassword(elementId, btnElem) {
       const textElement = document.getElementById(elementId);
@@ -913,48 +934,47 @@
     }
 
     // =========================================================================
-    // INITIALIZATION & LIFECYCLE MANAGEMENT (SKENARIO A & B)
+    // INITIALIZATION & LIFECYCLE MANAGEMENT (BACKEND V4.2 PRESISI)
     // =========================================================================
     document.addEventListener("DOMContentLoaded", async function() {
       pageLoadTime = Date.now();
       
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
-      const sessionData = sessionStorage.getItem('portal_session');
+      const sessionData = getSessionData();
 
-      // SKENARIO B: PAGE REFRESH (SessionStorage Tersedia)
+      // SKENARIO B: PAGE REFRESH / SESI TERLINDUNGI LOKAL
       if (sessionData) {
         try {
-          const parsed = JSON.parse(sessionData);
-          const remainingMs = parsed.targetTime - Date.now();
+          const remainingMs = sessionData.targetTime - Date.now();
 
           if (remainingMs > 0) {
             // Ambil token tersimpan dari sesi lokal
-            if (parsed.token) activeToken = parsed.token;
+            if (sessionData.token) activeToken = sessionData.token;
 
-            // Hapus token dari URL jika tersisa
+            // Hapus token dari URL jika masih tertulis
             if (token) {
               window.history.replaceState({}, document.title, window.location.pathname);
             }
-            populateGames(parsed.games);
-            updateStatsUI(parsed.stats);
-            startCountdownTimer(parsed.targetTime);
+            populateGames(sessionData.games);
+            updateStatsUI(sessionData.stats);
+            startCountdownTimer(sessionData.targetTime);
             fetchUserGeo();
             hideLoadingModal();
             return;
           } else {
-            // Sesi habis
-            sessionStorage.removeItem('portal_session');
+            // Sesi kadaluwarsa
+            removeSessionData();
             lockPortalState("⏰ Sesi aktif telah habis. Silakan verifikasi ulang melalui Blogspot.");
             hideLoadingModal();
             return;
           }
         } catch (e) {
-          sessionStorage.removeItem('portal_session');
+          removeSessionData();
         }
       }
 
-      // SKENARIO A: KUNJUNGAN PERTAMA (Dengan Token URL)
+      // SKENARIO A: KUNJUNGAN PERTAMA / TOKEN DARI BLOGSPOT
       if (token) {
         try {
           activeToken = token; // SIMPAN TOKEN KE VARIABEL GLOBAL
@@ -963,17 +983,18 @@
           const res = await fetch(`${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}`);
           const data = await res.json();
 
-          if (data.status === "success" || data.success) {
+          // SISIPAN V4.2: DUKUNGAN "burned_fallback" AGAR USER TIDAK DIBLOKIR JIKA SESI DIAKUASAI PADA TAB SAMA
+          if (data.status === "success" || data.success || data.status === "burned_fallback") {
             const durationMs = (data.durationSeconds || 300) * 1000;
             const targetTime = Date.now() + durationMs;
 
-            // Simpan ke sessionStorage beserta token
-            sessionStorage.setItem('portal_session', JSON.stringify({
+            // Simpan ke Sesi Lokal (Storage)
+            saveSessionData({
               token: token,
               games: data.games || [],
               stats: data.stats || {},
               targetTime: targetTime
-            }));
+            });
 
             // Hapus parameter token dari Address Bar Browser
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -1065,7 +1086,7 @@
 
         if (remaining <= 0) {
           clearInterval(countdownInterval);
-          sessionStorage.removeItem('portal_session');
+          removeSessionData();
           if (timerDisplay) timerDisplay.innerText = "00:00";
           lockPortalState("⏰ Sesi WCaptcha telah kadaluwarsa. Silakan lewati captcha dari blog kembali!");
           return;
@@ -1149,10 +1170,12 @@
       btn.disabled = true;
       btn.innerText = "Memproses Verifikasi...";
 
-      // PAYLOAD TERMASUK PARAMETER TOKEN
+      // PAYLOAD DIPERBARUI (V4.2 COMPATIBLE): Mengirimkan wcaptchaToken & sessionToken
       const payload = {
         action: "claim_access",
-        token: activeToken, // MENGERIMKAN TOKEN KE SERVERSIDE GAS
+        token: activeToken,
+        wcaptchaToken: activeToken,
+        sessionToken: activeToken,
         tipeAkses: currentTab,
         emailUser: email,
         idGame: gameId,
@@ -1175,7 +1198,7 @@
 
         if (data.success) {
           if (countdownInterval) clearInterval(countdownInterval);
-          sessionStorage.removeItem('portal_session'); // Bersihkan sesi lokal
+          removeSessionData(); // Bersihkan sesi lokal setelah sukses klaim
           showMsg(data.message, true);
           document.getElementById("portalForm").style.display = "none";
           document.getElementById("downloadArea").style.display = "block";
