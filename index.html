@@ -823,7 +823,16 @@
     let rawDriveUrl = ""; 
     let activeEmail = "";
     let activeGameId = "";
+    let activeToken = ""; // SIMPAN TOKEN DI VARIABEL GLOBAL
     let countdownInterval = null;
+
+    // TAMPILKAN POP-UP PERINGATAN BROWSER SAAT USER MENCOBA CLOSE TAB / REFRESH HALAMAN
+    window.addEventListener("beforeunload", function (e) {
+      if (rawDriveUrl !== "") {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    });
 
     function copyPassword(elementId, btnElem) {
       const textElement = document.getElementById(elementId);
@@ -920,6 +929,9 @@
           const remainingMs = parsed.targetTime - Date.now();
 
           if (remainingMs > 0) {
+            // Ambil token tersimpan dari sesi lokal
+            if (parsed.token) activeToken = parsed.token;
+
             // Hapus token dari URL jika tersisa
             if (token) {
               window.history.replaceState({}, document.title, window.location.pathname);
@@ -945,6 +957,8 @@
       // SKENARIO A: KUNJUNGAN PERTAMA (Dengan Token URL)
       if (token) {
         try {
+          activeToken = token; // SIMPAN TOKEN KE VARIABEL GLOBAL
+
           // Validasi Token ke GAS Backend
           const res = await fetch(`${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}`);
           const data = await res.json();
@@ -953,8 +967,9 @@
             const durationMs = (data.durationSeconds || 300) * 1000;
             const targetTime = Date.now() + durationMs;
 
-            // Simpan ke sessionStorage
+            // Simpan ke sessionStorage beserta token
             sessionStorage.setItem('portal_session', JSON.stringify({
+              token: token,
               games: data.games || [],
               stats: data.stats || {},
               targetTime: targetTime
@@ -1038,7 +1053,7 @@
       document.getElementById("kodeAkses").required = (type === "PREMIUM");
     }
 
-    // HITUNG MUNDUR TIMER BERBASIS TARGET TIMESTAMP (RESILIENT TERHADAP REFRESH)
+    // HITUNG MUNDUR TIMER BERBASIS TARGET TIMESTAMP
     function startCountdownTimer(targetTime) {
       const statusBox = document.getElementById("tokenStatusBox");
       const timerDisplay = document.getElementById("timerDisplay");
@@ -1134,8 +1149,10 @@
       btn.disabled = true;
       btn.innerText = "Memproses Verifikasi...";
 
+      // PAYLOAD TERMASUK PARAMETER TOKEN
       const payload = {
         action: "claim_access",
+        token: activeToken, // MENGERIMKAN TOKEN KE SERVERSIDE GAS
         tipeAkses: currentTab,
         emailUser: email,
         idGame: gameId,
