@@ -294,8 +294,9 @@
     .portal-field input:disabled,
     .portal-field select:disabled {
       background-color: #f1f5f9;
-      color: #64748b;
+      color: #94a3b8;
       cursor: not-allowed;
+      border-color: #e2e8f0;
     }
 
     .portal-btn {
@@ -693,10 +694,22 @@
           <input autocomplete="off" id="websiteUrlTrap" name="website_url" tabindex="-1" type="text" />
         </div>
 
+        <!-- 1. PILIH KATEGORI ARSIP (DROPDOWN UTAMA) -->
+        <div class="portal-field">
+          <label for="selectCategory">Pilih Kategori Arsip:</label>
+          <select id="selectCategory" onchange="onCategoryChange()" required="">
+            <option value="">-- Pilih Kategori Arsip --</option>
+            <option value="RPG">RPG (Role-Playing Game)</option>
+            <option value="RVN">RVN (Raising Visual Novel)</option>
+            <option value="VN">VN (Visual Novel)</option>
+          </select>
+        </div>
+
+        <!-- 2. PILIH GAME / VISUAL NOVEL (DEPENDENT DROPDOWN - TERKUNCI AWAL) -->
         <div class="portal-field">
           <label for="selectGame">Pilih Game / Visual Novel:</label>
-          <select id="selectGame" required="">
-            <option value="">-- Memuat daftar game... --</option>
+          <select id="selectGame" disabled required="">
+            <option value="">-- Pilih Kategori Terlebih Dahulu --</option>
           </select>
         </div>
 
@@ -823,10 +836,11 @@
     let rawDriveUrl = ""; 
     let activeEmail = "";
     let activeGameId = "";
-    let activeToken = ""; // SIMPAN TOKEN DI VARIABEL GLOBAL
+    let activeToken = ""; 
     let countdownInterval = null;
+    let masterGamesData = []; // VARIABEL PENAMPUNG MASTER DATA GAME UNTUK DEPENDENT DROPDOWN
 
-    // TAMPILKAN POP-UP PERINGATAN BROWSER SAAT USER MENCOBA CLOSE TAB / REFRESH HALAMAN
+    // PERINGATAN REFRESH HALAMAN
     window.addEventListener("beforeunload", function (e) {
       if (rawDriveUrl !== "") {
         e.preventDefault();
@@ -834,7 +848,7 @@
       }
     });
 
-    // MEMBANTU MENGELOLA STORAGE DENGAN FALLBACK LOKAL TERPERCAYA
+    // SISTEM STORAGE SESI
     function saveSessionData(data) {
       const strData = JSON.stringify(data);
       try { localStorage.setItem('portal_session', strData); } catch(e){}
@@ -934,7 +948,7 @@
     }
 
     // =========================================================================
-    // INITIALIZATION & LIFECYCLE MANAGEMENT (BACKEND V4.2 PRESISI)
+    // INITIALIZATION & LIFECYCLE MANAGEMENT
     // =========================================================================
     document.addEventListener("DOMContentLoaded", async function() {
       pageLoadTime = Date.now();
@@ -943,27 +957,27 @@
       const token = urlParams.get('token');
       const sessionData = getSessionData();
 
-      // SKENARIO B: PAGE REFRESH / SESI TERLINDUNGI LOKAL
+      // SKENARIO B: REFRESH / SESI TERLINDUNGI LOKAL
       if (sessionData) {
         try {
           const remainingMs = sessionData.targetTime - Date.now();
 
           if (remainingMs > 0) {
-            // Ambil token tersimpan dari sesi lokal
             if (sessionData.token) activeToken = sessionData.token;
 
-            // Hapus token dari URL jika masih tertulis
             if (token) {
               window.history.replaceState({}, document.title, window.location.pathname);
             }
-            populateGames(sessionData.games);
+            
+            // Simpan Master Games Data
+            masterGamesData = sessionData.games || [];
+            
             updateStatsUI(sessionData.stats);
             startCountdownTimer(sessionData.targetTime);
             fetchUserGeo();
             hideLoadingModal();
             return;
           } else {
-            // Sesi kadaluwarsa
             removeSessionData();
             lockPortalState("⏰ Sesi aktif telah habis. Silakan verifikasi ulang melalui Blogspot.");
             hideLoadingModal();
@@ -974,32 +988,29 @@
         }
       }
 
-      // SKENARIO A: KUNJUNGAN PERTAMA / TOKEN DARI BLOGSPOT
+      // SKENARIO A: KUNJUNGAN PERTAMA DENGAN TOKEN
       if (token) {
         try {
-          activeToken = token; // SIMPAN TOKEN KE VARIABEL GLOBAL
+          activeToken = token;
 
-          // Validasi Token ke GAS Backend
           const res = await fetch(`${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}`);
           const data = await res.json();
 
-          // SISIPAN V4.2: DUKUNGAN "burned_fallback" AGAR USER TIDAK DIBLOKIR JIKA SESI DIAKUASAI PADA TAB SAMA
           if (data.status === "success" || data.success || data.status === "burned_fallback") {
             const durationMs = (data.durationSeconds || 300) * 1000;
             const targetTime = Date.now() + durationMs;
 
-            // Simpan ke Sesi Lokal (Storage)
+            masterGamesData = data.games || [];
+
             saveSessionData({
               token: token,
-              games: data.games || [],
+              games: masterGamesData,
               stats: data.stats || {},
               targetTime: targetTime
             });
 
-            // Hapus parameter token dari Address Bar Browser
             window.history.replaceState({}, document.title, window.location.pathname);
 
-            populateGames(data.games);
             updateStatsUI(data.stats);
             startCountdownTimer(targetTime);
             fetchUserGeo();
@@ -1015,7 +1026,7 @@
         return;
       }
 
-      // AKSES TANPA TOKEN & TANPA SESI
+      // TANPA TOKEN & SESI
       lockPortalState("⚠️ Akses Ditolak: Anda belum menyelesaikan verifikasi WCaptcha di postingan blog!");
       hideLoadingModal();
     });
@@ -1030,20 +1041,52 @@
       }
     }
 
-    function populateGames(games) {
-      const select = document.getElementById("selectGame");
-      if (!select) return;
-      
-      select.innerHTML = '<option value="">-- Pilih Game / Visual Novel --</option>';
-      if (Array.isArray(games)) {
-        games.forEach(g => {
-          const opt = document.createElement("option");
-          opt.value = String(g.id).trim();
-          opt.textContent = g.title;
-          select.appendChild(opt);
-        });
+    // =========================================================================
+    // DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME)
+    // =========================================================================
+    function onCategoryChange() {
+      const categorySelect = document.getElementById("selectCategory");
+      const gameSelect = document.getElementById("selectGame");
+      const selectedCategory = categorySelect.value.trim().toUpperCase();
+
+      // Reset Dropdown Game
+      gameSelect.innerHTML = "";
+
+      if (!selectedCategory) {
+        gameSelect.disabled = true;
+        gameSelect.innerHTML = '<option value="">-- Pilih Kategori Terlebih Dahulu --</option>';
+        return;
       }
-      select.disabled = false;
+
+      // Filter Game berdasarkan Kategori yang dipilih
+      const filteredGames = masterGamesData.filter(g => {
+        if (!g.kategori) {
+          // Fallback pencocokan manual via ID jika kolom Kategori belum diisi di Sheet
+          const gameId = String(g.id).toUpperCase();
+          if (selectedCategory === "RPG" && gameId.includes("RPG")) return true;
+          if (selectedCategory === "RVN" && gameId.includes("RVN")) return true;
+          if (selectedCategory === "VN" && gameId.includes("VN") && !gameId.includes("RVN")) return true;
+          return false;
+        }
+        return String(g.kategori).trim().toUpperCase() === selectedCategory;
+      });
+
+      if (filteredGames.length === 0) {
+        gameSelect.disabled = true;
+        gameSelect.innerHTML = '<option value="">-- Tidak Ada Game Tersedia di Kategori Ini --</option>';
+        return;
+      }
+
+      // Isi Dropdown Game dengan hasil filter
+      gameSelect.disabled = false;
+      gameSelect.innerHTML = '<option value="">-- Pilih Game / Visual Novel --</option>';
+      
+      filteredGames.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = String(g.id).trim();
+        opt.textContent = g.title;
+        gameSelect.appendChild(opt);
+      });
     }
 
     function updateStatsUI(stats) {
@@ -1074,7 +1117,6 @@
       document.getElementById("kodeAkses").required = (type === "PREMIUM");
     }
 
-    // HITUNG MUNDUR TIMER BERBASIS TARGET TIMESTAMP
     function startCountdownTimer(targetTime) {
       const statusBox = document.getElementById("tokenStatusBox");
       const timerDisplay = document.getElementById("timerDisplay");
@@ -1104,16 +1146,17 @@
       countdownInterval = setInterval(updateTimer, 1000);
     }
 
-    // MENGUNCI FORM & MENAMPILKAN PESAN DITOLAK
     function lockPortalState(errorMessage) {
       showMsg(errorMessage, false);
       
       const submitBtn = document.getElementById("btnSubmit");
+      const selectCategory = document.getElementById("selectCategory");
       const selectGame = document.getElementById("selectGame");
       const emailUser = document.getElementById("emailUser");
       const kodeAkses = document.getElementById("kodeAkses");
 
       if (submitBtn) submitBtn.disabled = true;
+      if (selectCategory) selectCategory.disabled = true;
       if (selectGame) selectGame.disabled = true;
       if (emailUser) emailUser.disabled = true;
       if (kodeAkses) kodeAkses.disabled = true;
@@ -1143,16 +1186,24 @@
     }
 
     function submitClaim() {
-      const select = document.getElementById("selectGame");
-      const gameId = select.value;
+      const selectCategory = document.getElementById("selectCategory");
+      const selectGame = document.getElementById("selectGame");
+      
+      const categoryVal = selectCategory.value;
+      const gameId = selectGame.value;
       const email = document.getElementById("emailUser").value.trim().toLowerCase();
       const kode = document.getElementById("kodeAkses").value.trim();
       const botTrap = document.getElementById("websiteUrlTrap").value;
       const btn = document.getElementById("btnSubmit");
       const submitDuration = Date.now() - pageLoadTime;
 
+      if (!categoryVal) {
+        showMsg("Silakan pilih Kategori Arsip terlebih dahulu!", false);
+        return;
+      }
+
       if (!gameId) {
-        showMsg("Silakan pilih game terlebih dahulu!", false);
+        showMsg("Silakan pilih Game / Visual Novel terlebih dahulu!", false);
         return;
       }
 
@@ -1170,7 +1221,6 @@
       btn.disabled = true;
       btn.innerText = "Memproses Verifikasi...";
 
-      // PAYLOAD DIPERBARUI (V4.2 COMPATIBLE): Mengirimkan wcaptchaToken & sessionToken
       const payload = {
         action: "claim_access",
         token: activeToken,
@@ -1198,7 +1248,7 @@
 
         if (data.success) {
           if (countdownInterval) clearInterval(countdownInterval);
-          removeSessionData(); // Bersihkan sesi lokal setelah sukses klaim
+          removeSessionData(); 
           showMsg(data.message, true);
           document.getElementById("portalForm").style.display = "none";
           document.getElementById("downloadArea").style.display = "block";
