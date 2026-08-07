@@ -643,6 +643,28 @@
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* STYLES KHUSUS PANEL DIAGNOSTIC DROPDOWN */
+    .debug-dropdown-box {
+      margin-top: 10px;
+      padding: 10px;
+      background: #0f172a;
+      color: #38bdf8;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #0284c7;
+    }
+    .debug-status-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
@@ -713,7 +735,14 @@
           </select>
         </div>
 
-        <div class="portal-field">
+        <!-- VISUAL DIAGNOSTIC BOX FOR DROPDOWN BUG ANALYSIS -->
+        <div id="debugDropdownBox" class="debug-dropdown-box">
+          ⚙️ <strong>[Diagnostic Dropdown Mode]</strong><br/>
+          <span id="debugDataStatus">Menunggu data masterGamesData...</span><br/>
+          <div id="debugLogList" style="margin-top:4px;"></div>
+        </div>
+
+        <div class="portal-field" style="margin-top: 18px;">
           <label for="emailUser">Alamat Email (@gmail.com):</label>
           <input autocomplete="email" id="emailUser" placeholder="contoh: namamu@gmail.com" required="" type="email" />
         </div>
@@ -727,7 +756,6 @@
 
           <div class="portal-field" style="margin-top: 14px;">
             <label for="kodeAkses">Kode Akses Premium:</label>
-            <!-- FIX: Added id="kodeAkses" attribute -->
             <input autocomplete="off" id="kodeAkses" placeholder="Masukkan kode akses premium" type="text" />
           </div>
 
@@ -840,6 +868,32 @@
     let activeToken = ""; 
     let countdownInterval = null;
     let masterGamesData = [];
+
+    // HELPER DIAGNOSTIC LOGGING
+    function logDebug(msg, type = "info") {
+      console.log(`[DROPDOWN DEBUG]: ${msg}`);
+      const list = document.getElementById("debugLogList");
+      if (list) {
+        const item = document.createElement("div");
+        item.style.color = type === "error" ? "#f87171" : (type === "success" ? "#4ade80" : "#38bdf8");
+        item.innerText = `> ${msg}`;
+        list.appendChild(item);
+      }
+    }
+
+    function updateDebugDataStatus() {
+      const statusEl = document.getElementById("debugDataStatus");
+      if (!statusEl) return;
+
+      if (!Array.isArray(masterGamesData)) {
+        statusEl.innerHTML = `<span style="color:#f87171">❌ masterGamesData BUKAN Array! (${typeof masterGamesData})</span>`;
+      } else if (masterGamesData.length === 0) {
+        statusEl.innerHTML = `<span style="color:#fbbf24">⚠️ masterGamesData Kosong (0 item)</span>`;
+      } else {
+        const sample = JSON.stringify(masterGamesData[0]);
+        statusEl.innerHTML = `<span style="color:#4ade80">✅ Loaded (${masterGamesData.length} items)</span><br/><small style="color:#94a3b8">Sample item 0: ${sample}</small>`;
+      }
+    }
 
     // PERINGATAN REFRESH HALAMAN
     window.addEventListener("beforeunload", function (e) {
@@ -959,6 +1013,8 @@
             }
             
             masterGamesData = sessionData.games || [];
+            updateDebugDataStatus();
+            logDebug(`Session Restored. Loaded ${masterGamesData.length} games.`, "success");
             
             updateStatsUI(sessionData.stats);
             startCountdownTimer(sessionData.targetTime);
@@ -989,6 +1045,8 @@
             const targetTime = Date.now() + durationMs;
 
             masterGamesData = data.games || [];
+            updateDebugDataStatus();
+            logDebug(`Token Validated. API returned ${masterGamesData.length} games.`, "success");
 
             saveSessionData({
               token: token,
@@ -1007,6 +1065,7 @@
           }
         } catch (err) {
           console.error("Error Validasi Token:", err);
+          logDebug("Error Fetch Validation: " + err.message, "error");
           lockPortalState("⚠️ Gagal terhubung ke server verifikasi. Silakan coba lagi nanti.");
         } finally {
           hideLoadingModal();
@@ -1030,42 +1089,59 @@
     }
 
     // =========================================================================
-    // DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME)
+    // DEPENDENT DROPDOWN LOGIC WITH DIAGNOSTICS (KATEGORI -> GAME)
     // =========================================================================
     function onCategoryChange() {
       const categorySelect = document.getElementById("selectCategory");
       const gameSelect = document.getElementById("selectGame");
       const selectedCategory = categorySelect.value.trim().toUpperCase();
 
+      logDebug(`Category Changed To: "${selectedCategory}"`);
       gameSelect.innerHTML = "";
 
       if (!selectedCategory) {
         gameSelect.disabled = true;
         gameSelect.innerHTML = '<option value="">-- Pilih Kategori Terlebih Dahulu --</option>';
+        logDebug("Category reset to empty.");
         return;
       }
 
-      const filteredGames = masterGamesData.filter(g => {
+      if (!Array.isArray(masterGamesData) || masterGamesData.length === 0) {
+        logDebug("BUG DETECTED: masterGamesData is empty or not array!", "error");
+        gameSelect.disabled = true;
+        gameSelect.innerHTML = '<option value="">-- Data Game Belum Dimuat --</option>';
+        return;
+      }
+
+      const filteredGames = masterGamesData.filter((g, index) => {
         const cat = g.kategori ? String(g.kategori).trim().toUpperCase() : "";
         const gameId = String(g.id || "").toUpperCase();
 
+        let isMatch = false;
+
         if (cat) {
-          if (selectedCategory === "RPG" && (cat === "RPG" || cat.includes("ROLE"))) return true;
-          if (selectedCategory === "RVN" && (cat === "RVN" || cat.includes("RAISING"))) return true;
-          if (selectedCategory === "VN" && (cat === "VN" || cat === "VISUAL NOVEL")) return true;
-          if (cat === selectedCategory) return true;
+          if (selectedCategory === "RPG" && (cat === "RPG" || cat.includes("ROLE"))) isMatch = true;
+          if (selectedCategory === "RVN" && (cat === "RVN" || cat.includes("RAISING"))) isMatch = true;
+          if (selectedCategory === "VN" && (cat === "VN" || cat === "VISUAL NOVEL")) isMatch = true;
+          if (cat === selectedCategory) isMatch = true;
         }
 
-        if (selectedCategory === "RPG" && gameId.includes("RPG")) return true;
-        if (selectedCategory === "RVN" && gameId.includes("RVN")) return true;
-        if (selectedCategory === "VN" && gameId.includes("VN") && !gameId.includes("RVN")) return true;
+        if (!isMatch) {
+          if (selectedCategory === "RPG" && gameId.includes("RPG")) isMatch = true;
+          if (selectedCategory === "RVN" && gameId.includes("RVN")) isMatch = true;
+          if (selectedCategory === "VN" && gameId.includes("VN") && !gameId.includes("RVN")) isMatch = true;
+        }
 
-        return false;
+        logDebug(`Item #${index} [ID:${g.id}, Cat:${g.kategori}] -> Match: ${isMatch}`);
+        return isMatch;
       });
+
+      logDebug(`Filtering Complete. Found ${filteredGames.length} matches for "${selectedCategory}".`);
 
       if (filteredGames.length === 0) {
         gameSelect.disabled = true;
         gameSelect.innerHTML = '<option value="">-- Tidak Ada Game Tersedia di Kategori Ini --</option>';
+        logDebug("No games matched filter criteria.", "error");
         return;
       }
 
@@ -1078,6 +1154,8 @@
         opt.textContent = g.title || g.namaGame || g.id;
         gameSelect.appendChild(opt);
       });
+
+      logDebug(`Successfully added ${filteredGames.length} options to selectGame.`, "success");
     }
 
     function updateStatsUI(stats) {
@@ -1205,7 +1283,6 @@
         return;
       }
 
-      // Regex diperluas agar mendukung email dengan karakter '+' (e.g. user+tag@gmail.com)
       const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
       if (!emailRegex.test(email)) {
         showMsg("Email wajib menggunakan alamat @gmail.com yang valid!", false);
