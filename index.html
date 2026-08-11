@@ -834,6 +834,7 @@
     let activeGameId = "";
     let activeToken = ""; 
     let isTokenBurned = false; // Flag status token
+    let isProtectionActive = false; // Flag kontrol utama cegah exit tab
     let countdownInterval = null;
     let masterGamesData = [];
 
@@ -841,22 +842,24 @@
     // CLIENT-SIDE TOKEN SHIELD (PENCEKAL TUTUP TAB / REFRESH)
     // =========================================================================
     function handleBeforeUnload(e) {
-      if (!isTokenBurned || rawDriveUrl !== "") {
+      if (isProtectionActive) {
         e.preventDefault();
-        e.returnValue = "";
+        e.returnValue = ""; // Wajib ada untuk memicu pop-up dialog bawaan browser
         return "";
       }
     }
 
     function lockUserExit() {
+      isProtectionActive = true;
       window.addEventListener("beforeunload", handleBeforeUnload);
     }
 
     function unlockUserExit() {
+      isProtectionActive = false;
       window.removeEventListener("beforeunload", handleBeforeUnload);
     }
 
-    // Emergency Beacon saat user nekat menutup tab/browser
+    // Emergency Beacon saat user nekat menutup tab/browser saat token belum hangus
     window.addEventListener("unload", function () {
       if (activeToken && !isTokenBurned) {
         const payload = JSON.stringify({
@@ -984,10 +987,14 @@
             updateStatsUI(sessionData.stats);
             startCountdownTimer(sessionData.targetTime);
             fetchUserGeo();
+            
+            // AKTIFKAN PROTEKSI SELAMA BERADA DI PORTAL
+            lockUserExit();
             hideLoadingModal();
             return;
           } else {
             removeSessionData();
+            unlockUserExit();
             lockPortalState("⏰ Sesi aktif telah habis. Silakan verifikasi ulang melalui Blogspot.");
             hideLoadingModal();
             return;
@@ -1012,7 +1019,6 @@
 
           if (data.status === "success" || data.success || data.status === "burned_fallback") {
             isTokenBurned = true;
-            unlockUserExit(); // Token aman di-burn, lepas tahanan
 
             const durationMs = (data.durationSeconds || 300) * 1000;
             const targetTime = Date.now() + durationMs;
@@ -1031,15 +1037,18 @@
             updateStatsUI(data.stats);
             startCountdownTimer(targetTime);
             fetchUserGeo();
+            
+            // JAGA PROTEKSI TETAP AKTIF SAAT PORTAL SIAP DIGUNAKAN
+            lockUserExit();
           } else {
             isTokenBurned = true;
-            unlockUserExit();
+            unlockUserExit(); // Lepas proteksi jika token ditolak
             lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid atau sudah digunakan!"));
           }
         } catch (err) {
           console.error("Error Validasi Token:", err);
           isTokenBurned = true;
-          unlockUserExit();
+          unlockUserExit(); // Lepas proteksi jika ada eror koneksi
           lockPortalState("⚠️ Gagal terhubung ke server verifikasi. Silakan coba lagi nanti.");
         } finally {
           hideLoadingModal();
@@ -1049,6 +1058,7 @@
 
       // TANPA TOKEN & SESI
       isTokenBurned = true;
+      unlockUserExit();
       lockPortalState("⚠️ Akses Ditolak: Anda belum menyelesaikan verifikasi WCaptcha di postingan blog!");
       hideLoadingModal();
     });
@@ -1175,6 +1185,7 @@
         if (remaining <= 0) {
           clearInterval(countdownInterval);
           removeSessionData();
+          unlockUserExit(); // Buka proteksi jika waktu habis
           if (timerDisplay) timerDisplay.innerText = "00:00";
           lockPortalState("⏰ Sesi WCaptcha telah kadaluwarsa. Silakan lewati captcha dari blog kembali!");
           return;
@@ -1267,6 +1278,9 @@
         return;
       }
 
+      // KUNCI TAB SAAT PROSES LOADING BERLANGSUNG
+      lockUserExit();
+
       btn.disabled = true;
       btn.innerText = "Memproses Verifikasi...";
 
@@ -1305,7 +1319,9 @@
           rawDriveUrl = data.driveUrl;
           activeEmail = email;
           activeGameId = gameId;
-          lockUserExit(); // Tahan exit saat link drive sudah terbuka agar user tidak sengaja memuat ulang
+          
+          // TETAP JAGA PROTEKSI SAAT Halaman DOWNLOAD MUNCUL (AGAR USER BISA MENGAMBIL PASSWORD ZIP)
+          lockUserExit();
         } else {
           showMsg(data.message, false);
         }
@@ -1326,7 +1342,9 @@
 
       const targetUrl = rawDriveUrl;
       rawDriveUrl = ""; 
-      unlockUserExit(); // Bebaskan kuncian exit setelah link dibuka
+      
+      // BEBASKAN CEGAH TUTUP TAB SAAT USER SUDAH KLIK BUKA DRIVE
+      unlockUserExit(); 
 
       const trackPayload = {
         action: "track_click",
