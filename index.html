@@ -97,7 +97,7 @@
       padding: 28px 32px;
       text-align: center;
       box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.25);
-      max-width: 320px;
+      max-width: 340px;
       width: 85%;
     }
 
@@ -126,6 +126,7 @@
     .loading-subtext {
       font-size: 0.85rem;
       color: var(--text-muted);
+      line-height: 1.4;
     }
 
     /* CHIBI MASCOT HEADER */
@@ -651,8 +652,8 @@
   <div aria-live="polite" class="loading-overlay" id="loadingModal">
     <div class="loading-box">
       <div class="spinner"></div>
-      <div class="loading-text">Memuat Data Portal...</div>
-      <div class="loading-subtext">Mohon tunggu sebentar ya ~</div>
+      <div class="loading-text" id="loadingModalTitle">Memuat Data Portal...</div>
+      <div class="loading-subtext" id="loadingModalSubtext">Mohon tunggu sebentar ya ~</div>
     </div>
   </div>
 
@@ -820,7 +821,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT LOGIKA FRONTEND INTEGRATED WITH GAS BACKEND V4.2 -->
+  <!-- SCRIPT LOGIKA FRONTEND INTEGRATED WITH GAS BACKEND V4.2 + CLIENT-SIDE SHIELD -->
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
 
@@ -832,14 +833,39 @@
     let activeEmail = "";
     let activeGameId = "";
     let activeToken = ""; 
+    let isTokenBurned = false; // Flag status token
     let countdownInterval = null;
     let masterGamesData = [];
 
-    // PERINGATAN REFRESH HALAMAN
-    window.addEventListener("beforeunload", function (e) {
-      if (rawDriveUrl !== "") {
+    // =========================================================================
+    // CLIENT-SIDE TOKEN SHIELD (PENCEKAL TUTUP TAB / REFRESH)
+    // =========================================================================
+    function handleBeforeUnload(e) {
+      if (!isTokenBurned || rawDriveUrl !== "") {
         e.preventDefault();
         e.returnValue = "";
+        return "";
+      }
+    }
+
+    function lockUserExit() {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    function unlockUserExit() {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    // Emergency Beacon saat user nekat menutup tab/browser
+    window.addEventListener("unload", function () {
+      if (activeToken && !isTokenBurned) {
+        const payload = JSON.stringify({
+          action: "burn_token_emergency",
+          token: activeToken
+        });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(SCRIPT_URL, payload);
+        }
       }
     });
 
@@ -947,6 +973,7 @@
 
           if (remainingMs > 0) {
             if (sessionData.token) activeToken = sessionData.token;
+            isTokenBurned = true; // Sesi lokal sudah tuntas burn sebelumnya
 
             if (token) {
               window.history.replaceState({}, document.title, window.location.pathname);
@@ -974,11 +1001,19 @@
       if (token) {
         try {
           activeToken = token;
+          isTokenBurned = false;
+          
+          // Tampilkan instruksi edukatif di overlay loading
+          setLoadingText("Memverifikasi & Mengamankan Sesi...", "Mohon jangan tutup atau refresh halaman ini agar token Anda tidak hangus.");
+          lockUserExit(); // Tahan exit browser selama validasi berlangsung
 
           const res = await fetch(`${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}`);
           const data = await res.json();
 
           if (data.status === "success" || data.success || data.status === "burned_fallback") {
+            isTokenBurned = true;
+            unlockUserExit(); // Token aman di-burn, lepas tahanan
+
             const durationMs = (data.durationSeconds || 300) * 1000;
             const targetTime = Date.now() + durationMs;
 
@@ -997,10 +1032,14 @@
             startCountdownTimer(targetTime);
             fetchUserGeo();
           } else {
+            isTokenBurned = true;
+            unlockUserExit();
             lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid atau sudah digunakan!"));
           }
         } catch (err) {
           console.error("Error Validasi Token:", err);
+          isTokenBurned = true;
+          unlockUserExit();
           lockPortalState("⚠️ Gagal terhubung ke server verifikasi. Silakan coba lagi nanti.");
         } finally {
           hideLoadingModal();
@@ -1009,9 +1048,17 @@
       }
 
       // TANPA TOKEN & SESI
+      isTokenBurned = true;
       lockPortalState("⚠️ Akses Ditolak: Anda belum menyelesaikan verifikasi WCaptcha di postingan blog!");
       hideLoadingModal();
     });
+
+    function setLoadingText(title, subtext) {
+      const t = document.getElementById("loadingModalTitle");
+      const s = document.getElementById("loadingModalSubtext");
+      if (t) t.innerText = title;
+      if (s) s.innerText = subtext;
+    }
 
     function hideLoadingModal() {
       const modal = document.getElementById("loadingModal");
@@ -1258,6 +1305,7 @@
           rawDriveUrl = data.driveUrl;
           activeEmail = email;
           activeGameId = gameId;
+          lockUserExit(); // Tahan exit saat link drive sudah terbuka agar user tidak sengaja memuat ulang
         } else {
           showMsg(data.message, false);
         }
@@ -1278,6 +1326,7 @@
 
       const targetUrl = rawDriveUrl;
       rawDriveUrl = ""; 
+      unlockUserExit(); // Bebaskan kuncian exit setelah link dibuka
 
       const trackPayload = {
         action: "track_click",
