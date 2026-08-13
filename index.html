@@ -824,6 +824,9 @@
   <!-- SCRIPT LOGIKA FRONTEND INTEGRATED WITH GAS BACKEND V4.2 + CLIENT-SIDE SHIELD -->
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
+    
+    // TOKEN IPAPI RESMI (SAMA SEPERTI WCAPTCHA V2.7 - AKTIF S.D. 12 SEPT 2026)
+    const IPAPI_TOKEN = "PEX29yL3AOpQy4J05eM8k94oR8YOnpA2xR9j5SrtX0eSTh9JqP";
 
     let currentTab = "FREE";
     let userIp = "Unknown";
@@ -960,11 +963,54 @@
     }
 
     // =========================================================================
+    // 3-TIER SMART IP DETECTOR LOGIC (SAMA PERSIS DENGAN WCAPTCHA V2.7)
+    // =========================================================================
+    function getSmartUserIp() {
+      // TIER 1: Gunakan IPAPI + Token Resmi (Prioritas Utama)
+      fetch(`https://ipapi.co/json/?key=${IPAPI_TOKEN}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Tier 1 Limit/Error");
+          return res.json();
+        })
+        .then(data => {
+          if (data.ip) userIp = data.ip;
+          if (data.country_code) userCountry = data.country_code;
+          console.log("🌐 GeoIP Loaded (Tier 1):", userIp, userCountry);
+        })
+        .catch(() => {
+          // TIER 2: Fallback ke IPAPI Publik tanpa Token
+          fetch("https://ipapi.co/json/")
+            .then(res => {
+              if (!res.ok) throw new Error("Tier 2 Limit/Error");
+              return res.json();
+            })
+            .then(data => {
+              if (data.ip) userIp = data.ip;
+              if (data.country_code) userCountry = data.country_code;
+              console.log("🌐 GeoIP Loaded (Tier 2):", userIp, userCountry);
+            })
+            .catch(() => {
+              // TIER 3: Fallback akhir ke Ipify (Khusus IP saja)
+              fetch("https://api.ipify.org?format=json")
+                .then(res => res.json())
+                .then(data => {
+                  if (data.ip) userIp = data.ip;
+                  console.log("🌐 GeoIP Loaded (Tier 3 - IP Only):", userIp);
+                })
+                .catch(err => console.error("❌ All GeoIP Tiers Failed:", err));
+            });
+        });
+    }
+
+    // =========================================================================
     // INITIALIZATION & LIFECYCLE MANAGEMENT
     // =========================================================================
     document.addEventListener("DOMContentLoaded", async function() {
       pageLoadTime = Date.now();
       
+      // MENGAMBIL DATA GEO IP DENGAN LOGIKA 3-TIER SMART IP
+      getSmartUserIp();
+
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
       const sessionData = getSessionData();
@@ -986,7 +1032,6 @@
             
             updateStatsUI(sessionData.stats);
             startCountdownTimer(sessionData.targetTime);
-            fetchUserGeo();
             
             // AKTIFKAN PROTEKSI SELAMA BERADA DI PORTAL
             lockUserExit();
@@ -1036,7 +1081,6 @@
 
             updateStatsUI(data.stats);
             startCountdownTimer(targetTime);
-            fetchUserGeo();
             
             // JAGA PROTEKSI TETAP AKTIF SAAT PORTAL SIAP DIGUNAKAN
             lockUserExit();
@@ -1225,21 +1269,6 @@
         statusBox.style.color = "#dc2626";
         statusBox.innerHTML = "🔴 <strong>Akses Terkunci:</strong> Silakan verifikasi ulang melalui tombol download di blog.";
       }
-    }
-
-    function fetchUserGeo() {
-      fetch("https://ipapi.co/json/")
-        .then(res => res.json())
-        .then(data => {
-          if (data.ip) userIp = data.ip;
-          if (data.country_code) userCountry = data.country_code;
-        })
-        .catch(() => {
-          fetch("https://api.ipify.org?format=json")
-            .then(r => r.json())
-            .then(d => { if (d.ip) userIp = d.ip; })
-            .catch(err => console.error("Error IP Fetch:", err));
-        });
     }
 
     function submitClaim() {
