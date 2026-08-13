@@ -792,7 +792,7 @@
           </div>
           Gunakan password di bawah ini untuk membuka dan mengekstrak file arsip (.zip).
           <div class="pass-box-highlight">
-            <span class="pass-key-code" id="passText2">pass_rynet_key</span>
+            <span class="pass-key-code" id="passText2">Memuat password...</span>
             <button class="copy-btn" onclick="copyPassword('passText2', this)" type="button">Salin Password</button>
           </div>
         </div>
@@ -1317,10 +1317,17 @@
           document.getElementById("downloadArea").style.display = "block";
 
           rawDriveUrl = data.driveUrl;
+          
+          // MAP PASSWORD ZIP DARI BACKEND
+          if (data.passwordZip) {
+            const passElem = document.getElementById("passText2");
+            if (passElem) passElem.innerText = data.passwordZip;
+          }
+
           activeEmail = email;
           activeGameId = gameId;
           
-          // TETAP JAGA PROTEKSI SAAT Halaman DOWNLOAD MUNCUL (AGAR USER BISA MENGAMBIL PASSWORD ZIP)
+          // TETAP JAGA PROTEKSI SAAT HALAMAN DOWNLOAD MUNCUL (AGAR USER BISA MENGAMBIL PASSWORD ZIP)
           lockUserExit();
         } else {
           showMsg(data.message, false);
