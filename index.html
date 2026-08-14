@@ -590,6 +590,19 @@
       color: #92400e;
     }
 
+    .mimin-note-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .mimin-note-list li {
+      margin-bottom: 4px;
+    }
+
+    .mimin-note-list li:last-child {
+      margin-bottom: 0;
+    }
+
     /* BOX PASSWORD ZIP */
     .pass-box-highlight {
       background: #ffffff;
@@ -882,12 +895,15 @@
           </div>
         </div>
 
-        <!-- CATATAN MIMIN -->
+        <!-- CATATAN MIMIN (BAGIAN YANG DIPERBARUI) -->
         <div class="mimin-note-box">
           <div class="mimin-note-title">
-            <span>💡</span> Catatan Pemeliharaan:
+            <span>💡</span> Catatan Mimin:
           </div>
-          Pengajuan klaim link ditutup sementara waktu. Anda dapat menghubungi Mimin langsung melalui WhatsApp untuk bantuan manual.
+          <ol class="mimin-note-list">
+            <li>Pastikan email yang diinputkan adalah email aktif. Jika email salah, akses tidak akan terverifikasi.</li>
+            <li>Selesaikan verifikasi untuk mendapatkan akses dan kunci file arsip (.zip).</li>
+          </ol>
         </div>
 
         <button class="portal-btn" id="btnSubmit" style="margin-top: 18px;" type="submit" disabled>🔒 Server Sedang Perbaikan</button>
