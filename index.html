@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Akses Visual Novel</title>
+  <title>Portal Akses Visual Novel - Pemeliharaan Sistem</title>
   
   <!-- Favicon -->
   <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -155,6 +155,53 @@
       margin: 0 0 16px 0;
       letter-spacing: -0.02em;
       text-transform: uppercase;
+    }
+
+    /* BANNER MAINTENANCE (OPSI B) */
+    .maintenance-banner {
+      background: #fffbebf5;
+      border: 2px solid #f59e0b;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15);
+      animation: pulseGlow 2.5s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      from { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15); }
+      to { box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35); }
+    }
+
+    .maintenance-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .maintenance-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    .maintenance-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #78350f;
+      margin: 0;
+    }
+
+    .maintenance-text {
+      font-size: 0.85rem;
+      color: #92400e;
+      line-height: 1.5;
+      margin: 0 0 14px 0;
+    }
+
+    .maintenance-action {
+      border-top: 1px dashed #fcd34d;
+      padding-top: 12px;
     }
 
     /* BADGE TOKEN STATUS & TIMER COUNTDOWN */
@@ -665,6 +712,25 @@
 
     <h2 class="portal-title">Akses Link Arsip Visual Novel</h2>
 
+    <!-- OPSI B: GLOBAL NOTICE BANNER MAINTENANCE -->
+    <div class="maintenance-banner">
+      <div class="maintenance-header">
+        <span class="maintenance-icon">🚧</span>
+        <h3 class="maintenance-title">ごめんね、皆さん! (Gomen ne, minasan~)</h3>
+      </div>
+      <p class="maintenance-text">
+        Sehubungan dengan perbaikan &amp; pembaruan database Server File Arsip Visual Novel Mimin, seluruh sistem saat ini sedang dalam masa pemeliharaan (*maintenance*). Sistem akan kembali pulih secara otomatis setelah pembaruan selesai[cite: 1].
+      </p>
+      <div class="maintenance-action">
+        <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" target="_blank">
+          <svg class="wa-icon-svg" viewBox="0 0 24 24">
+            <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
+          </svg>
+          Hubungi WA Mimin Jika Mendesak[cite: 1]
+        </a>
+      </div>
+    </div>
+
     <!-- BADGE INFORMASI TOKEN & TIMER -->
     <div class="token-status-box" id="tokenStatusBox">
       🟢 <strong>Token Terverifikasi:</strong> Sesi aktif berakhir dalam <span class="token-timer" id="timerDisplay">05:00</span>
@@ -698,8 +764,8 @@
         <!-- 1. PILIH KATEGORI ARSIP -->
         <div class="portal-field">
           <label for="selectCategory">Pilih Kategori Arsip:</label>
-          <select id="selectCategory" onchange="onCategoryChange()" required="">
-            <option value="">-- Pilih Kategori Arsip --</option>
+          <select id="selectCategory" onchange="onCategoryChange()" required="" disabled>
+            <option value="">-- Pemeliharaan Server --</option>
             <option value="RPG">RPG (Role-Playing Game)</option>
             <option value="RVN">RVN (Raising Visual Novel)</option>
             <option value="VN">VN (Visual Novel)</option>
@@ -710,13 +776,13 @@
         <div class="portal-field">
           <label for="selectGame">Pilih Game / Visual Novel:</label>
           <select id="selectGame" disabled required="">
-            <option value="">-- Pilih Kategori Terlebih Dahulu --</option>
+            <option value="">-- Pemeliharaan Server --</option>
           </select>
         </div>
 
         <div class="portal-field" style="margin-top: 18px;">
           <label for="emailUser">Alamat Email (@gmail.com):</label>
-          <input autocomplete="email" id="emailUser" placeholder="contoh: namamu@gmail.com" required="" type="email" />
+          <input autocomplete="email" id="emailUser" placeholder="Sistem sedang diperbaiki..." required="" type="email" disabled />
         </div>
 
         <div id="freeInfoArea">
@@ -728,7 +794,7 @@
 
           <div class="portal-field" style="margin-top: 14px;">
             <label for="kodeAkses">Kode Akses Premium:</label>
-            <input autocomplete="off" id="kodeAkses" placeholder="Masukkan kode akses premium" type="text" />
+            <input autocomplete="off" id="kodeAkses" placeholder="Masukkan kode akses premium" type="text" disabled />
           </div>
 
           <!-- KOTAK PAYMENT & WA MIMIN -->
@@ -766,16 +832,17 @@
         <!-- CATATAN MIMIN -->
         <div class="mimin-note-box">
           <div class="mimin-note-title">
-            <span>💡</span> Catatan Mimin:
+            <span>💡</span> Catatan Pemeliharaan:
           </div>
-          1. Pastikan email yang diinputkan adalah email aktif. Jika email salah, akses tidak akan terverifikasi.<br />
-          2. Selesaikan verifikasi untuk mendapatkan akses dan kunci file arsip (.zip).
+          Pengajuan klaim link ditutup sementara waktu. Anda dapat menghubungi Mimin langsung melalui WhatsApp untuk bantuan manual.
         </div>
 
-        <button class="portal-btn" id="btnSubmit" style="margin-top: 18px;" type="submit">Buka Link Akses</button>
+        <button class="portal-btn" id="btnSubmit" style="margin-top: 18px;" type="submit" disabled>🔒 Server Sedang Perbaikan</button>
       </form>
 
-      <div aria-live="assertive" id="portalMsg"></div>
+      <div aria-live="assertive" id="portalMsg" class="msg-error" style="display: block;">
+        🚧 Portal sedang dalam pemeliharaan server. Mohon kembali lagi nanti.
+      </div>
 
       <!-- AREA DOWNLOAD (MUNCUL JIKA BERHASIL) -->
       <div id="downloadArea">
