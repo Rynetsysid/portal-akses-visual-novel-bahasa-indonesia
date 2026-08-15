@@ -1465,7 +1465,7 @@
 
           setTimeout(() => {
             btn.disabled = false;
-            btn.innerText = "🎁 KLAIM AKSES GAME";
+            btn.innerText = "KLAIM AKSES GAME";
 
             if (countdownInterval) clearInterval(countdownInterval);
             removeSessionData(); 
@@ -1490,14 +1490,14 @@
         } else {
           hideProgressUI();
           btn.disabled = false;
-          btn.innerText = "🎁 KLAIM AKSES GAME";
+          btn.innerText = "KLAIM AKSES GAME";
           showMsg(data.message, false);
         }
       })
       .catch(err => {
         hideProgressUI();
         btn.disabled = false;
-        btn.innerText = "🎁 KLAIM AKSES GAME";
+        btn.innerText = "KLAIM AKSES GAME";
         showMsg("Terjadi kesalahan koneksi atau server.", false);
         console.error("Error Claim:", err);
       });
