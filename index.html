@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Akses Visual Novel - Pemeliharaan Sistem</title>
+  <title>Portal Akses Visual Novel</title>
   
   <!-- Favicon -->
   <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -35,12 +35,6 @@
       background-position: center;
       background-repeat: no-repeat;
       background-attachment: fixed;
-    }
-
-    /* Helper Utility Class */
-    .text-center {
-      text-align: center !important;
-      justify-content: center !important;
     }
 
     /* Responsive Breakpoint untuk Desktop */
@@ -161,100 +155,6 @@
       margin: 0 0 16px 0;
       letter-spacing: -0.02em;
       text-transform: uppercase;
-    }
-
-    /* BANNER MAINTENANCE */
-    .maintenance-banner {
-      background: #fffbebf5;
-      border: 2px solid #f59e0b;
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15);
-      animation: pulseGlow 2.5s infinite alternate;
-    }
-
-    @keyframes pulseGlow {
-      from { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15); }
-      to { box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35); }
-    }
-
-    .maintenance-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-
-    .maintenance-icon {
-      font-size: 1.8rem;
-      line-height: 1;
-      display: inline-block;
-    }
-
-    .maintenance-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #78350f;
-      margin: 0;
-      line-height: 1.3;
-    }
-
-    .maintenance-text {
-      font-size: 0.88rem;
-      color: #92400e;
-      line-height: 1.55;
-      margin: 0 0 16px 0;
-      text-align: center;
-    }
-
-    .maintenance-action {
-      border-top: 1px dashed #fcd34d;
-      padding-top: 14px;
-      text-align: center;
-    }
-
-    /* OPTIMASI KHUSUS TAMPILAN MOBILE (LAYAR S.D 767PX) */
-    @media (max-width: 767px) {
-      .portal-container {
-        padding: 16px 14px;
-      }
-
-      .maintenance-banner {
-        padding: 18px 14px;
-      }
-
-      .maintenance-header {
-        flex-direction: column;
-        gap: 6px;
-        margin-bottom: 10px;
-      }
-
-      .maintenance-icon {
-        font-size: 2.2rem;
-        margin-bottom: 2px;
-      }
-
-      .maintenance-title {
-        font-size: 1.1rem;
-        text-align: center;
-        padding: 0 4px;
-      }
-
-      .maintenance-text {
-        font-size: 0.85rem;
-        padding: 0 4px;
-        text-align: center;
-        line-height: 1.55;
-      }
-
-      .maintenance-action .wa-btn-link {
-        width: 100%;
-        padding: 12px 14px;
-        font-size: 0.85rem;
-      }
     }
 
     /* BADGE TOKEN STATUS & TIMER COUNTDOWN */
@@ -398,6 +298,74 @@
       color: #94a3b8;
       cursor: not-allowed;
       border-color: #e2e8f0;
+    }
+
+    /* INLINE PROGRESS BAR UI (DI ATAS TOMBOL AKSES) */
+    .inline-progress-container {
+      display: none;
+      margin-top: 18px;
+      margin-bottom: 14px;
+      padding: 14px 16px;
+      background: #fff7ed;
+      border: 1.5px solid var(--primary-border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.08);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .inline-progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .inline-progress-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .inline-progress-percent {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .inline-progress-track {
+      width: 100%;
+      height: 10px;
+      background: #fed7aa;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .inline-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ea580c, #f97316);
+      border-radius: 20px;
+      transition: width 0.4s ease, background 0.3s ease;
+      box-shadow: 0 0 10px rgba(234, 88, 12, 0.5);
+    }
+
+    .inline-progress-fill.success {
+      background: linear-gradient(90deg, #16a34a, #22c55e) !important;
+      box-shadow: 0 0 10px rgba(22, 163, 74, 0.5) !important;
+    }
+
+    .inline-progress-step {
+      font-size: 0.78rem;
+      color: #7c2d12;
+      font-weight: 600;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .portal-btn {
@@ -765,25 +733,6 @@
 
     <h2 class="portal-title">Akses Link Arsip Visual Novel</h2>
 
-    <!-- OPSI B: GLOBAL NOTICE BANNER MAINTENANCE -->
-    <div class="maintenance-banner">
-      <div class="maintenance-header">
-        <span class="maintenance-icon">🚧</span>
-        <h3 class="maintenance-title">ごめんね、皆さん! (Gomen ne, minasan~)</h3>
-      </div>
-      <p class="maintenance-text">
-         Berhubung sedang ada perbaikan &amp; pembaruan database Server File Arsip Visual Novel Mimin, seluruh sistem saat ini sedang dalam masa pemeliharaan (maintenance). Sistem akan kembali pulih secara otomatis setelah pembaruan selesai.
-      </p>
-      <div class="maintenance-action">
-        <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" target="_blank">
-          <svg class="wa-icon-svg" viewBox="0 0 24 24">
-            <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
-          </svg>
-          Selengkapnya Tanyakan Langsung Ke Mimin
-        </a>
-      </div>
-    </div>
-
     <!-- BADGE INFORMASI TOKEN & TIMER -->
     <div class="token-status-box" id="tokenStatusBox">
       🟢 <strong>Token Terverifikasi:</strong> Sesi aktif berakhir dalam <span class="token-timer" id="timerDisplay">05:00</span>
@@ -817,8 +766,8 @@
         <!-- 1. PILIH KATEGORI ARSIP -->
         <div class="portal-field">
           <label for="selectCategory">Pilih Kategori Arsip:</label>
-          <select id="selectCategory" onchange="onCategoryChange()" required="" disabled>
-            <option value="">-- Pemeliharaan Server --</option>
+          <select id="selectCategory" onchange="onCategoryChange()" required="">
+            <option value="">-- Pilih Kategori Arsip --</option>
             <option value="RPG">RPG (Role-Playing Game)</option>
             <option value="RVN">RVN (Raising Visual Novel)</option>
             <option value="VN">VN (Visual Novel)</option>
@@ -829,13 +778,13 @@
         <div class="portal-field">
           <label for="selectGame">Pilih Game / Visual Novel:</label>
           <select id="selectGame" disabled required="">
-            <option value="">-- Pemeliharaan Server --</option>
+            <option value="">-- Pilih Kategori Terlebih Dahulu --</option>
           </select>
         </div>
 
         <div class="portal-field" style="margin-top: 18px;">
           <label for="emailUser">Alamat Email (@gmail.com):</label>
-          <input autocomplete="email" id="emailUser" placeholder="Sistem sedang diperbaiki..." required="" type="email" disabled />
+          <input autocomplete="email" id="emailUser" placeholder="contoh: namamu@gmail.com" required="" type="email" />
         </div>
 
         <div id="freeInfoArea">
@@ -847,7 +796,7 @@
 
           <div class="portal-field" style="margin-top: 14px;">
             <label for="kodeAkses">Kode Akses Premium:</label>
-            <input autocomplete="off" id="kodeAkses" placeholder="Masukkan kode akses premium" type="text" disabled />
+            <input autocomplete="off" id="kodeAkses" placeholder="Masukkan kode akses premium" type="text" />
           </div>
 
           <!-- KOTAK PAYMENT & WA MIMIN -->
@@ -885,17 +834,30 @@
         <!-- CATATAN MIMIN -->
         <div class="mimin-note-box">
           <div class="mimin-note-title">
-            <span>💡</span> Catatan Pemeliharaan:
+            <span>💡</span> Catatan Mimin:
           </div>
-          Pengajuan klaim link ditutup sementara waktu. Anda dapat menghubungi Mimin langsung melalui WhatsApp untuk bantuan manual.
+          1. Pastikan email yang diinputkan adalah email aktif. Jika email salah, akses tidak akan terverifikasi.<br />
+          2. Selesaikan verifikasi untuk mendapatkan akses dan kunci file arsip (.zip).
         </div>
 
-        <button class="portal-btn" id="btnSubmit" style="margin-top: 18px;" type="submit" disabled>🔒 Server Sedang Perbaikan</button>
+        <!-- INLINE PROGRESS BAR UI (MUNCUL SAAT DIKLIK) -->
+        <div class="inline-progress-container" id="inlineProgressBox">
+          <div class="inline-progress-header">
+            <span class="inline-progress-title" id="progressTitleText">⚡ Memproses Klaim Akses...</span>
+            <span class="inline-progress-percent" id="progressPercentText">0%</span>
+          </div>
+          <div class="inline-progress-track">
+            <div class="inline-progress-fill" id="progressFillBar"></div>
+          </div>
+          <div class="inline-progress-step" id="progressStepText">
+            📌 Step 1 dari 4: Memverifikasi keamanan sesi &amp; token...
+          </div>
+        </div>
+
+        <button class="portal-btn" id="btnSubmit" style="margin-top: 14px;" type="submit">🎁 KLAIM AKSES GAME</button>
       </form>
 
-      <div aria-live="assertive" id="portalMsg" class="msg-error" style="display: block;">
-        🚧 Portal sedang dalam pemeliharaan server. Mohon kembali lagi nanti.
-      </div>
+      <div aria-live="assertive" id="portalMsg"></div>
 
       <!-- AREA DOWNLOAD (MUNCUL JIKA BERHASIL) -->
       <div id="downloadArea">
@@ -941,7 +903,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT LOGIKA FRONTEND INTEGRATED WITH GAS BACKEND V4.2 + CLIENT-SIDE SHIELD -->
+  <!-- SCRIPT LOGIKA FRONTEND INTEGRATED WITH GAS BACKEND V5.1 + INLINE PROGRESS BAR -->
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
     
@@ -960,6 +922,37 @@
     let isProtectionActive = false; // Flag kontrol utama cegah exit tab
     let countdownInterval = null;
     let masterGamesData = [];
+
+    // =========================================================================
+    // INLINE PROGRESS BAR UI LOGIC
+    // =========================================================================
+    function updateProgressUI(percent, titleText, stepText, isSuccess = false) {
+      const box = document.getElementById("inlineProgressBox");
+      const fill = document.getElementById("progressFillBar");
+      const percentTxt = document.getElementById("progressPercentText");
+      const titleTxt = document.getElementById("progressTitleText");
+      const stepTxt = document.getElementById("progressStepText");
+
+      if (!box || !fill) return;
+
+      box.style.display = "block";
+      fill.style.width = percent + "%";
+      if (percentTxt) percentTxt.innerText = percent + "%";
+
+      if (titleText && titleTxt) titleTxt.innerHTML = titleText;
+      if (stepText && stepTxt) stepTxt.innerHTML = stepText;
+
+      if (isSuccess) {
+        fill.classList.add("success");
+      } else {
+        fill.classList.remove("success");
+      }
+    }
+
+    function hideProgressUI() {
+      const box = document.getElementById("inlineProgressBox");
+      if (box) box.style.display = "none";
+    }
 
     // =========================================================================
     // CLIENT-SIDE TOKEN SHIELD (PENCEKAL TUTUP TAB / REFRESH)
@@ -1395,8 +1388,8 @@
       const selectCategory = document.getElementById("selectCategory");
       const selectGame = document.getElementById("selectGame");
       
-      const categoryVal = selectCategory.value;
-      const gameId = selectGame.value;
+      const categoryVal = selectCategory ? selectCategory.value : "";
+      const gameId = selectGame ? selectGame.value : "";
       const email = document.getElementById("emailUser").value.trim().toLowerCase();
       
       const kodeInput = document.getElementById("kodeAkses");
@@ -1431,7 +1424,18 @@
       lockUserExit();
 
       btn.disabled = true;
-      btn.innerText = "Memproses Verifikasi...";
+      btn.innerText = "⏳ Memproses Klaim...";
+
+      // ANIMASI INLINE PROGRESS BAR (4 STEP INDICATOR)
+      updateProgressUI(25, "⚡ Memverifikasi Keamanan Sesi...", "📌 Step 1 dari 4: Mengecek token captcha &amp; validasi IP...");
+
+      setTimeout(() => {
+        updateProgressUI(50, "🌐 Menghubungkan Storage Node...", "📌 Step 2 dari 4: Menentukan Node Storage...");
+      }, 500);
+
+      setTimeout(() => {
+        updateProgressUI(75, "🔑 Mengirimkan Izin Silent Viewer...", "📌 Step 3 dari 4: Eksekusi Drive API Worker Node...");
+      }, 1000);
 
       const payload = {
         action: "claim_access",
@@ -1455,36 +1459,45 @@
       })
       .then(res => res.json())
       .then(data => {
-        btn.disabled = false;
-        btn.innerText = "Buka Link Akses";
-
         if (data.success) {
-          if (countdownInterval) clearInterval(countdownInterval);
-          removeSessionData(); 
-          showMsg(data.message, true);
-          document.getElementById("portalForm").style.display = "none";
-          document.getElementById("downloadArea").style.display = "block";
+          // STEP 4: SUKSES 100%
+          updateProgressUI(100, "🎉 Akses Terbuka Sempurna!", "✓ Step 4 dari 4: Link Google Drive Siap!", true);
 
-          rawDriveUrl = data.driveUrl;
-          
-          // MAP PASSWORD ZIP DARI BACKEND
-          if (data.passwordZip) {
-            const passElem = document.getElementById("passText2");
-            if (passElem) passElem.innerText = data.passwordZip;
-          }
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.innerText = "🎁 KLAIM AKSES GAME";
 
-          activeEmail = email;
-          activeGameId = gameId;
-          
-          // TETAP JAGA PROTEKSI SAAT HALAMAN DOWNLOAD MUNCUL (AGAR USER BISA MENGAMBIL PASSWORD ZIP)
-          lockUserExit();
+            if (countdownInterval) clearInterval(countdownInterval);
+            removeSessionData(); 
+            showMsg(data.message, true);
+            document.getElementById("portalForm").style.display = "none";
+            document.getElementById("downloadArea").style.display = "block";
+
+            rawDriveUrl = data.driveUrl;
+            
+            // MAP PASSWORD ZIP DARI BACKEND
+            if (data.passwordZip) {
+              const passElem = document.getElementById("passText2");
+              if (passElem) passElem.innerText = data.passwordZip;
+            }
+
+            activeEmail = email;
+            activeGameId = gameId;
+            
+            // TETAP JAGA PROTEKSI SAAT HALAMAN DOWNLOAD MUNCUL (AGAR USER BISA MENGAMBIL PASSWORD ZIP)
+            lockUserExit();
+          }, 800);
         } else {
+          hideProgressUI();
+          btn.disabled = false;
+          btn.innerText = "🎁 KLAIM AKSES GAME";
           showMsg(data.message, false);
         }
       })
       .catch(err => {
+        hideProgressUI();
         btn.disabled = false;
-        btn.innerText = "Buka Link Akses";
+        btn.innerText = "🎁 KLAIM AKSES GAME";
         showMsg("Terjadi kesalahan koneksi atau server.", false);
         console.error("Error Claim:", err);
       });
