@@ -854,7 +854,7 @@
           </div>
         </div>
 
-        <button class="portal-btn" id="btnSubmit" style="margin-top: 14px;" type="submit">🎁 KLAIM AKSES GAME</button>
+        <button class="portal-btn" id="btnSubmit" style="margin-top: 14px;" type="submit">KLAIM AKSES</button>
       </form>
 
       <div aria-live="assertive" id="portalMsg"></div>
@@ -1465,7 +1465,7 @@
 
           setTimeout(() => {
             btn.disabled = false;
-            btn.innerText = "KLAIM AKSES GAME";
+            btn.innerText = "KLAIM AKSES";
 
             if (countdownInterval) clearInterval(countdownInterval);
             removeSessionData(); 
@@ -1490,14 +1490,14 @@
         } else {
           hideProgressUI();
           btn.disabled = false;
-          btn.innerText = "KLAIM AKSES GAME";
+          btn.innerText = "KLAIM AKSES";
           showMsg(data.message, false);
         }
       })
       .catch(err => {
         hideProgressUI();
         btn.disabled = false;
-        btn.innerText = "KLAIM AKSES GAME";
+        btn.innerText = "KLAIM AKSES";
         showMsg("Terjadi kesalahan koneksi atau server.", false);
         console.error("Error Claim:", err);
       });
