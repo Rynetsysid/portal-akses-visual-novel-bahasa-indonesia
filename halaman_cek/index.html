@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pemeriksaan Status & Riwayat Akses User - Portal Akses Visual Novel</title>
+
+  <!-- GOOGLE FONTS: PLUS JAKARTA SANS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #ea580c;
+      --primary-hover: #c2410c;
+      --primary-light: #fff7ed;
+      --primary-border: #ffedd5;
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-dark: #334155;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 20px 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* HEADER CARD */
+    .header-card {
+      background: var(--bg-card);
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 20px;
+    }
+
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: var(--primary-light);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--primary-border);
+      margin-bottom: 10px;
+    }
+
+    .header-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .header-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    /* SEARCH CARD */
+    .search-card {
+      background: var(--bg-card);
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #cbd5e1;
+      font-size: 0.92rem;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3.5px rgba(234, 88, 12, 0.15);
+    }
+
+    .ip-info-tag {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      padding: 0 2px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(234, 88, 12, 0.28);
+    }
+
+    .btn-submit:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* SPINNER */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #ffffff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* NOTICE & ALERT BOX */
+    .alert-box {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .alert-error {
+      background: var(--danger-bg);
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+    }
+
+    .alert-warning {
+      background: var(--warning-bg);
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    .alert-info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+
+    /* RESULT AREA & TABS */
+    .result-container {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .tabs-header {
+      display: flex;
+      gap: 8px;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* DATA CARD */
+    .data-card {
+      background: var(--bg-card);
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 16px;
+    }
+
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px dashed #f1f5f9;
+      font-size: 0.88rem;
+    }
+
+    .data-row:last-child {
+      border-bottom: none;
+    }
+
+    .data-label {
+      font-weight: 600;
+      color: var(--text-muted);
+      width: 40%;
+      flex-shrink: 0;
+    }
+
+    .data-value {
+      font-weight: 700;
+      color: var(--text-main);
+      width: 60%;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-active {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+    }
+
+    .badge-expired {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+    }
+
+    .badge-blocked {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+
+    .badge-full {
+      background: #fff7ed;
+      color: #ea580c;
+      border: 1px solid #fed7aa;
+    }
+
+    /* KODE VIP BOX */
+    .vip-code-box {
+      background: var(--primary-light);
+      border: 1.5px dashed var(--primary);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .vip-code-text {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #9a3412;
+    }
+
+    .btn-copy {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-copy:hover {
+      background: var(--primary-hover);
+    }
+
+    /* CATATAN STATIS BOX */
+    .static-notes-card {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .notes-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #92400e;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .notes-list {
+      list-style-type: decimal;
+      padding-left: 20px;
+      font-size: 0.82rem;
+      color: #78350f;
+    }
+
+    .notes-list li {
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .notes-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* EMPTY STATE CARD */
+    .empty-card {
+      background: var(--bg-card);
+      border: 1px dashed #cbd5e1;
+      border-radius: var(--radius-lg);
+      padding: 30px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .empty-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* FOOTER LINK */
+    .footer-box {
+      margin-top: 30px;
+      text-align: center;
+      padding-bottom: 20px;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-dark);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-decoration: none;
+      background: var(--bg-card);
+      padding: 10px 18px;
+      border-radius: 20px;
+      border: 1px solid #cbd5e1;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .data-row {
+        flex-direction: column;
+        gap: 4px;
+      }
+      .data-label, .data-value {
+        width: 100%;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- HEADER BRANDING -->
+    <div class="header-card">
+      <div class="brand-logo">
+        <span>🛡️</span> SYSTEM ACCESS CHECKER
+      </div>
+      <h1 class="header-title">Pemeriksaan Status Akses User</h1>
+      <p class="header-subtitle">Masukkan email terdaftar untuk melihat riwayat &amp; sisa masa aktif akses Anda.</p>
+    </div>
+
+    <!-- CARI CARD FORM -->
+    <div class="search-card">
+      <form id="checkForm" onsubmit="handleCheckSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="userEmailInput">Alamat Email (@gmail.com):</label>
+          <div class="input-wrapper">
+            <input 
+              type="email" 
+              id="userEmailInput" 
+              class="input-field" 
+              placeholder="contoh: namamu@gmail.com" 
+              required 
+              autocomplete="email"
+            />
+          </div>
+          <div class="ip-info-tag">
+            <span>🌐 IP Anda: <strong id="ipDisplay">Memuat IP...</strong></span>
+            <span id="rateLimitHint">Batas: 3x (FREE) / 6x (PREMIUM)</span>
+          </div>
+        </div>
+
+        <button type="submit" id="btnCheck" class="btn-submit">
+          <div class="spinner" id="btnSpinner"></div>
+          <span id="btnText">🔍 CARI DATA AKSES</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- ALERT / ERROR MESSAGE CONTAINER -->
+    <div id="alertBox" class="alert-box alert-error"></div>
+
+    <!-- RESULT CONTAINER (TABS & DETAILS) -->
+    <div id="resultContainer" class="result-container">
+      
+      <!-- TABS HEADER -->
+      <div class="tabs-header">
+        <button class="tab-btn active" id="tabFreeBtn" onclick="switchTab('FREE')">
+          <span>🎁</span> Tab FREE
+        </button>
+        <button class="tab-btn" id="tabPremBtn" onclick="switchTab('PREMIUM')">
+          <span>👑</span> Tab PREMIUM
+        </button>
+      </div>
+
+      <!-- CONTENT TAB FREE -->
+      <div id="contentFree" class="tab-content active">
+        <!-- DATA CONTAINER (FILLED BY JS) -->
+        <div id="freeDataWrapper"></div>
+        
+        <!-- CATATAN STATIS FREE (HIDDEN IF NO DATA) -->
+        <div id="freeStaticNotes" class="static-notes-card" style="display: none;">
+          <div class="notes-title">
+            <span>📌</span> Catatan Penting User Gratis (FREE):
+          </div>
+          <ol class="notes-list">
+            <li>User Gratis hanya boleh mengakses 1 file arsip dalam 1x akses.</li>
+            <li>Masa aktif User Gratis hanyalah 1 hari dengan masa tunggu 3 hari dari masa aktif.</li>
+            <li>Selama masa aktif berlaku, user gratis tidak diizinkan mengubah koneksi dan mengganti email akses yang mengakibatkan pemancingan sistem keamanan.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- CONTENT TAB PREMIUM -->
+      <div id="contentPrem" class="tab-content">
+        <!-- DATA CONTAINER (FILLED BY JS) -->
+        <div id="premDataWrapper"></div>
+
+        <!-- CATATAN STATIS PREMIUM (HIDDEN IF NO DATA) -->
+        <div id="premStaticNotes" class="static-notes-card" style="display: none;">
+          <div class="notes-title">
+            <span>👑</span> Catatan Penting User Akses Premium:
+          </div>
+          <ol class="notes-list">
+            <li>User Premium mendapatkan masa aktif 15 hari dari masa berlakunya kode.</li>
+            <li>User Premium memiliki batasan 3x akses arsip berbeda dalam batasan 24 jam demi menjaga stabilitas sistem arsip.</li>
+            <li>User Premium tidak perlu melakukan klaim Akses Gratis jika masa aktif Premium masih berlaku.</li>
+            <li>User Premium dilarang melakukan akses tidak sah, melakukan anomali klaim dan membuat spam portal yang mengakibatkan pemicunya sistem keamanan mengakibatkan blokir sistem permanent.</li>
+          </ol>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER NAVIGASI KEMBALI -->
+    <div class="footer-box">
+      <a href="../" class="btn-back">
+        <span>←</span> Kembali ke Portal Utama
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    // SCRIPT ENDPOINT GAS MASTER NODE
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQy1Lg4m_7J0xL2tP2_MasterNode_Placeholder/exec";
+    let detectedIp = "Unknown";
+
+    // 1. OTOMATIS AMBIL IP PUBLIC PENGGUNA
+    window.addEventListener("DOMContentLoaded", () => {
+      fetch("https://api.ipify.org?format=json")
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.ip) {
+            detectedIp = data.ip;
+            document.getElementById("ipDisplay").innerText = detectedIp;
+          } else {
+            document.getElementById("ipDisplay").innerText = "Aktif (Protected)";
+          }
+        })
+        .catch(() => {
+          document.getElementById("ipDisplay").innerText = "Aktif (Protected)";
+        });
+    });
+
+    // 2. SWITCH TAB SYSTEM
+    function switchTab(type) {
+      const freeBtn = document.getElementById("tabFreeBtn");
+      const premBtn = document.getElementById("tabPremBtn");
+      const contentFree = document.getElementById("contentFree");
+      const contentPrem = document.getElementById("contentPrem");
+
+      if (type === 'FREE') {
+        freeBtn.classList.add("active");
+        premBtn.classList.remove("active");
+        contentFree.classList.add("active");
+        contentPrem.classList.remove("active");
+      } else {
+        premBtn.classList.add("active");
+        freeBtn.classList.remove("active");
+        contentPrem.classList.add("active");
+        contentFree.classList.remove("active");
+      }
+    }
+
+    // 3. SUBMIT PENCARIAN STATUS EMAIL
+    function handleCheckSubmit(e) {
+      e.preventDefault();
+      
+      const emailInput = document.getElementById("userEmailInput").value.trim();
+      const btnCheck = document.getElementById("btnCheck");
+      const btnSpinner = document.getElementById("btnSpinner");
+      const btnText = document.getElementById("btnText");
+      const alertBox = document.getElementById("alertBox");
+      const resultContainer = document.getElementById("resultContainer");
+
+      if (!emailInput.endsWith("@gmail.com")) {
+        showAlert("error", "Akses Ditolak! Alamat email harus berakhiran @gmail.com.");
+        return;
+      }
+
+      // UI Loading state
+      btnCheck.disabled = true;
+      btnSpinner.style.display = "block";
+      btnText.innerText = "MEMERIKSA DATA...";
+      alertBox.style.display = "none";
+      resultContainer.style.display = "none";
+
+      const payload = {
+        action: "check_user_status",
+        emailUser: emailInput,
+        ipPublic: detectedIp
+      };
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        btnCheck.disabled = false;
+        btnSpinner.style.display = "none";
+        btnText.innerText = "🔍 CARI DATA AKSES";
+
+        if (!data.success) {
+          showAlert("error", data.message || "Email tidak terdaftar.");
+          return;
+        }
+
+        // BERHASIL DITEMUKAN: RENDER HASIL
+        renderResults(data);
+      })
+      .catch(err => {
+        btnCheck.disabled = false;
+        btnSpinner.style.display = "none";
+        btnText.innerText = "🔍 CARI DATA AKSES";
+        showAlert("error", "Gagal menghubungkan ke server. Silakan periksa koneksi internet Anda!");
+      });
+    }
+
+    // 4. RENDER RESULT TO DOM
+    function renderResults(data) {
+      const resultContainer = document.getElementById("resultContainer");
+      const freeWrapper = document.getElementById("freeDataWrapper");
+      const premWrapper = document.getElementById("premDataWrapper");
+      const freeNotes = document.getElementById("freeStaticNotes");
+      const premNotes = document.getElementById("premStaticNotes");
+
+      // Clear wrappers
+      freeWrapper.innerHTML = "";
+      premWrapper.innerHTML = "";
+
+      // --- TAB FREE RENDER ---
+      if (data.hasFreeData && data.freeData) {
+        const fd = data.freeData;
+        
+        let badgeClass = "badge-active";
+        if (fd.kondisiAkses === "EXPIRED") badgeClass = "badge-expired";
+        if (fd.kondisiAkses === "BLOCKED") badgeClass = "badge-blocked";
+
+        freeWrapper.innerHTML = `
+          <div class="data-card">
+            <div class="data-row">
+              <span class="data-label">Nama Email:</span>
+              <span class="data-value">${escapeHtml(fd.emailUser)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tanggal Akses:</span>
+              <span class="data-value">${escapeHtml(fd.tanggalAkses)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tanggal Expired:</span>
+              <span class="data-value">${escapeHtml(fd.tanggalExpired)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Masa Tunggu (Cooldown):</span>
+              <span class="data-value">${escapeHtml(fd.tanggalMasaTunggu)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Akses Game:</span>
+              <span class="data-value" style="color: var(--primary);">${escapeHtml(fd.aksesGame)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Kondisi Akses:</span>
+              <span class="data-value"><span class="badge ${badgeClass}">${escapeHtml(fd.kondisiAkses)}</span></span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Status Deskripsi:</span>
+              <span class="data-value" style="color: ${fd.isUpgradedToPremium ? '#ea580c' : 'inherit'}; font-style: ${fd.isUpgradedToPremium ? 'italic' : 'normal'};">
+                ${escapeHtml(fd.statusDeskripsi)}
+              </span>
+            </div>
+          </div>
+        `;
+        freeNotes.style.display = "block";
+      } else {
+        freeWrapper.innerHTML = `
+          <div class="empty-card">
+            <span class="empty-icon">📭</span>
+            Tidak ada riwayat data Akses Gratis (FREE) untuk email ini.
+          </div>
+        `;
+        freeNotes.style.display = "none";
+      }
+
+      // --- TAB PREMIUM RENDER ---
+      if (data.hasPremiumData && data.premiumData) {
+        const pd = data.premiumData;
+
+        let badgeClass = "badge-active";
+        if (pd.status === "EXPIRED PREMIUM") badgeClass = "badge-expired";
+        if (pd.status === "BANNED") badgeClass = "badge-blocked";
+
+        premWrapper.innerHTML = `
+          <div class="data-card">
+            <div class="data-row" style="flex-direction: column; align-items: stretch;">
+              <span class="data-label" style="width: 100%; margin-bottom: 4px;">Kode Transaksi VIP:</span>
+              <div class="vip-code-box">
+                <span class="vip-code-text" id="vipCodeText">${escapeHtml(pd.kodeTransaksi)}</span>
+                <button class="btn-copy" onclick="copyVipCode('${escapeHtml(pd.kodeTransaksi)}', this)">Salin Kode</button>
+              </div>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Nama Email:</span>
+              <span class="data-value">${escapeHtml(pd.emailUser)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tanggal Klaim Akses:</span>
+              <span class="data-value">${escapeHtml(pd.tanggalKlaim)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tanggal Expired Tiket:</span>
+              <span class="data-value">${escapeHtml(pd.tanggalExpired)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Jumlah Akses (24Jam):</span>
+              <span class="data-value">
+                <span class="badge ${pd.isFullQuota ? 'badge-full' : 'badge-active'}">${escapeHtml(pd.jumlahAkses24Jam)}</span>
+              </span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Status Premium:</span>
+              <span class="data-value"><span class="badge ${badgeClass}">${escapeHtml(pd.status)}</span></span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Kondisi Akses:</span>
+              <span class="data-value">${escapeHtml(pd.kondisiAkses)}</span>
+            </div>
+          </div>
+        `;
+        premNotes.style.display = "block";
+      } else {
+        premWrapper.innerHTML = `
+          <div class="empty-card">
+            <span class="empty-icon">🔕</span>
+            Tidak ada data Akses Premium untuk email ini.
+          </div>
+        `;
+        premNotes.style.display = "none";
+      }
+
+      // Auto Switch ke tab yang memiliki data
+      if (!data.hasFreeData && data.hasPremiumData) {
+        switchTab('PREMIUM');
+      } else {
+        switchTab('FREE');
+      }
+
+      resultContainer.style.display = "block";
+    }
+
+    // 5. HELPER SHOW ALERT
+    function showAlert(type, msg) {
+      const alertBox = document.getElementById("alertBox");
+      alertBox.className = "alert-box " + (type === "error" ? "alert-error" : "alert-warning");
+      alertBox.innerText = msg;
+      alertBox.style.display = "block";
+    }
+
+    // 6. HELPER COPY VIP CODE
+    function copyVipCode(code, btn) {
+      navigator.clipboard.writeText(code).then(() => {
+        const oldText = btn.innerText;
+        btn.innerText = "Tersalin! ✓";
+        btn.style.background = "#16a34a";
+        setTimeout(() => {
+          btn.innerText = oldText;
+          btn.style.background = "var(--primary)";
+        }, 2000);
+      });
+    }
+
+    // HELPER ESCAPE HTML
+    function escapeHtml(str) {
+      if (!str) return "-";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
