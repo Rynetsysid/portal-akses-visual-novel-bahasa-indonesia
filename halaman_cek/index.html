@@ -48,17 +48,18 @@
       background-color: var(--bg-main);
       color: var(--text-main);
       line-height: 1.5;
-      padding: 20px 14px;
+      padding: 24px 14px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
     }
 
     .container {
       width: 100%;
       max-width: 680px;
-      margin: 0 auto;
+      margin: auto 0;
     }
 
     /* HEADER CARD */
@@ -512,13 +513,13 @@
           </div>
         </div>
 
-        <!-- ALERT / ERROR MESSAGE CONTAINER (DIDALAM CARD FORM, DIPINDAH KE ATAS TOMBOL) -->
-        <div id="alertBox" class="alert-box alert-error"></div>
-
         <button type="submit" id="btnCheck" class="btn-submit">
           <div class="spinner" id="btnSpinner"></div>
           <span id="btnText">CARI DATA AKSES</span>
         </button>
+
+        <!-- ALERT / ERROR MESSAGE CONTAINER (DIDALAM CARD FORM, DIPINDAH KE BAWAH TOMBOL) -->
+        <div id="alertBox" class="alert-box alert-error" style="margin-top: 14px; margin-bottom: 0;"></div>
       </form>
     </div>
 
