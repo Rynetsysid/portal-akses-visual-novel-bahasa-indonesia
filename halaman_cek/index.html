@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pemeriksaan Status & Riwayat Akses User - Portal Akses Visual Novel</title>
+  <title>Pemeriksaan Status & Riwayat Akses User - Portal Access System</title>
 
   <!-- FAVICON -->
   <link rel="icon" href="../favicon.ico" type="image/x-icon" />
@@ -588,7 +588,10 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
     let detectedIp = "Unknown";
 
-    // 1. OTOMATIS AMBIL IP PUBLIC PENGGUNA UNTUK SHIELD BACKEND
+    let isDataFetched = false;
+    let cdInterval = null;
+
+    // 1. OTOMATIS AMBIL IP PUBLIC PENGGUNA UNTUK SHIELD BACKEND & MONITOR INPUT EMAIL
     window.addEventListener("DOMContentLoaded", () => {
       fetch("https://api.ipify.org?format=json")
         .then(res => res.json())
@@ -598,7 +601,27 @@
           }
         })
         .catch(() => {});
+
+      const emailInput = document.getElementById("userEmailInput");
+      if (emailInput) {
+        emailInput.addEventListener("input", () => {
+          if (isDataFetched) {
+            resetButtonToDefault();
+          }
+        });
+      }
     });
+
+    function resetButtonToDefault() {
+      if (cdInterval) clearInterval(cdInterval);
+      isDataFetched = false;
+      const btnCheck = document.getElementById("btnCheck");
+      const btnSpinner = document.getElementById("btnSpinner");
+      const btnText = document.getElementById("btnText");
+      if (btnCheck) btnCheck.disabled = false;
+      if (btnSpinner) btnSpinner.style.display = "none";
+      if (btnText) btnText.innerText = "CARI DATA AKSES";
+    }
 
     // 2. SWITCH TAB SYSTEM
     function switchTab(type) {
@@ -636,22 +659,29 @@
         return;
       }
 
-      // CLIENT-SIDE SESSION CACHE: Cek apakah email yang sama pernah dicari pada tab ini
       const cacheKey = "cache_status_" + emailInput;
-      const cachedDataStr = sessionStorage.getItem(cacheKey);
-      if (cachedDataStr) {
-        try {
-          const cachedData = JSON.parse(cachedDataStr);
-          alertBox.style.display = "none";
-          renderResults(cachedData);
-          return;
-        } catch(eCache) {}
+
+      // JIKA MODUS REFRESH: Hapus cache session agar mengambil data terbaru dari server
+      if (isDataFetched) {
+        try { sessionStorage.removeItem(cacheKey); } catch(eCache){}
+      } else {
+        // CLIENT-SIDE SESSION CACHE: Cek apakah email yang sama pernah dicari pada tab ini
+        const cachedDataStr = sessionStorage.getItem(cacheKey);
+        if (cachedDataStr) {
+          try {
+            const cachedData = JSON.parse(cachedDataStr);
+            alertBox.style.display = "none";
+            renderResults(cachedData);
+            enableButtonWithCooldown(btnCheck, btnSpinner, btnText, true);
+            return;
+          } catch(eCache) {}
+        }
       }
 
       // UI Loading state & Cooldown
       btnCheck.disabled = true;
       btnSpinner.style.display = "block";
-      btnText.innerText = "MEMERIKSA DATA...";
+      btnText.innerText = isDataFetched ? "MEMUAT ULANG DATA..." : "MEMERIKSA DATA...";
       alertBox.style.display = "none";
       resultContainer.style.display = "none";
 
@@ -670,12 +700,13 @@
       })
       .then(res => res.json())
       .then(data => {
-        enableButtonWithCooldown(btnCheck, btnSpinner, btnText);
-
         if (!data.success) {
+          enableButtonWithCooldown(btnCheck, btnSpinner, btnText, false);
           showAlert("error", data.message || "Email tidak terdaftar.");
           return;
         }
+
+        enableButtonWithCooldown(btnCheck, btnSpinner, btnText, true);
 
         // Cache hasil sukses ke sessionStorage
         try { sessionStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e){}
@@ -688,21 +719,28 @@
       });
     }
 
-    function enableButtonWithCooldown(btnCheck, btnSpinner, btnText) {
+    function enableButtonWithCooldown(btnCheck, btnSpinner, btnText, success = true) {
       btnSpinner.style.display = "none";
-      btnText.innerText = "CARI DATA AKSES";
       btnCheck.disabled = true;
 
-      // 5 Detik Cooldown Tombol cegah spamming click
+      if (success) {
+        isDataFetched = true;
+      }
+
+      const targetLabel = isDataFetched ? "REFRESH DATA AKSES" : "CARI DATA AKSES";
+      btnText.innerText = `${targetLabel} (5s)`;
+
+      if (cdInterval) clearInterval(cdInterval);
       let cooldownSec = 5;
-      const cdInterval = setInterval(() => {
+      cdInterval = setInterval(() => {
         cooldownSec--;
         if (cooldownSec > 0) {
-          btnText.innerText = `CARI DATA AKSES (${cooldownSec}s)`;
+          btnText.innerText = `${targetLabel} (${cooldownSec}s)`;
         } else {
           clearInterval(cdInterval);
+          cdInterval = null;
           btnCheck.disabled = false;
-          btnText.innerText = "CARI DATA AKSES";
+          btnText.innerText = targetLabel;
         }
       }, 1000);
     }
@@ -819,6 +857,14 @@
           </div>
         `;
         freeNotes.style.display = "block";
+      } else if (data.hasPremiumData) {
+        freeWrapper.innerHTML = `
+          <div class="empty-card" style="border-left: 4px solid var(--primary);">
+            <span class="empty-icon">👑</span>
+            User berstatus <strong>ACTIVE PREMIUM</strong> dan tidak memiliki riwayat Akses Gratis (FREE). Tab Akses Gratis (FREE) non-aktif.
+          </div>
+        `;
+        freeNotes.style.display = "none";
       } else {
         freeWrapper.innerHTML = `
           <div class="empty-card">
@@ -836,6 +882,11 @@
         let badgeClass = "badge-active";
         if (pd.status === "EXPIRED PREMIUM") badgeClass = "badge-expired";
         if (pd.status === "BANNED") badgeClass = "badge-blocked";
+
+        let gamesHtml = '<span class="data-value">-</span>';
+        if (pd.aksesGameList && pd.aksesGameList.length > 0) {
+          gamesHtml = pd.aksesGameList.map(g => `<div style="padding: 3px 0; color: var(--primary); font-weight: 600; text-align: left;">🎮 ${escapeHtml(g)}</div>`).join('');
+        }
 
         premWrapper.innerHTML = `
           <div class="data-card">
@@ -864,6 +915,10 @@
                 <span class="badge ${pd.isFullQuota ? 'badge-full' : 'badge-active'}">${escapeHtml(pd.jumlahAkses24Jam)}</span>
               </span>
             </div>
+            <div class="data-row" style="flex-direction: column; align-items: flex-start; background: #fafafa; padding: 10px 12px; border-radius: 8px; margin: 6px 0;">
+              <span class="data-label" style="margin-bottom: 4px; font-weight: 700;">Akses Game:</span>
+              <div style="width: 100%;">${gamesHtml}</div>
+            </div>
             <div class="data-row">
               <span class="data-label">Status Premium:</span>
               <span class="data-value"><span class="badge ${badgeClass}">${escapeHtml(pd.status)}</span></span>
@@ -885,8 +940,8 @@
         premNotes.style.display = "none";
       }
 
-      // Auto Switch ke tab yang memiliki data
-      if (!data.hasFreeData && data.hasPremiumData) {
+      // Auto Switch ke tab yang sesuai
+      if (data.hasPremiumData) {
         switchTab('PREMIUM');
       } else {
         switchTab('FREE');
