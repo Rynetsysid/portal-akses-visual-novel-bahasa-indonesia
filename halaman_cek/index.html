@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pemeriksaan Status & Riwayat Akses User - Portal Akses Visual Novel</title>
 
+  <!-- FAVICON -->
+  <link rel="icon" href="../favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
+
   <!-- GOOGLE FONTS: PLUS JAKARTA SANS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -506,10 +510,6 @@
               autocomplete="email"
             />
           </div>
-          <div class="ip-info-tag">
-            <span>🌐 IP Anda: <strong id="ipDisplay">Memuat IP...</strong></span>
-            <span id="rateLimitHint">Batas: 3x (FREE) / 6x (PREMIUM)</span>
-          </div>
         </div>
 
         <!-- ALERT / ERROR MESSAGE CONTAINER (DIDALAM CARD FORM, DIPINDAH KE ATAS TOMBOL) -->
@@ -588,21 +588,16 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
     let detectedIp = "Unknown";
 
-    // 1. OTOMATIS AMBIL IP PUBLIC PENGGUNA
+    // 1. OTOMATIS AMBIL IP PUBLIC PENGGUNA UNTUK SHIELD BACKEND
     window.addEventListener("DOMContentLoaded", () => {
       fetch("https://api.ipify.org?format=json")
         .then(res => res.json())
         .then(data => {
           if (data && data.ip) {
             detectedIp = data.ip;
-            document.getElementById("ipDisplay").innerText = detectedIp;
-          } else {
-            document.getElementById("ipDisplay").innerText = "Aktif (Protected)";
           }
         })
-        .catch(() => {
-          document.getElementById("ipDisplay").innerText = "Aktif (Protected)";
-        });
+        .catch(() => {});
     });
 
     // 2. SWITCH TAB SYSTEM
