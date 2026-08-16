@@ -1155,6 +1155,7 @@
             }
             
             masterGamesData = sessionData.games || [];
+            populateCategoryDropdown();
             
             updateStatsUI(sessionData.stats);
             startCountdownTimer(sessionData.targetTime);
@@ -1195,6 +1196,7 @@
             const targetTime = Date.now() + durationMs;
 
             masterGamesData = data.games || [];
+            populateCategoryDropdown();
 
             saveSessionData({
               token: token,
@@ -1251,8 +1253,41 @@
     }
 
     // =========================================================================
-    // DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME)
+    // DYNAMIC CATEGORY POPULATOR & DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME)
     // =========================================================================
+    function populateCategoryDropdown() {
+      const categorySelect = document.getElementById("selectCategory");
+      if (!categorySelect || !Array.isArray(masterGamesData)) return;
+
+      const categoryLabelMap = {
+        "RPG": "RPG (Role-Playing Game)",
+        "RVN": "RVN (Raising Visual Novel)",
+        "VN": "VN (Visual Novel)",
+        "BAKA": "BAKA (Baka Archive)"
+      };
+
+      const categoriesSet = new Set();
+      masterGamesData.forEach(g => {
+        let cat = g.kategori ? String(g.kategori).trim().toUpperCase() : "";
+        if (!cat && g.id) {
+          const parts = String(g.id).split("_");
+          if (parts.length > 1) {
+            cat = parts[1].replace(/[0-9]/g, "").toUpperCase();
+          }
+        }
+        if (cat) categoriesSet.add(cat);
+      });
+
+      categorySelect.innerHTML = '<option value="">-- Pilih Kategori Arsip --</option>';
+
+      categoriesSet.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = categoryLabelMap[cat] || `${cat} (Kategori Arsip)`;
+        categorySelect.appendChild(opt);
+      });
+    }
+
     function onCategoryChange() {
       const categorySelect = document.getElementById("selectCategory");
       const gameSelect = document.getElementById("selectGame");
@@ -1279,16 +1314,14 @@
         let isMatch = false;
 
         if (cat) {
+          if (cat === selectedCategory) isMatch = true;
           if (selectedCategory === "RPG" && (cat === "RPG" || cat.includes("ROLE"))) isMatch = true;
           if (selectedCategory === "RVN" && (cat === "RVN" || cat.includes("RAISING"))) isMatch = true;
           if (selectedCategory === "VN" && (cat === "VN" || cat === "VISUAL NOVEL")) isMatch = true;
-          if (cat === selectedCategory) isMatch = true;
         }
 
         if (!isMatch) {
-          if (selectedCategory === "RPG" && gameId.includes("RPG")) isMatch = true;
-          if (selectedCategory === "RVN" && gameId.includes("RVN")) isMatch = true;
-          if (selectedCategory === "VN" && gameId.includes("VN") && !gameId.includes("RVN")) isMatch = true;
+          if (gameId.includes(selectedCategory)) isMatch = true;
         }
 
         return isMatch;
