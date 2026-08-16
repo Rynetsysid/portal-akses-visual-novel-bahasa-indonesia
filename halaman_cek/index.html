@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pemeriksaan Status & Riwayat Akses User - Portal Akses Visual Novel</title>
+  <title>Pemeriksaan Status & Riwayat Akses User - Portal Access System</title>
 
   <!-- GOOGLE FONTS: PLUS JAKARTA SANS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -431,6 +431,46 @@
       display: block;
     }
 
+    /* DEBUG CONSOLE LOG BOX */
+    .debug-card {
+      background: #0f172a;
+      color: #38bdf8;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 24px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.78rem;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    .debug-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 6px;
+      color: #f1f5f9;
+      font-weight: 700;
+    }
+
+    .debug-body {
+      max-height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    .debug-log-line {
+      margin-bottom: 4px;
+    }
+
+    .debug-log-success { color: #4ade80; }
+    .debug-log-error { color: #f87171; }
+    .debug-log-warn { color: #fbbf24; }
+
     /* FOOTER LINK */
     .footer-box {
       margin-top: 30px;
@@ -573,6 +613,17 @@
 
     </div>
 
+    <!-- DEBUG LOG PANEL -->
+    <div class="debug-card" id="debugCard">
+      <div class="debug-header">
+        <span>🛠️ Debug &amp; Server Connection Inspector</span>
+        <button onclick="clearDebugLogs()" style="background:#334155; color:#fff; border:none; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:0.7rem;">Bersihkan Log</button>
+      </div>
+      <div class="debug-body" id="debugLogs">
+        <div class="debug-log-line debug-log-info">[INIT] Debug Inspector aktif. Menunggu aksi pencarian email...</div>
+      </div>
+    </div>
+
     <!-- FOOTER NAVIGASI KEMBALI -->
     <div class="footer-box">
       <a href="../" class="btn-back">
@@ -583,24 +634,47 @@
   </div>
 
   <script>
-    // SCRIPT ENDPOINT GAS MASTER NODE
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQy1Lg4m_7J0xL2tP2_MasterNode_Placeholder/exec";
+    // 🔗 SCRIPT ENDPOINT GAS MASTER NODE RESMI (SAMA DENGAN GITHUBPAGE.KS)
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
     let detectedIp = "Unknown";
+
+    // DEBUG LOGGER HELPER
+    function addDebugLog(msg, type = "info") {
+      const logsBox = document.getElementById("debugLogs");
+      if (!logsBox) return;
+      const timestamp = new Date().toLocaleTimeString("id-ID");
+      const line = document.createElement("div");
+      line.className = "debug-log-line debug-log-" + type;
+      line.innerText = `[${timestamp}] ${msg}`;
+      logsBox.appendChild(line);
+      logsBox.scrollTop = logsBox.scrollHeight;
+    }
+
+    function clearDebugLogs() {
+      const logsBox = document.getElementById("debugLogs");
+      if (logsBox) logsBox.innerHTML = '<div class="debug-log-line debug-log-info">[INIT] Log dibersihkan.</div>';
+    }
 
     // 1. OTOMATIS AMBIL IP PUBLIC PENGGUNA
     window.addEventListener("DOMContentLoaded", () => {
+      addDebugLog("Menguji koneksi IP API & Server Endpoint...", "info");
+      addDebugLog("Endpoint Master Node: " + SCRIPT_URL, "info");
+
       fetch("https://api.ipify.org?format=json")
         .then(res => res.json())
         .then(data => {
           if (data && data.ip) {
             detectedIp = data.ip;
             document.getElementById("ipDisplay").innerText = detectedIp;
+            addDebugLog("IP Public Pengguna Terdeteksi: " + detectedIp, "success");
           } else {
             document.getElementById("ipDisplay").innerText = "Aktif (Protected)";
+            addDebugLog("Gagal parsing IP dari ipify, fallback ke Unknown", "warn");
           }
         })
-        .catch(() => {
+        .catch(err => {
           document.getElementById("ipDisplay").innerText = "Aktif (Protected)";
+          addDebugLog("Peringatan IP Fetch: " + err.toString(), "warn");
         });
     });
 
@@ -624,7 +698,7 @@
       }
     }
 
-    // 3. SUBMIT PENCARIAN STATUS EMAIL
+    // 3. SUBMIT PENCARIAN STATUS EMAIL WITH MULTI-STRATEGY FETCH & JSONP FALLBACK
     function handleCheckSubmit(e) {
       e.preventDefault();
       
@@ -637,6 +711,7 @@
 
       if (!emailInput.endsWith("@gmail.com")) {
         showAlert("error", "Akses Ditolak! Alamat email harus berakhiran @gmail.com.");
+        addDebugLog("Validasi Gagal: Email harus @gmail.com", "warn");
         return;
       }
 
@@ -647,6 +722,10 @@
       alertBox.style.display = "none";
       resultContainer.style.display = "none";
 
+      addDebugLog("----------------------------------------", "info");
+      addDebugLog("Mengirim permintaan pencarian status untuk: " + emailInput, "info");
+
+      // STRATEGI 1: FETCH POST (Standard Web App Request)
       const payload = {
         action: "check_user_status",
         emailUser: emailInput,
@@ -659,26 +738,99 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
       })
-      .then(res => res.json())
+      .then(res => {
+        addDebugLog(`HTTP Response Status: ${res.status} ${res.statusText}`, "info");
+        return res.json();
+      })
       .then(data => {
         btnCheck.disabled = false;
         btnSpinner.style.display = "none";
         btnText.innerText = "🔍 CARI DATA AKSES";
+
+        addDebugLog("Respon Server Diterima (POST): " + JSON.stringify(data), "success");
 
         if (!data.success) {
           showAlert("error", data.message || "Email tidak terdaftar.");
           return;
         }
 
-        // BERHASIL DITEMUKAN: RENDER HASIL
         renderResults(data);
       })
-      .catch(err => {
+      .catch(errPost => {
+        addDebugLog("POST Fetch Error: " + errPost.toString() + " -> Mencoba Strategi 2 (GET JSONP Fallback)...", "warn");
+        
+        // STRATEGI 2: FALLBACK TO GET / JSONP IF CORS POST REDIRECT ISSUES OCCUR
+        fetchViaGetFallback(emailInput, detectedIp, btnCheck, btnSpinner, btnText);
+      });
+    }
+
+    // STRATEGI 2: GET FALLBACK FOR GAS REDIRECTIONS
+    function fetchViaGetFallback(emailInput, ip, btnCheck, btnSpinner, btnText) {
+      const getUrl = `${SCRIPT_URL}?action=check_user_status&emailUser=${encodeURIComponent(emailInput)}&ipPublic=${encodeURIComponent(ip)}`;
+
+      fetch(getUrl, { method: "GET" })
+      .then(res => res.json())
+      .then(data => {
         btnCheck.disabled = false;
         btnSpinner.style.display = "none";
         btnText.innerText = "🔍 CARI DATA AKSES";
-        showAlert("error", "Gagal menghubungkan ke server. Silakan periksa koneksi internet Anda!");
+
+        addDebugLog("Respon Server Diterima (GET Fallback): " + JSON.stringify(data), "success");
+
+        if (!data.success) {
+          showAlert("error", data.message || "Email tidak terdaftar.");
+          return;
+        }
+
+        renderResults(data);
+      })
+      .catch(errGet => {
+        addDebugLog("GET Fetch Error: " + errGet.toString() + " -> Mencoba Strategi 3 (JSONP Script Injection)...", "error");
+        fetchViaJsonp(emailInput, ip, btnCheck, btnSpinner, btnText);
       });
+    }
+
+    // STRATEGI 3: JSONP SCRIPT INJECTION (100% RELIABLE CROSS-ORIGIN FALLBACK)
+    function fetchViaJsonp(emailInput, ip, btnCheck, btnSpinner, btnText) {
+      const callbackName = "gasCallback_" + Math.round(Math.random() * 1000000);
+      const jsonpUrl = `${SCRIPT_URL}?action=check_user_status&emailUser=${encodeURIComponent(emailInput)}&ipPublic=${encodeURIComponent(ip)}&prefix=${callbackName}`;
+
+      window[callbackName] = function(data) {
+        delete window[callbackName];
+        if (scriptElem && scriptElem.parentNode) {
+          scriptElem.parentNode.removeChild(scriptElem);
+        }
+
+        btnCheck.disabled = false;
+        btnSpinner.style.display = "none";
+        btnText.innerText = "🔍 CARI DATA AKSES";
+
+        addDebugLog("Respon Server Diterima (JSONP Callback): " + JSON.stringify(data), "success");
+
+        if (!data.success) {
+          showAlert("error", data.message || "Email tidak terdaftar.");
+          return;
+        }
+
+        renderResults(data);
+      };
+
+      const scriptElem = document.createElement("script");
+      scriptElem.src = jsonpUrl;
+      scriptElem.onerror = function() {
+        delete window[callbackName];
+        if (scriptElem && scriptElem.parentNode) {
+          scriptElem.parentNode.removeChild(scriptElem);
+        }
+        btnCheck.disabled = false;
+        btnSpinner.style.display = "none";
+        btnText.innerText = "🔍 CARI DATA AKSES";
+
+        addDebugLog("FATAL ERROR: Seluruh strategi koneksi ke Master Node gagal!", "error");
+        showAlert("error", "Gagal menghubungkan ke server Master Node! Silakan pastikan skrip ggss.ks pada Master Node sudah di-Deploy sebagai Web App dengan akses 'Anyone'.");
+      };
+
+      document.body.appendChild(scriptElem);
     }
 
     // 4. RENDER RESULT TO DOM
@@ -689,7 +841,6 @@
       const freeNotes = document.getElementById("freeStaticNotes");
       const premNotes = document.getElementById("premStaticNotes");
 
-      // Clear wrappers
       freeWrapper.innerHTML = "";
       premWrapper.innerHTML = "";
 
