@@ -481,7 +481,7 @@
       font-size: 1.05rem;
       font-weight: 800;
       color: var(--primary);
-      margin-bottom: 4px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -494,12 +494,28 @@
       line-height: 1.4;
     }
 
-    /* GRID TOMBOL PAYMENT VOUCHER */
+    /* CARD WHATSAPP & PAYMENT */
+    .wa-card-custom {
+      margin-top: 10px;
+      padding: 18px 16px;
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+
+    .payment-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #166534;
+      margin-bottom: 10px;
+    }
+
     .payment-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .pay-btn {
@@ -507,7 +523,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 10px 14px;
+      padding: 10px;
       border-radius: 8px;
       font-weight: 700;
       font-size: 0.85rem;
@@ -526,7 +542,7 @@
       background: #e0981e;
       transform: translateY(-1px);
     }
-
+    
     .pay-shopeepay {
       background: #ffffff !important;
       color: #ee4d2d !important;
@@ -541,10 +557,60 @@
     }
 
     .pay-icon-img {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       object-fit: contain;
       flex-shrink: 0;
+    }
+
+    .confirm-wa-box {
+      border-top: 1px dashed #a7f3d0;
+      padding-top: 12px;
+      margin-top: 10px;
+    }
+
+    .confirm-text {
+      font-size: 0.82rem;
+      color: #15803d;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .confirm-note {
+      font-size: 0.76rem;
+      color: #166534;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+
+    .wa-btn-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 0.88rem;
+      border-radius: var(--radius-sm);
+      text-decoration: none !important;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+      transition: all 0.2s ease;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .wa-btn-link:hover {
+      background: linear-gradient(135deg, #20ba5a, #0e7065);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 211, 102, 0.35);
+    }
+
+    .wa-icon-svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
     }
 
     .badge-updated {
@@ -667,24 +733,42 @@
         <!-- KOTAK TOP-UP MASA AKTIF PREMIUM (TAMPIL KHUSUS USER PREMIUM AKTIF) -->
         <div id="topupCardSection" class="topup-card" style="display: none;">
           <div class="topup-header">
-            <h3 class="topup-title">⚡ Ingin menambah masa aktif?</h3>
-            <p class="topup-subtitle">Silahkan konfirmasi token voucher melalui tombol di bawah ini:</p>
+            <h3 class="topup-title">Ingin menambah masa aktif?</h3>
           </div>
 
-          <!-- TOMBOL PAYMENT VOUCHER (SAWERIA & SHOPEEPAY) -->
-          <div class="payment-grid">
-            <a href="https://saweria.co/Rynet" target="_blank" rel="noopener noreferrer" class="pay-btn pay-saweria">
-              <img src="https://saweria.co/favicon.ico" class="pay-icon-img" alt="Saweria" />
-              <span>Via Saweria</span>
-            </a>
-            <a href="https://shopee.co.id" target="_blank" rel="noopener noreferrer" class="pay-btn pay-shopeepay">
-              <img src="https://shopee.co.id/favicon.ico" class="pay-icon-img" alt="Shopee" />
-              <span>Via Shopee</span>
-            </a>
+          <!-- KOTAK PAYMENT & WA MIMIN -->
+          <div class="wa-card-custom">
+            <div class="payment-title">Dapatkan token voucher dengan:</div>
+            
+            <div class="payment-grid">
+              <!-- SAWERIA BUTTON -->
+              <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
+                Saweria
+              </a>
+
+              <!-- SHOPEEPAY BUTTON -->
+              <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
+                ShopeePay
+              </button>
+            </div>
+
+            <div class="confirm-wa-box">
+              <div class="confirm-text">Silahkan hubungi mimin untuk mendapatkan token voucher</div>
+              <div class="confirm-note">arigatou gozaimasu~</div>
+              
+              <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" target="_blank">
+                <svg class="wa-icon-svg" viewBox="0 0 24 24">
+                  <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
+                </svg>
+                Konfirmasi via WA Mimin
+              </a>
+            </div>
           </div>
 
           <!-- FORM INPUT TOKEN VOUCHER -->
-          <form id="extendForm" onsubmit="handleExtendSubmit(event)">
+          <form id="extendForm" onsubmit="handleExtendSubmit(event)" style="margin-top: 18px;">
             <div class="form-group">
               <label class="form-label" for="tokenVoucherInput">Masukkan Token Voucher Top-Up:</label>
               <div class="input-wrapper">
@@ -692,7 +776,7 @@
                   type="text" 
                   id="tokenVoucherInput" 
                   class="input-field" 
-                  placeholder="Contoh: ADD3D-XYZ123..." 
+                  placeholder="(kosongkan saja)" 
                   required 
                   autocomplete="off"
                 />
@@ -701,7 +785,7 @@
 
             <button type="submit" id="btnExtendSubmit" class="btn-submit">
               <div class="spinner" id="extendSpinner" style="display: none;"></div>
-              <span id="extendBtnText">🚀 TAMBAH MASA AKTIF</span>
+              <span id="extendBtnText">TAMBAH MASA AKTIF</span>
             </button>
 
             <!-- ALERT ERROR / SUCCESS FOR EXTEND TOPUP -->
@@ -1188,7 +1272,7 @@
       .catch(err => {
         btnSubmit.disabled = false;
         if (spinner) spinner.style.display = "none";
-        if (btnText) btnText.innerText = "🚀 TAMBAH MASA AKTIF";
+        if (btnText) btnText.innerText = "TAMBAH MASA AKTIF";
         showExtendAlert("error", "Gagal memproses request! Periksa koneksi internet Anda.");
       });
     }
@@ -1209,7 +1293,46 @@
       alertBox.style.display = "block";
     }
 
-    // 7. HELPER COPY VIP CODE
+    // 7. HELPER COPY SHOPEEPAY & VIP CODE
+    function copyShopeePay(btnElem) {
+      const shopeeNum = "085175409246";
+      
+      const copyAction = () => {
+        const originalHTML = btnElem.innerHTML;
+        btnElem.innerHTML = "&#10003; Disalin!";
+        btnElem.style.background = "#16a34a";
+        alert("Nomor ShopeePay (" + shopeeNum + ") berhasil disalin!");
+        setTimeout(() => {
+          btnElem.innerHTML = originalHTML;
+          btnElem.style.background = "#ee4d2d";
+        }, 2000);
+      };
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shopeeNum).then(copyAction).catch(() => {
+          fallbackCopyText(shopeeNum, copyAction);
+        });
+      } else {
+        fallbackCopyText(shopeeNum, copyAction);
+      }
+    }
+
+    function fallbackCopyText(text, callback) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        if (callback) callback();
+      } catch (err) {
+        console.error("Fallback copy failed", err);
+      }
+      document.body.removeChild(textarea);
+    }
+
     function copyVipCode(code, btn) {
       navigator.clipboard.writeText(code).then(() => {
         const oldText = btn.innerText;
