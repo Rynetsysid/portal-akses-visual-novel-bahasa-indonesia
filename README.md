@@ -1,58 +1,118 @@
-# Visual Novel Archive Link Access Portal
+# Indonesian Visual Novel Resource Access Portal (Rynet Access System)
 
-Welcome to the official repository for the Visual Novel Archive Link Access Portal. This platform serves as a secure, encrypted gateway for managing the distribution of Visual Novel archive links safely, systematically, and protected from bot tracking.
+![Version](https://img.shields.io/badge/Version-5.1_Master_Node-orange.svg)
+![Architecture](https://img.shields.io/badge/Architecture-Distributed_Multi--Node-blue.svg)
+![Backend](https://img.shields.io/badge/Backend-Google_Apps_Script-green.svg)
+![Frontend](https://img.shields.io/badge/Frontend-GitHub_Pages-black.svg)
+![Status](https://img.shields.io/badge/Status-Active_Production-brightgreen.svg)
 
----
-
-## System Overview
-
-The portal is built using a lightweight client-side architecture fully integrated with Google Apps Script (GAS) as its server-side backend. This system ensures that all users accessing the archive files have successfully completed a valid verification process from the main blog post.
-
----
-
-## Key Services and Features
-
-### 1. Access Tiering System
-* Free Access Tier:
-  * Claim limit of 1 game per day.
-  * Short-term session duration.
-  * Requires completing the WCaptcha verification on the blog post.
-* Premium Access (VIP Tier):
-  * Higher claim quota of 3 games per day.
-  * Long-term access session.
-  * Requires a valid Premium Access Code.
-
-### 2. Integrated Payment and Support
-* Integrated Payment Gateways: Supports instant payments via Saweria and ShopeePay (equipped with a One-Click Copy Number feature).
-* WhatsApp Confirmation and Support: Direct communication links (wa.link) to the Admin ("Mimin") for payment confirmations or technical issue reporting.
-
-### 3. Transparency and User Experience (UI/UX)
-* Real-time Statistics: Displays Total Registered Users and Free Quota Used Today.
-* Interactive Countdown Timer: Displays remaining active session time for the verification token in real time.
-* Quick Copy Password: One-click feature to quickly copy the .zip archive extraction password (pass_rynet_key).
+**Rynet Access System** is a distributed access management infrastructure built on a **Serverless Architecture** (GitHub Pages + Google Apps Script + Google Drive API). It is specifically engineered for distributing Indonesian Visual Novel and RPG archive files in a secure, automated, quota-safe, and bot-resistant environment—completely free of invasive ad-shorteners and automated scrapers.
 
 ---
 
-## Security Measures
+## System Architecture
 
-This portal implements a layered defense (Defense-in-Depth) mechanism to prevent link piracy, scraping, and automated bot attacks:
+The architecture decouples responsibilities between the **Interactive Frontend**, the **Serverless Orchestrator (Master Node)**, and the **Drive API Executing Workers (Worker Nodes)**:
 
-* Session-Based Token Verification: Users must possess a valid token issued directly by the Google Apps Script backend.
-* Instant URL Sanitization (history.replaceState): The ?token= parameter in the address bar is immediately removed upon successful validation to prevent token link sharing.
-* Memory Session Isolation (sessionStorage): Verification state is safely stored in browser memory. Page refreshes preserve the session, but copying the link to another tab or browser results in an automatic Access Denied.
-* Anti-Bot Protection (Honeypot Trap): Features hidden trap fields to catch automated scrapers or spammers.
-* Submit Duration Analysis (submitDuration): Measures form completion speed to detect instant executions by automated bot scripts.
-* Storage Link Protection: Original Google Drive URLs are held temporarily in JavaScript memory and are immediately cleared (rawDriveUrl = "") once the link is opened.
-* Geolocation and IP Tracking: Records public IP addresses and country codes to prevent quota abuse (rate-limit abuse).
-* Post-Download Protection: All .zip archives are password-protected for an extra layer of security.
+```mermaid
+flowchart TD
+    subgraph Blogspot
+        A[Blog Post] -->|1. WCaptcha Verification| B[Call Generate Token API]
+    end
 
----
+    subgraph Serverless Backend
+        B -->|2. Validate IP & Issue Token| C[GAS Master Node V5.1]
+        C <-->|Read/Write Data| DB[(Google Spreadsheet DB)]
+    end
 
-## Integration Architecture
+    subgraph GitHub Pages
+        D[Main Access Portal] -->|3. Validate Token & Claim Access| C
+        E[Status & Top-Up Portal] -->|Status Lookup & Voucher| C
+    end
 
-```text
-[ Blogspot Post ] --( WCaptcha )--> [ Google Apps Script (GAS) ]
-                                                | (Issues Token)
-                                                v
-[ Google Drive Storage ] <--( Access Link )-- [ GitHub Pages Portal ]
+    subgraph Storage Worker Nodes
+        C -->|4. Router Handshake / Secret Key| F[Worker Node Drive B]
+        C -->|4. Router Handshake / Secret Key| G[Worker Node Drive C]
+        F -->|5. Silent Drive Permission Grant/Revoke| H[(Google Drive Storage)]
+        G -->|5. Silent Drive Permission Grant/Revoke| H
+    end
 ```
+
+---
+
+## Key Features
+
+### 1. WCaptcha (Waifu CAPTCHA Gamification)
+- Anime-themed gamified visual verification (*Choose Your Favorite Waifu*).
+- Eliminates reliance on 3rd-party CAPTCHAs that are frequently blocked by ad-blockers or privacy extensions.
+- Integrated **Behavioral Delay Guard (15-Second Timer)** to throttle automated bot scripts.
+
+### 2. IP Defender & Retoken Rate Limiter
+- **3-Tier Smart IP Detection:** Combines `ipapi.co` Token, `ipapi.co` Public, and `api.ipify.org` as fallback tiers.
+- **Retoken Throttling:** Enforces a maximum limit of 6 new token requests per 24 hours per IP.
+- **Automated Sanctions:** IPs detected spamming or exceeding retoken thresholds are automatically banned for 24 hours (`Log_IP_Block_Token`).
+- **Honeypot Bot Trap:** Hidden trap fields to instantly identify and reject automated web crawlers.
+
+### 3. Multi-Node Worker Router System
+- Load distribution of Drive API permission grants and revocations across multiple dedicated Worker accounts (`NODE_DRIVE_A`, `NODE_DRIVE_B`, etc.) secured via **Secret Signature Keys**.
+- **Silent Mode Access:** Grants *Viewer* permissions to user Gmail accounts silently (`sendNotificationEmails: false`) without cluttering their email inboxes.
+- **Autonomous Cron Revocation:** Worker Nodes process expired permission revocation queues in batches via autonomous time-driven triggers every 10–15 minutes.
+
+### 4. Free vs. Premium Access Tiers
+- **Free Tier:** Limited to 3 active daily slots, 1-day (24-hour) access duration with a 3-day cooldown period. Single archive claim per cycle.
+- **Premium Tier:** 15-day active period per ticket (`Master_Kode_Premium`), capped at 3 archive claims per 24 hours for storage stability.
+- **Top-Up Voucher System:** Enables active period extensions via top-up voucher tokens verified directly with the admin via WhatsApp.
+
+---
+
+## Repository Directory Structure
+
+```struct
+├── GAS_Backend_Script_Portal.ks    # Master Node Backend Script (Google Apps Script V5.1)
+├── API_Script_Drive_Worker.ks       # Worker Node Drive API Executor Script
+├── Trigger_service_GAS_Portal.ks    # Time-Driven Automated Trigger for Master Node
+├── Trigger_Service_GAS_Worker.ks    # Time-Driven Automated Trigger for Worker Nodes
+├── portal_githubpage.ks             # Main Access Portal Frontend (GitHub Pages)
+├── portal_halaman_cek_githubpage.ks # Status Checker & Top-Up Voucher Frontend
+├── Postingan Blog(Wcapctha).ks      # WCaptcha Widget & Blogspot Post Script
+├── Database Tabel Portal Rynet.ks   # Database Schema & 11 Table Mappings
+└── README.md                        # Project Repository Documentation
+```
+
+---
+
+## Database Schema (Google Spreadsheet DB)
+
+The Master Node interfaces with a Google Spreadsheet Database managing 11 primary tables:
+
+| Table Name | Primary Function |
+| :--- | :--- |
+| `Log_Akses` | Audit log of access grants and revocations. |
+| `Log_Token` | WCaptcha token registry (Active, Burned, Expired). |
+| `Log_IP_Block_Token` | Retoken frequency tracking and IP block status. |
+| `Node_Registry` | Worker node registry, webhook URLs, and storage capacities. |
+| `Master_Game` | Game catalog, categories, storage nodes, zip passwords, & access levels. |
+| `Master_Kode_Premium` | Premium ticket registry and validity tracking. |
+| `Log_Aktivitas` | User activity and system operation audit log. |
+| `Blacklist` | Permanent and temporary email/IP ban list. |
+| `IP_Blocked` | System-level IP security block log. |
+| `Log_System_Debug` | Internal backend error and debug logs. |
+| `Premium_Add_Akses` | Top-up voucher registry for access extensions. |
+
+---
+
+## Security & Privacy Commitments
+
+1. **Single-Use Token Enforcement:** Every token is immediately burned upon access claim to prevent *Replay Attacks*.
+2. **Client-Side Exit Defender:** Prevents accidental tab closures/refreshes during claim processing (`beforeunload`).
+3. **Strict Server-Side Validation:** All input parameters (Gmail regex, ban lists, daily quotas) are re-validated on the server.
+4. **Data Privacy Assurance:** User email addresses are used exclusively for Google Drive *Viewer* permissions and are never shared or published.
+
+---
+
+## Author & Maintainer
+
+**Admin Rynet (Mimin Rynet)**  
+*Fan Translator & Systems Architect*  
+- Official Portal: [Rynet Access Portal](https://rynetsysid.github.io/portal-akses-visual-novel-bahasa-indonesia/)  
+- Support & Confirmation: [Official WhatsApp Admin](https://wa.link/c9eihx)
