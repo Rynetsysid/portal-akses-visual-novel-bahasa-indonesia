@@ -466,12 +466,117 @@
       transform: translateY(-1px);
     }
 
+    /* KOTAK TOP-UP MASA AKTIF PREMIUM */
+    .topup-card {
+      background: var(--bg-card);
+      border: 1.5px solid #fed7aa;
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-soft);
+      margin-top: 20px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .topup-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topup-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    /* GRID TOMBOL PAYMENT VOUCHER */
+    .payment-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .pay-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-decoration: none !important;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .pay-saweria {
+      background: #faae2b;
+      color: #4a2800 !important;
+    }
+
+    .pay-saweria:hover {
+      background: #e0981e;
+      transform: translateY(-1px);
+    }
+
+    .pay-shopeepay {
+      background: #ffffff !important;
+      color: #ee4d2d !important;
+      border: 1.5px solid #ee4d2d !important;
+    }
+
+    .pay-shopeepay:hover {
+      background: #fff5f3 !important;
+      border-color: #d73a1c !important;
+      color: #d73a1c !important;
+      transform: translateY(-1px);
+    }
+
+    .pay-icon-img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .badge-updated {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-left: 6px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .alert-success {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 480px) {
+      .payment-grid {
+        grid-template-columns: 1fr;
+      }
       .data-row {
         flex-direction: column;
         gap: 4px;
@@ -559,6 +664,51 @@
         <!-- DATA CONTAINER (FILLED BY JS) -->
         <div id="premDataWrapper"></div>
 
+        <!-- KOTAK TOP-UP MASA AKTIF PREMIUM (TAMPIL KHUSUS USER PREMIUM AKTIF) -->
+        <div id="topupCardSection" class="topup-card" style="display: none;">
+          <div class="topup-header">
+            <h3 class="topup-title">⚡ Ingin menambah masa aktif?</h3>
+            <p class="topup-subtitle">Silahkan konfirmasi token voucher melalui tombol di bawah ini:</p>
+          </div>
+
+          <!-- TOMBOL PAYMENT VOUCHER (SAWERIA & SHOPEEPAY) -->
+          <div class="payment-grid">
+            <a href="https://saweria.co/Rynet" target="_blank" rel="noopener noreferrer" class="pay-btn pay-saweria">
+              <img src="https://saweria.co/favicon.ico" class="pay-icon-img" alt="Saweria" />
+              <span>Via Saweria</span>
+            </a>
+            <a href="https://shopee.co.id" target="_blank" rel="noopener noreferrer" class="pay-btn pay-shopeepay">
+              <img src="https://shopee.co.id/favicon.ico" class="pay-icon-img" alt="Shopee" />
+              <span>Via Shopee</span>
+            </a>
+          </div>
+
+          <!-- FORM INPUT TOKEN VOUCHER -->
+          <form id="extendForm" onsubmit="handleExtendSubmit(event)">
+            <div class="form-group">
+              <label class="form-label" for="tokenVoucherInput">Masukkan Token Voucher Top-Up:</label>
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  id="tokenVoucherInput" 
+                  class="input-field" 
+                  placeholder="Contoh: ADD3D-XYZ123..." 
+                  required 
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+
+            <button type="submit" id="btnExtendSubmit" class="btn-submit">
+              <div class="spinner" id="extendSpinner" style="display: none;"></div>
+              <span id="extendBtnText">🚀 TAMBAH MASA AKTIF</span>
+            </button>
+
+            <!-- ALERT ERROR / SUCCESS FOR EXTEND TOPUP -->
+            <div id="extendAlertBox" class="alert-box" style="display: none; margin-top: 14px; margin-bottom: 0;"></div>
+          </form>
+        </div>
+
         <!-- CATATAN STATIS PREMIUM (HIDDEN IF NO DATA) -->
         <div id="premStaticNotes" class="static-notes-card" style="display: none;">
           <div class="notes-title">
@@ -568,7 +718,8 @@
             <li>User Premium mendapatkan masa aktif 15 hari dari masa berlakunya kode.</li>
             <li>User Premium memiliki batasan 3x akses arsip berbeda dalam batasan 24 jam demi menjaga stabilitas sistem arsip.</li>
             <li>User Premium tidak perlu melakukan klaim Akses Gratis jika masa aktif Premium masih berlaku.</li>
-            <li>User Premium dilarang melakukan akses tidak sah, melakukan anomali klaim dan membuat spam portal yang mengakibatkan pemicunya sistem keamanan mengakibatkan blokir sistem permanent.</li>
+            <li>User Premium dilarang melakukan akses tidak sah, melakukan anomali klaim dan membuat spam portal yang memicu sistem keamanan.</li>
+			<li>User Premium dapat menambah masa aktif menggunakan voucher token khusus yang bisa dibuatkan oleh Mimin.</li>
           </ol>
         </div>
       </div>
@@ -907,7 +1058,7 @@
             </div>
             <div class="data-row">
               <span class="data-label">Tanggal Expired Tiket:</span>
-              <span class="data-value">${escapeHtml(pd.tanggalExpired)}</span>
+              <span class="data-value" id="premExpiredText">${escapeHtml(pd.tanggalExpired)}</span>
             </div>
             <div class="data-row">
               <span class="data-label">Jumlah Akses (24Jam):</span>
@@ -930,6 +1081,25 @@
           </div>
         `;
         premNotes.style.display = "block";
+
+        // SIMPAN EMAIL DAN ATUR KETERLIHATAN KOTAK TOP-UP
+        currentExtendEmail = pd.emailUser || "";
+        const topupSection = document.getElementById("topupCardSection");
+        const statusUpper = String(pd.status || "").toUpperCase();
+        const kondisiUpper = String(pd.kondisiAkses || "").toUpperCase();
+
+        const isPremStatusActive = statusUpper.includes("ACTIVE") || statusUpper.includes("AKTIF");
+        const isPremKondisiExpired = kondisiUpper.includes("EXPIRED");
+        const isPremKondisiBlocked = kondisiUpper.includes("BLOCKED") || kondisiUpper.includes("BANNED");
+
+        if (topupSection) {
+          if (isPremStatusActive && !isPremKondisiExpired && !isPremKondisiBlocked) {
+            topupSection.style.display = "block";
+          } else {
+            topupSection.style.display = "none";
+          }
+        }
+
       } else {
         premWrapper.innerHTML = `
           <div class="empty-card">
@@ -938,6 +1108,8 @@
           </div>
         `;
         premNotes.style.display = "none";
+        const topupSection = document.getElementById("topupCardSection");
+        if (topupSection) topupSection.style.display = "none";
       }
 
       // Auto Switch ke tab yang sesuai
@@ -950,7 +1122,86 @@
       resultContainer.style.display = "block";
     }
 
-    // 5. HELPER SHOW ALERT
+    // 5. HANDLER TOP-UP EXTEND PREMIUM VOUCHER
+    let currentExtendEmail = "";
+
+    function handleExtendSubmit(e) {
+      e.preventDefault();
+
+      const tokenInputElem = document.getElementById("tokenVoucherInput");
+      const tokenInput = tokenInputElem ? tokenInputElem.value.trim() : "";
+      const btnSubmit = document.getElementById("btnExtendSubmit");
+      const spinner = document.getElementById("extendSpinner");
+      const btnText = document.getElementById("extendBtnText");
+      const alertBox = document.getElementById("extendAlertBox");
+
+      if (!tokenInput) {
+        showExtendAlert("error", "Silakan masukkan Token Voucher Top-Up!");
+        return;
+      }
+
+      const emailUser = currentExtendEmail || document.getElementById("userEmailInput").value.trim();
+
+      btnSubmit.disabled = true;
+      if (spinner) spinner.style.display = "block";
+      if (btnText) btnText.innerText = "MEMPROSES TOP-UP...";
+      if (alertBox) alertBox.style.display = "none";
+
+      const payload = {
+        action: "claim_extend_premium",
+        emailUser: emailUser,
+        tokenAdd: tokenInput,
+        ipPublic: detectedIp
+      };
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(resData => {
+        btnSubmit.disabled = false;
+        if (spinner) spinner.style.display = "none";
+        if (btnText) btnText.innerText = "🚀 TAMBAH MASA AKTIF";
+
+        if (!resData.success) {
+          showExtendAlert("error", resData.message || "Gagal memproses Token Voucher Top-Up.");
+          return;
+        }
+
+        showExtendAlert("success", resData.message);
+        if (tokenInputElem) tokenInputElem.value = "";
+
+        // LIVE UPDATE TANGGAL EXPIRED TIKET & CENTANG ACCENT
+        if (resData.newExpiresAtStr) {
+          const expiredElem = document.getElementById("premExpiredText");
+          if (expiredElem) {
+            expiredElem.innerHTML = `${escapeHtml(resData.newExpiresAtStr)} <span class="badge-updated">✔️ Masa aktif diperbarui!</span>`;
+          }
+        }
+
+        // Hapus cache session agar pencarian berikutnya mengambil data terbaru
+        try { sessionStorage.removeItem("cache_status_" + emailUser); } catch(eCache){}
+      })
+      .catch(err => {
+        btnSubmit.disabled = false;
+        if (spinner) spinner.style.display = "none";
+        if (btnText) btnText.innerText = "🚀 TAMBAH MASA AKTIF";
+        showExtendAlert("error", "Gagal memproses request! Periksa koneksi internet Anda.");
+      });
+    }
+
+    function showExtendAlert(type, msg) {
+      const alertBox = document.getElementById("extendAlertBox");
+      if (!alertBox) return;
+      alertBox.className = "alert-box " + (type === "error" ? "alert-error" : "alert-success");
+      alertBox.innerText = msg;
+      alertBox.style.display = "block";
+    }
+
+    // 6. HELPER SHOW ALERT
     function showAlert(type, msg) {
       const alertBox = document.getElementById("alertBox");
       alertBox.className = "alert-box " + (type === "error" ? "alert-error" : "alert-warning");
@@ -958,7 +1209,7 @@
       alertBox.style.display = "block";
     }
 
-    // 6. HELPER COPY VIP CODE
+    // 7. HELPER COPY VIP CODE
     function copyVipCode(code, btn) {
       navigator.clipboard.writeText(code).then(() => {
         const oldText = btn.innerText;
