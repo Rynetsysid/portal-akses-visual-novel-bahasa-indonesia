@@ -112,7 +112,7 @@ The Master Node interfaces with a Google Spreadsheet Database managing 11 primar
 
 ## Author & Maintainer
 
-**Admin Rynet (Mimin Rynet)**  
+**ファン翻訳Rynet**  
 *Fan Translator & Systems Architect*  
 - Official Portal: [Rynet Access Portal](https://rynetsysid.github.io/portal-akses-visual-novel-bahasa-indonesia/)  
-- Support & Confirmation: [Official WhatsApp Admin](https://wa.link/c9eihx)
+- Support & Confirmation: [Official WhatsApp Rynet](https://wa.link/c9eihx)
