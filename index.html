@@ -933,6 +933,7 @@
     let activeToken = ""; 
     let isTokenBurned = false; // Flag status token
     let isProtectionActive = false; // Flag kontrol utama cegah exit tab
+    let isFormDirty = false; // Flag status interaksi input/form user
     let countdownInterval = null;
     let masterGamesData = [];
 
@@ -971,7 +972,8 @@
     // CLIENT-SIDE TOKEN SHIELD (PENCEKAL TUTUP TAB / REFRESH)
     // =========================================================================
     function handleBeforeUnload(e) {
-      if (isProtectionActive) {
+      // Defender HANYA aktif jika proteksi di-lock DAN user sudah berinteraksi/mengisi form
+      if (isProtectionActive && isFormDirty) {
         e.preventDefault();
         e.returnValue = ""; // Wajib ada untuk memicu pop-up dialog bawaan browser
         return "";
@@ -1137,6 +1139,9 @@
       // MENGAMBIL DATA GEO IP DENGAN LOGIKA 3-TIER SMART IP
       getSmartUserIp();
 
+      // MEMASANG LISTENER UTAMA PENANDA FORM DIRTY
+      attachFormDirtyListeners();
+
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
       const sessionData = getSessionData();
@@ -1235,6 +1240,32 @@
       hideLoadingModal();
     });
 
+    function attachFormDirtyListeners() {
+      const inputs = ["emailUser", "kodeAkses"];
+      inputs.forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) {
+          elem.addEventListener("input", function() {
+            if (this.value.trim() !== "") {
+              isFormDirty = true;
+            }
+          });
+        }
+      });
+
+      const selects = ["selectCategory", "selectGame"];
+      selects.forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) {
+          elem.addEventListener("change", function() {
+            if (this.value !== "") {
+              isFormDirty = true;
+            }
+          });
+        }
+      });
+    }
+
     function setLoadingText(title, subtext) {
       const t = document.getElementById("loadingModalTitle");
       const s = document.getElementById("loadingModalSubtext");
@@ -1280,7 +1311,10 @@
 
       categorySelect.innerHTML = '<option value="">-- Pilih Kategori Arsip --</option>';
 
-      categoriesSet.forEach(cat => {
+      // Urutkan kategori agar Tampilan Dropdown Konsisten
+      const sortedCategories = Array.from(categoriesSet).sort();
+
+      sortedCategories.forEach(cat => {
         const opt = document.createElement("option");
         opt.value = cat;
         opt.textContent = categoryLabelMap[cat] || `${cat} (Kategori Arsip)`;
@@ -1292,6 +1326,10 @@
       const categorySelect = document.getElementById("selectCategory");
       const gameSelect = document.getElementById("selectGame");
       const selectedCategory = categorySelect.value.trim().toUpperCase();
+
+      if (selectedCategory !== "") {
+        isFormDirty = true;
+      }
 
       gameSelect.innerHTML = "";
 
@@ -1308,23 +1346,18 @@
       }
 
       const filteredGames = masterGamesData.filter(g => {
-        const cat = g.kategori ? String(g.kategori).trim().toUpperCase() : "";
-        const gameId = String(g.id || "").toUpperCase();
+        let gameCat = g.kategori ? String(g.kategori).trim().toUpperCase() : "";
 
-        let isMatch = false;
-
-        if (cat) {
-          if (cat === selectedCategory) isMatch = true;
-          if (selectedCategory === "RPG" && (cat === "RPG" || cat.includes("ROLE"))) isMatch = true;
-          if (selectedCategory === "RVN" && (cat === "RVN" || cat.includes("RAISING"))) isMatch = true;
-          if (selectedCategory === "VN" && (cat === "VN" || cat === "VISUAL NOVEL")) isMatch = true;
+        // Fallback ekstraksi presisi dari ID Game jika kolom kategori di sheet kosong (cth: RYNET_RVN001 -> RVN)
+        if (!gameCat && g.id) {
+          const parts = String(g.id).split("_");
+          if (parts.length > 1) {
+            gameCat = parts[1].replace(/[0-9]/g, "").toUpperCase();
+          }
         }
 
-        if (!isMatch) {
-          if (gameId.includes(selectedCategory)) isMatch = true;
-        }
-
-        return isMatch;
+        // Strict Exact Match: Hanya cocokkan jika kategori persis sama
+        return gameCat === selectedCategory;
       });
 
       if (filteredGames.length === 0) {
@@ -1466,7 +1499,8 @@
         return;
       }
 
-      // KUNCI TAB SAAT PROSES LOADING BERLANGSUNG
+      // SET DIRTY DAN KUNCI TAB SAAT PROSES LOADING BERLANGSUNG
+      isFormDirty = true;
       lockUserExit();
 
       btn.disabled = true;
