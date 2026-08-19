@@ -1530,6 +1530,8 @@
         updateProgressUI(75, "🔑 Mengirimkan Izin Silent Viewer...", "📌 Step 3 dari 4: Eksekusi Drive API Worker Node...");
       }, 1000);
 
+      const devInfo = getDevicePayload();
+
       const payload = {
         action: "claim_access",
         token: activeToken,
@@ -1540,6 +1542,10 @@
         idGame: gameId,
         ipPublic: userIp,
         userCountry: userCountry,
+        userDevice: devInfo.device,
+        userBrowser: devInfo.browser,
+        device: devInfo.device,
+        browser: devInfo.browser,
         kodeAkses: kode,
         botTrap: botTrap,
         submitDuration: submitDuration
