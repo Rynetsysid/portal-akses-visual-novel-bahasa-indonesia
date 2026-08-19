@@ -898,20 +898,27 @@
       }
 
       const cacheKey = "cache_status_" + emailInput;
+      const CACHE_TTL_MS = 60000; // 60 Detik TTL Cache
 
       // JIKA MODUS REFRESH: Hapus cache session agar mengambil data terbaru dari server
       if (isDataFetched) {
         try { sessionStorage.removeItem(cacheKey); } catch(eCache){}
       } else {
-        // CLIENT-SIDE SESSION CACHE: Cek apakah email yang sama pernah dicari pada tab ini
+        // CLIENT-SIDE SESSION CACHE (Dengan TTL 60s): Cek apakah email yang sama pernah dicari pada tab ini
         const cachedDataStr = sessionStorage.getItem(cacheKey);
         if (cachedDataStr) {
           try {
-            const cachedData = JSON.parse(cachedDataStr);
-            alertBox.style.display = "none";
-            renderResults(cachedData);
-            enableButtonWithCooldown(btnCheck, btnSpinner, btnText, true);
-            return;
+            const cacheObj = JSON.parse(cachedDataStr);
+            // Cek keabsahan struktur data & umur cache (harus < 60 detik)
+            if (cacheObj && cacheObj.timestamp && (Date.now() - cacheObj.timestamp < CACHE_TTL_MS)) {
+              alertBox.style.display = "none";
+              renderResults(cacheObj.data || cacheObj);
+              enableButtonWithCooldown(btnCheck, btnSpinner, btnText, true);
+              return;
+            } else {
+              // Cache sudah kadaluwarsa (expired > 60s), hapus cache
+              sessionStorage.removeItem(cacheKey);
+            }
           } catch(eCache) {}
         }
       }
@@ -923,14 +930,16 @@
       alertBox.style.display = "none";
       resultContainer.style.display = "none";
 
-      // STRATEGI 1: FETCH POST
+      // STRATEGI 1: FETCH POST (Tambahkan Cache-Buster _t agar HTTP Cache Browser Selalu Fresh)
       const payload = {
         action: "check_user_status",
         emailUser: emailInput,
         ipPublic: detectedIp
       };
 
-      fetch(SCRIPT_URL, {
+      const fetchPostUrl = SCRIPT_URL + (SCRIPT_URL.includes("?") ? "&" : "?") + "_t=" + Date.now();
+
+      fetch(fetchPostUrl, {
         method: "POST",
         mode: "cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -946,8 +955,10 @@
 
         enableButtonWithCooldown(btnCheck, btnSpinner, btnText, true);
 
-        // Cache hasil sukses ke sessionStorage
-        try { sessionStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e){}
+        // Cache hasil sukses ke sessionStorage beserta timestamp pemuatan
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: data }));
+        } catch(e){}
 
         renderResults(data);
       })
@@ -983,9 +994,9 @@
       }, 1000);
     }
 
-    // STRATEGI 2: GET FALLBACK FOR GAS REDIRECTIONS
+    // STRATEGI 2: GET FALLBACK FOR GAS REDIRECTIONS (DENGAN CACHE BUSTER _t)
     function fetchViaGetFallback(emailInput, ip, btnCheck, btnSpinner, btnText, cacheKey) {
-      const getUrl = `${SCRIPT_URL}?action=check_user_status&emailUser=${encodeURIComponent(emailInput)}&ipPublic=${encodeURIComponent(ip)}`;
+      const getUrl = `${SCRIPT_URL}?action=check_user_status&emailUser=${encodeURIComponent(emailInput)}&ipPublic=${encodeURIComponent(ip)}&_t=${Date.now()}`;
 
       fetch(getUrl, { method: "GET" })
       .then(res => res.json())
@@ -997,7 +1008,9 @@
           return;
         }
 
-        try { sessionStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e){}
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: data }));
+        } catch(e){}
         renderResults(data);
       })
       .catch(errGet => {
@@ -1005,10 +1018,10 @@
       });
     }
 
-    // STRATEGI 3: JSONP SCRIPT INJECTION (100% RELIABLE FALLBACK)
+    // STRATEGI 3: JSONP SCRIPT INJECTION (DENGAN CACHE BUSTER _t)
     function fetchViaJsonp(emailInput, ip, btnCheck, btnSpinner, btnText, cacheKey) {
       const callbackName = "gasCallback_" + Math.round(Math.random() * 1000000);
-      const jsonpUrl = `${SCRIPT_URL}?action=check_user_status&emailUser=${encodeURIComponent(emailInput)}&ipPublic=${encodeURIComponent(ip)}&prefix=${callbackName}`;
+      const jsonpUrl = `${SCRIPT_URL}?action=check_user_status&emailUser=${encodeURIComponent(emailInput)}&ipPublic=${encodeURIComponent(ip)}&prefix=${callbackName}&_t=${Date.now()}`;
 
       window[callbackName] = function(data) {
         delete window[callbackName];
@@ -1023,7 +1036,9 @@
           return;
         }
 
-        try { sessionStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e){}
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: data }));
+        } catch(e){}
         renderResults(data);
       };
 
@@ -1122,17 +1137,14 @@
 
         let gamesHtml = '<span class="data-value">-</span>';
         if (pd.aksesGameList && pd.aksesGameList.length > 0) {
-          gamesHtml = pd.aksesGameList.map(g => `<div style="padding: 3px 0; color: var(--primary); font-weight: 600; text-align: left;">🎮 ${escapeHtml(g)}</div>`).join('');
+          gamesHtml = pd.aksesGameList.map(g => `<div style="padding: 3px 0; color: var(--primary); font-weight: 600; text-align: left;">• ${escapeHtml(g)}</div>`).join('');
         }
 
         premWrapper.innerHTML = `
           <div class="data-card">
-            <div class="data-row" style="flex-direction: column; align-items: stretch;">
-              <span class="data-label" style="width: 100%; margin-bottom: 4px;">Kode Transaksi VIP:</span>
-              <div class="vip-code-box">
-                <span class="vip-code-text" id="vipCodeText">${escapeHtml(pd.kodeTransaksi)}</span>
-                <button class="btn-copy" onclick="copyVipCode('${escapeHtml(pd.kodeTransaksi)}', this)">Salin Kode</button>
-              </div>
+            <div class="data-row">
+              <span class="data-label">Kode Transaksi VIP:</span>
+              <span class="data-value" style="font-weight: 700;">${escapeHtml(pd.kodeTransaksi)}</span>
             </div>
             <div class="data-row">
               <span class="data-label">Nama Email:</span>
