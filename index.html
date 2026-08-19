@@ -1552,6 +1552,10 @@
       })
       .then(res => res.json())
       .then(data => {
+        if (!data || typeof data !== "object") {
+          throw new Error("Respon server kosong atau format tidak valid.");
+        }
+
         if (data.success) {
           // STEP 4: SUKSES 100%
           updateProgressUI(100, "🎉 Akses Terbuka Sempurna!", "✓ Step 4 dari 4: Link Google Drive Siap!", true);
@@ -1562,11 +1566,12 @@
 
             if (countdownInterval) clearInterval(countdownInterval);
             removeSessionData(); 
-            showMsg(data.message, true);
+            const successMsg = data.message || "Klaim Akses Berhasil!";
+            showMsg(successMsg, true);
             document.getElementById("portalForm").style.display = "none";
             document.getElementById("downloadArea").style.display = "block";
 
-            rawDriveUrl = data.driveUrl;
+            rawDriveUrl = data.driveUrl || "#";
             
             // MAP PASSWORD ZIP DARI BACKEND
             if (data.passwordZip) {
@@ -1584,14 +1589,15 @@
           hideProgressUI();
           btn.disabled = false;
           btn.innerText = "KLAIM AKSES";
-          showMsg(data.message, false);
+          const errorMsg = data.message || "Gagal memproses klaim akses. Silakan coba lagi.";
+          showMsg(errorMsg, false);
         }
       })
       .catch(err => {
         hideProgressUI();
         btn.disabled = false;
         btn.innerText = "KLAIM AKSES";
-        showMsg("Terjadi kesalahan koneksi atau server.", false);
+        showMsg("⚠️ Terjadi gangguan koneksi jaringan seluler saat menerima balasan server.<br><small style='font-size:0.82rem; font-weight:normal;'>Karena sistem diproses di latar belakang server, klaim Anda mungkin sudah sukses terdaftar. Silakan cek status di menu <strong>Cek Akses Terdaftar</strong>.</small>", false);
         console.error("Error Claim:", err);
       });
     }
