@@ -1476,6 +1476,27 @@
       }
     }
 
+    function getDevicePayload() {
+      try {
+        const ua = navigator.userAgent || "";
+        let device = "Desktop";
+        if (/mobile/i.test(ua)) device = "Mobile";
+        else if (/tablet|ipad/i.test(ua)) device = "Tablet";
+
+        let browser = "Unknown Browser";
+        if (ua.includes("Firefox")) browser = "Firefox";
+        else if (ua.includes("SamsungBrowser")) browser = "Samsung Internet";
+        else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
+        else if (ua.includes("Edge") || ua.includes("Edg")) browser = "Edge";
+        else if (ua.includes("Chrome")) browser = "Chrome";
+        else if (ua.includes("Safari")) browser = "Safari";
+
+        return { device: device, browser: browser };
+      } catch (err) {
+        return { device: "Unknown Device", browser: "Unknown Browser" };
+      }
+    }
+
     function submitClaim() {
       const selectCategory = document.getElementById("selectCategory");
       const selectGame = document.getElementById("selectGame");
@@ -1530,7 +1551,12 @@
         updateProgressUI(75, "🔑 Mengirimkan Izin Silent Viewer...", "📌 Step 3 dari 4: Eksekusi Drive API Worker Node...");
       }, 1000);
 
-      const devInfo = getDevicePayload();
+      let devInfo = { device: "Unknown Device", browser: "Unknown Browser" };
+      try {
+        devInfo = getDevicePayload();
+      } catch (e) {
+        console.warn("Device info fallback:", e);
+      }
 
       const payload = {
         action: "claim_access",
@@ -1551,13 +1577,28 @@
         submitDuration: submitDuration
       };
 
-      fetch(SCRIPT_URL, {
+      // Safety controller with 35s timeout to prevent script from hanging indefinitely
+      const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), 35000) : null;
+
+      const fetchOptions = {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(data => {
+      };
+      if (controller) fetchOptions.signal = controller.signal;
+
+      fetch(SCRIPT_URL, fetchOptions)
+      .then(async res => {
+        if (timeoutId) clearTimeout(timeoutId);
+        const rawText = await res.text();
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (jsonErr) {
+          throw new Error("Respon server bukan format JSON yang valid.");
+        }
+
         if (!data || typeof data !== "object") {
           throw new Error("Respon server kosong atau format tidak valid.");
         }
@@ -1600,10 +1641,15 @@
         }
       })
       .catch(err => {
+        if (timeoutId) clearTimeout(timeoutId);
         hideProgressUI();
         btn.disabled = false;
         btn.innerText = "KLAIM AKSES";
-        showMsg("⚠️ Terjadi gangguan koneksi jaringan seluler saat menerima balasan server.<br><small style='font-size:0.82rem; font-weight:normal;'>Karena sistem diproses di latar belakang server, klaim Anda mungkin sudah sukses terdaftar. Silakan cek status di menu <strong>Cek Akses Terdaftar</strong>.</small>", false);
+        if (err.name === "AbortError") {
+          showMsg("⏱️ Respon server membutuhkan waktu terlalu lama (Timeout). Silakan coba beberapa saat lagi.", false);
+        } else {
+          showMsg("⚠️ Terjadi gangguan koneksi jaringan saat menerima balasan server.<br><small style='font-size:0.82rem; font-weight:normal;'>Karena sistem diproses di latar belakang server, klaim Anda mungkin sudah sukses terdaftar. Silakan cek status di menu <strong>Cek Akses Terdaftar</strong>.</small>", false);
+        }
         console.error("Error Claim:", err);
       });
     }
