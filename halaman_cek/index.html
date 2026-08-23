@@ -636,6 +636,102 @@
       border: 1px solid #bbf7d0;
     }
 
+    /* GIFT VOUCHER SPECIAL CARD STYLES */
+    @keyframes bellRock {
+      0% { transform: rotate(0deg); }
+      15% { transform: rotate(14deg); }
+      30% { transform: rotate(-12deg); }
+      45% { transform: rotate(10deg); }
+      60% { transform: rotate(-8deg); }
+      75% { transform: rotate(4deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .swing-bell {
+      display: inline-block;
+      font-size: 2.4rem;
+      animation: bellRock 2s infinite ease-in-out;
+      transform-origin: top center;
+      margin-bottom: 4px;
+    }
+
+    .gift-card-special {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);
+      border: 2px solid #fdba74;
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: 0 12px 28px -6px rgba(234, 88, 12, 0.12);
+      margin-top: 20px;
+      text-align: center;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .gift-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #c2410c;
+      margin-top: 4px;
+      margin-bottom: 6px;
+    }
+
+    .gift-subtitle {
+      font-size: 0.88rem;
+      color: #7c2d12;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .gift-btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    .btn-gift-claim {
+      padding: 11px 24px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.92rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-gift-claim:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(234, 88, 12, 0.4);
+    }
+
+    .btn-gift-dismiss {
+      padding: 11px 20px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: 1px solid #cbd5e1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-gift-dismiss:hover {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .gift-details-box {
+      background: #ffffff;
+      border: 1.5px solid #fed7aa;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 16px;
+      text-align: left;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
@@ -652,6 +748,13 @@
       .data-label, .data-value {
         width: 100%;
         text-align: left;
+      }
+      .gift-btn-group {
+        flex-direction: column;
+        width: 100%;
+      }
+      .btn-gift-claim, .btn-gift-dismiss {
+        width: 100%;
       }
     }
   </style>
@@ -808,6 +911,26 @@
 			<li>User Premium dapat menambah masa aktif menggunakan voucher token khusus yang bisa dibuatkan oleh Mimin.</li>
           </ol>
         </div>
+      </div>
+
+      <!-- KOTAK GIFT VOUCHER SPESIAL (TAMPIL HANYA JIKA ELIGIBLE) -->
+      <div id="giftVoucherSection" class="gift-card-special" style="display: none;">
+        <div class="swing-bell">🔔</div>
+        <h3 class="gift-title">Ada Gift khusus nih dari mimin!</h3>
+        <p class="gift-subtitle">Email kamu terdaftar sebagai penerima voucher gift spesial!</p>
+
+        <div id="giftPromptBox">
+          <div class="gift-btn-group">
+            <button type="button" class="btn-gift-claim" onclick="claimGiftVoucherAction()">
+              🎁 AMBIL GIFT
+            </button>
+            <button type="button" class="btn-gift-dismiss" onclick="dismissGiftVoucher()">
+              NANTI
+            </button>
+          </div>
+        </div>
+
+        <div id="giftResultBox" class="gift-details-box" style="display: none;"></div>
       </div>
 
     </div>
@@ -1217,10 +1340,148 @@
         switchTab('FREE');
       }
 
+      // RENDER GIFT CARD SPESIAL JIKA ADA VOUCHER GIFT ELIGIBLE
+      renderGiftCardIfAvailable(data);
+
       resultContainer.style.display = "block";
     }
 
-    // 5. HANDLER TOP-UP EXTEND PREMIUM VOUCHER
+    // 5. HANDLER GIFT VOUCHER SPESIAL
+    let currentGiftData = null;
+
+    function renderGiftCardIfAvailable(data) {
+      const giftSection = document.getElementById("giftVoucherSection");
+      const promptBox = document.getElementById("giftPromptBox");
+      const resultBox = document.getElementById("giftResultBox");
+
+      if (data && data.giftVoucher && data.giftVoucher.hasGift) {
+        currentGiftData = data.giftVoucher;
+        if (giftSection) giftSection.style.display = "block";
+        if (promptBox) {
+          promptBox.style.display = "block";
+          promptBox.innerHTML = `
+            <div class="gift-btn-group">
+              <button type="button" class="btn-gift-claim" onclick="claimGiftVoucherAction()">
+                🎁 AMBIL GIFT
+              </button>
+              <button type="button" class="btn-gift-dismiss" onclick="dismissGiftVoucher()">
+                NANTI
+              </button>
+            </div>
+          `;
+        }
+        if (resultBox) {
+          resultBox.style.display = "none";
+          resultBox.innerHTML = "";
+        }
+      } else {
+        if (giftSection) giftSection.style.display = "none";
+        currentGiftData = null;
+      }
+    }
+
+    function dismissGiftVoucher() {
+      const giftSection = document.getElementById("giftVoucherSection");
+      if (giftSection) giftSection.style.display = "none";
+    }
+
+    function claimGiftVoucherAction() {
+      if (!currentGiftData || !currentGiftData.kodeGift) return;
+
+      const emailUser = document.getElementById("userEmailInput").value.trim();
+      const promptBox = document.getElementById("giftPromptBox");
+      const resultBox = document.getElementById("giftResultBox");
+
+      if (promptBox) {
+        promptBox.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; color: var(--primary); margin: 14px 0;">
+            <div class="spinner" style="display: block; border-top-color: var(--primary);"></div>
+            <span>MEMPROSES KLAIM GIFT VOUCHER...</span>
+          </div>
+        `;
+      }
+
+      const payload = {
+        action: "claim_gift_voucher",
+        emailUser: emailUser,
+        kodeGift: currentGiftData.kodeGift,
+        ipPublic: detectedIp
+      };
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(resData => {
+        if (!resData.success) {
+          if (promptBox) {
+            promptBox.innerHTML = `
+              <div class="alert-box alert-error" style="display: block; margin-top: 10px;">
+                ${escapeHtml(resData.message || "Gagal mengklaim gift voucher.")}
+              </div>
+            `;
+          }
+          return;
+        }
+
+        if (promptBox) promptBox.style.display = "none";
+
+        const driveLinkHtml = resData.driveUrl 
+          ? `<a href="${escapeHtml(resData.driveUrl)}" target="_blank" rel="noopener" class="btn-submit" style="display: inline-flex; text-decoration: none; justify-content: center; margin-top: 12px; padding: 10px 18px;">📂 BUKA GOOGLE DRIVE</a>` 
+          : '';
+
+        const passZipHtml = resData.passwordZip 
+          ? `<div class="vip-code-box" style="margin-top: 10px;">
+               <span class="data-label" style="width: auto;">Password Zip:</span>
+               <span class="vip-code-text">${escapeHtml(resData.passwordZip)}</span>
+               <button type="button" class="btn-copy" onclick="copyVipCode('${escapeHtml(resData.passwordZip)}', this)">Salin</button>
+             </div>` 
+          : '';
+
+        if (resultBox) {
+          resultBox.innerHTML = `
+            <div style="font-weight: 800; color: #166534; font-size: 0.95rem; margin-bottom: 12px; text-align: center;">
+              🎉 Selamat! Gift Voucher Berhasil Diklaim!
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tanggal Klaim:</span>
+              <span class="data-value">${escapeHtml(resData.claimedAtStr || "-")}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Masa Aktif:</span>
+              <span class="data-value" style="color: var(--primary);">${escapeHtml(resData.masaAktifStr || "-")} (Sampai ${escapeHtml(resData.expiresAtStr || "-")})</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Jenis Arsip:</span>
+              <span class="data-value" style="color: var(--primary); font-weight: 800;">${escapeHtml(resData.gameTitle || "-")}</span>
+            </div>
+            <div class="data-row" style="flex-direction: column; align-items: flex-start; background: #fff7ed; padding: 10px 12px; border-radius: 8px; margin: 8px 0; border: 1px solid #ffedd5;">
+              <span class="data-label" style="font-weight: 800; color: #c2410c; margin-bottom: 4px;">Catatan Mimin:</span>
+              <span class="data-value" style="width: 100%; text-align: left; color: #7c2d12; font-weight: 600;">${escapeHtml(resData.catatan || "-")}</span>
+            </div>
+            ${passZipHtml}
+            ${driveLinkHtml}
+          `;
+          resultBox.style.display = "block";
+        }
+
+        try { sessionStorage.removeItem("cache_status_" + emailUser); } catch(eCache){}
+      })
+      .catch(err => {
+        if (promptBox) {
+          promptBox.innerHTML = `
+            <div class="alert-box alert-error" style="display: block; margin-top: 10px;">
+              Gagal menghubungkan ke server! Silakan periksa koneksi Anda.
+            </div>
+          `;
+        }
+      });
+    }
+
+    // 6. HANDLER TOP-UP EXTEND PREMIUM VOUCHER
     let currentExtendEmail = "";
 
     function handleExtendSubmit(e) {
