@@ -1104,18 +1104,7 @@
       window.removeEventListener("beforeunload", handleBeforeUnload);
     }
 
-    // Emergency Beacon saat user nekat menutup tab/browser saat token belum hangus
-    window.addEventListener("unload", function () {
-      if (activeToken && !isTokenBurned) {
-        const payload = JSON.stringify({
-          action: "burn_token_emergency",
-          token: activeToken
-        });
-        if (navigator.sendBeacon) {
-          navigator.sendBeacon(SCRIPT_URL, payload);
-        }
-      }
-    });
+    // Catatan: Token tetap ACTIVE ketika tab/browser ditutup agar user dapat me-resume sesi dalam kurun 1 jam.
 
     // SISTEM STORAGE SESI
     function saveSessionData(data) {
@@ -1267,7 +1256,7 @@
 
           if (remainingMs > 0) {
             if (sessionData.token) activeToken = sessionData.token;
-            isTokenBurned = true; // Sesi lokal sudah tuntas burn sebelumnya
+            isTokenBurned = false; // Token aktif dapat digunakan untuk klaim
 
             if (token) {
               window.history.replaceState({}, document.title, window.location.pathname);
@@ -1309,7 +1298,7 @@
           const data = await res.json();
 
           if (data.status === "success" || data.success || data.status === "burned_fallback") {
-            isTokenBurned = true;
+            isTokenBurned = false; // Token aktif belum di-burn
 
             const durationMs = (data.durationSeconds || 300) * 1000;
             const targetTime = Date.now() + durationMs;
