@@ -1249,50 +1249,16 @@
       const token = urlParams.get('token');
       const sessionData = getSessionData();
 
-      // SKENARIO B: REFRESH / SESI TERLINDUNGI LOKAL
-      if (sessionData) {
-        try {
-          const remainingMs = sessionData.targetTime - Date.now();
-
-          if (remainingMs > 0) {
-            if (sessionData.token) activeToken = sessionData.token;
-            isTokenBurned = false; // Token aktif dapat digunakan untuk klaim
-
-            if (token) {
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            
-            masterGamesData = sessionData.games || [];
-            populateCategoryDropdown();
-            
-            updateStatsUI(sessionData.stats);
-            startCountdownTimer(sessionData.targetTime);
-            
-            // AKTIFKAN PROTEKSI SELAMA BERADA DI PORTAL
-            lockUserExit();
-            hideLoadingModal();
-            return;
-          } else {
-            removeSessionData();
-            unlockUserExit();
-            lockPortalState("⏰ Sesi aktif telah habis. Silakan verifikasi ulang melalui Blogspot.");
-            hideLoadingModal();
-            return;
-          }
-        } catch (e) {
-          removeSessionData();
-        }
-      }
-
-      // SKENARIO A: KUNJUNGAN PERTAMA DENGAN TOKEN
+      // SKENARIO A: KUNJUNGAN DENGAN TOKEN DARI WCAPTCHA (PRIORITAS UTAMA)
       if (token) {
         try {
+          // Hapus data sesi lama agar token baru di URL diproses segar
+          removeSessionData();
           activeToken = token;
           isTokenBurned = false;
           
-          // Tampilkan instruksi edukatif di overlay loading
           setLoadingText("Memverifikasi & Mengamankan Sesi...", "Mohon jangan tutup atau refresh halaman ini agar token Anda tidak hangus.");
-          lockUserExit(); // Tahan exit browser selama validasi berlangsung
+          lockUserExit();
 
           const res = await fetch(`${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}`);
           const data = await res.json();
@@ -1318,22 +1284,51 @@
             updateStatsUI(data.stats);
             startCountdownTimer(targetTime);
             
-            // JAGA PROTEKSI TETAP AKTIF SAAT PORTAL SIAP DIGUNAKAN
             lockUserExit();
           } else {
             isTokenBurned = true;
-            unlockUserExit(); // Lepas proteksi jika token ditolak
+            unlockUserExit();
             lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid atau sudah digunakan!"));
           }
         } catch (err) {
           console.error("Error Validasi Token:", err);
           isTokenBurned = true;
-          unlockUserExit(); // Lepas proteksi jika ada eror koneksi
+          unlockUserExit();
           lockPortalState("⚠️ Gagal terhubung ke server verifikasi. Silakan coba lagi nanti.");
         } finally {
           hideLoadingModal();
         }
         return;
+      }
+
+      // SKENARIO B: REFRESH / SESI TERLINDUNGI LOKAL (TANPA PARAMETER TOKEN DI URL)
+      if (sessionData) {
+        try {
+          const remainingMs = sessionData.targetTime - Date.now();
+
+          if (remainingMs > 0) {
+            if (sessionData.token) activeToken = sessionData.token;
+            isTokenBurned = false;
+
+            masterGamesData = sessionData.games || [];
+            populateCategoryDropdown();
+            
+            updateStatsUI(sessionData.stats);
+            startCountdownTimer(sessionData.targetTime);
+            
+            lockUserExit();
+            hideLoadingModal();
+            return;
+          } else {
+            removeSessionData();
+            unlockUserExit();
+            lockPortalState("⏰ Sesi aktif telah habis. Silakan verifikasi ulang melalui Blogspot.");
+            hideLoadingModal();
+            return;
+          }
+        } catch (e) {
+          removeSessionData();
+        }
       }
 
       // TANPA TOKEN & SESI
