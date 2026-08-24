@@ -1222,8 +1222,32 @@
       // MEMASANG LISTENER UTAMA PENANDA FORM DIRTY
       attachFormDirtyListeners();
 
+      // BroadcastChannel untuk Sinkronisasi Kunci Dual Tab Real-time
+      const tabChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("rynet_portal_tab_lock") : null;
+      let currentTabId = sessionStorage.getItem("portal_tab_id");
+      if (!currentTabId) {
+        currentTabId = "TAB_PORTAL_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+        sessionStorage.setItem("portal_tab_id", currentTabId);
+      }
+
+      if (tabChannel) {
+        tabChannel.onmessage = function(event) {
+          if (event.data && event.data.type === "PING_ACTIVE_TAB") {
+            // Beri tahu tab baru bahwa tab ini sedang aktif
+            tabChannel.postMessage({ type: "PONG_TAB_ACTIVE", tabId: currentTabId });
+          } else if (event.data && event.data.type === "PONG_TAB_ACTIVE" && event.data.tabId !== currentTabId) {
+            // Jika ada tab lain yang membalas, kunci tab saat ini!
+            lockPortalState("⛔ **Akses Terkunci (Dual Tab Detected):** Portal ini sudah aktif berjalan di Tab Browser lain. Harap selesaikan atau tutup tab pertama terlebih dahulu.");
+            hideLoadingModal();
+          }
+        };
+        // Kirim PING saat dimuat untuk cek tab lain
+        tabChannel.postMessage({ type: "PING_ACTIVE_TAB" });
+      }
+
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
+      const urlTabId = urlParams.get('tabId');
       const sessionData = getSessionData();
 
       // SKENARIO A: KUNJUNGAN DENGAN TOKEN DARI WCAPTCHA (PRIORITAS UTAMA)
@@ -1237,7 +1261,8 @@
           setLoadingText("Memverifikasi & Mengamankan Sesi...", "Mohon jangan tutup atau refresh halaman ini agar token Anda tidak hangus.");
           lockUserExit();
 
-          const res = await fetch(`${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}`);
+          const validateUrl = `${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}&tabId=${encodeURIComponent(urlTabId || currentTabId)}`;
+          const res = await fetch(validateUrl);
           const data = await res.json();
 
           if (data.status === "success" || data.success || data.status === "burned_fallback") {
@@ -1251,6 +1276,7 @@
 
             saveSessionData({
               token: token,
+              tabId: currentTabId,
               games: masterGamesData,
               stats: data.stats || {},
               targetTime: targetTime
