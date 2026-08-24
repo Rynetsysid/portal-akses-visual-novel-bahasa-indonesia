@@ -824,29 +824,6 @@
 
     <h2 class="portal-title">Akses Link Arsip Visual Novel</h2>
 
-    <!-- ⚠️ KARTU INFORMASI PEMELIHARAAN (RESPONSIF & RAPI) -->
-    <div class="maintenance-card">
-      <div class="maintenance-icon">🚧</div>
-      <h3 class="maintenance-title">Informasi Pemeliharaan Portal Akses</h3>
-      
-      <div class="maintenance-divider"></div>
-
-      <p class="maintenance-jp-text">
-        Gomen ne, minasan<br>
-        <span class="maintenance-jp-kanji">ごめんね、皆さん!</span>
-      </p>
-
-      <p class="maintenance-body">
-        Mimin sedang melakukan perbaikan pada sistem portal akses.<br>
-        Portal Akses akan kembali dibuka setelah perbaikan dan pemeliharaan server.
-      </p>
-
-      <p class="maintenance-jp-text">
-        Arigatou gozaimasu<br>
-        <span class="maintenance-jp-kanji">ありがとうございます!</span>
-      </p>
-    </div>
-
     <!-- BADGE INFORMASI TOKEN & TIMER -->
     <div class="token-status-box" id="tokenStatusBox">
       🟢 <strong>Token Terverifikasi:</strong> Sesi aktif berakhir dalam <span class="token-timer" id="timerDisplay">05:00</span>
@@ -864,9 +841,9 @@
       </div>
     </div>
 
-    <div class="portal-tabs" role="tablist" style="pointer-events: none; opacity: 0.7;">
-      <button aria-selected="true" class="tab-btn active" id="tabFreeBtn" onclick="switchTab('FREE')" role="tab" type="button" disabled>🎁 Akses Gratis</button>
-      <button aria-selected="false" class="tab-btn" id="tabPremBtn" onclick="switchTab('PREMIUM')" role="tab" type="button" disabled>👑 Akses Premium (5k)</button>
+    <div class="portal-tabs" role="tablist">
+      <button aria-selected="true" class="tab-btn active" id="tabFreeBtn" onclick="switchTab('FREE')" role="tab" type="button">🎁 Akses Gratis</button>
+      <button aria-selected="false" class="tab-btn" id="tabPremBtn" onclick="switchTab('PREMIUM')" role="tab" type="button">👑 Akses Premium (5k)</button>
     </div>
 
     <div class="portal-card">
@@ -880,7 +857,7 @@
         <!-- 1. PILIH KATEGORI ARSIP -->
         <div class="portal-field">
           <label for="selectCategory">Pilih Kategori Arsip:</label>
-          <select id="selectCategory" onchange="onCategoryChange()" required="" disabled>
+          <select id="selectCategory" onchange="onCategoryChange()" required="">
             <option value="">-- Pilih Kategori Arsip --</option>
             <option value="RPG">RPG (Role-Playing Game)</option>
             <option value="RVN">RVN (Raising Visual Novel)</option>
@@ -898,7 +875,7 @@
 
         <div class="portal-field" style="margin-top: 18px;">
           <label for="emailUser">Alamat Email (@gmail.com):</label>
-          <input autocomplete="email" id="emailUser" placeholder="contoh: namamu@gmail.com" required="" type="email" disabled />
+          <input autocomplete="email" id="emailUser" placeholder="contoh: namamu@gmail.com" required="" type="email" />
         </div>
 
         <div id="freeInfoArea">
@@ -910,7 +887,7 @@
 
           <div class="portal-field" style="margin-top: 14px;">
             <label for="kodeAkses">Kode Akses Premium:</label>
-            <input autocomplete="off" id="kodeAkses" placeholder="Masukkan kode akses premium" type="text" disabled />
+            <input autocomplete="off" id="kodeAkses" placeholder="Masukkan kode akses premium" type="text" />
           </div>
 
           <!-- KOTAK PAYMENT & WA MIMIN -->
@@ -968,7 +945,7 @@
           </div>
         </div>
 
-        <button class="portal-btn" id="btnSubmit" style="margin-top: 14px; opacity: 0.6; cursor: not-allowed; pointer-events: none;" type="submit" disabled>PORTAL DALAM PEMELIHARAAN</button>
+        <button class="portal-btn" id="btnSubmit" style="margin-top: 14px;" type="submit">KLAIM AKSES</button>
       </form>
 
       <div aria-live="assertive" id="portalMsg"></div>
@@ -1583,9 +1560,6 @@
     }
 
     function submitClaim() {
-      showMsg("⛔ Portal Akses sedang dalam pemeliharaan server. Mohon tunggu perbaikan selesai ya~", false);
-      return;
-      
       const selectCategory = document.getElementById("selectCategory");
       const selectGame = document.getElementById("selectGame");
       
