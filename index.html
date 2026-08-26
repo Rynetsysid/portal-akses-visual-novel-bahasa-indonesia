@@ -875,7 +875,7 @@
 
         <div class="portal-field" style="margin-top: 18px;">
           <label for="emailUser">Alamat Email (@gmail.com):</label>
-          <input autocomplete="email" id="emailUser" placeholder="contoh: namamu@gmail.com" required="" type="email" />
+          <input autocomplete="email" id="emailUser" maxlength="64" placeholder="contoh: namamu@gmail.com" required="" type="email" />
         </div>
 
         <div id="freeInfoArea">
@@ -886,8 +886,8 @@
           <span class="badge-info" style="background: rgb(240, 249, 255); border-color: rgb(186, 230, 253); color: #0369a1;">👑 Keuntungan Premium: Akses Jangka Panjang!</span>
 
           <div class="portal-field" style="margin-top: 14px;">
-            <label for="kodeAkses">Kode Akses Premium:</label>
-            <input autocomplete="off" id="kodeAkses" placeholder="Masukkan kode akses premium" type="text" />
+            <label for="kodeAkses">Kode Akses Premium (10 Karakter):</label>
+            <input autocomplete="off" id="kodeAkses" maxlength="10" placeholder="Masukkan 10 digit kode akses premium" type="text" />
           </div>
 
           <!-- KOTAK PAYMENT & WA MIMIN -->
@@ -1591,10 +1591,12 @@
       
       const categoryVal = selectCategory ? selectCategory.value : "";
       const gameId = selectGame ? selectGame.value : "";
-      const email = document.getElementById("emailUser").value.trim().toLowerCase();
+      const rawEmail = document.getElementById("emailUser").value.trim().toLowerCase();
+      const email = rawEmail.slice(0, 64);
       
       const kodeInput = document.getElementById("kodeAkses");
-      const kode = kodeInput ? kodeInput.value.trim() : "";
+      const rawKode = kodeInput ? kodeInput.value.trim() : "";
+      const kode = rawKode.slice(0, 10);
       
       const botTrap = document.getElementById("websiteUrlTrap").value;
       const btn = document.getElementById("btnSubmit");
@@ -1610,15 +1612,27 @@
         return;
       }
 
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-      if (!emailRegex.test(email)) {
-        showMsg("Email wajib menggunakan alamat @gmail.com yang valid!", false);
+      if (rawEmail.includes(",") || rawEmail.includes(" ")) {
+        showMsg("Pengisian email ganda atau mengandung koma/spasi tidak diizinkan!", false);
         return;
       }
 
-      if (currentTab === "PREMIUM" && !kode) {
-        showMsg("Kode Akses Premium wajib diisi!", false);
+      const emailRegex = /^[a-zA-Z0-9._%+-]{1,50}@gmail\.com$/;
+      if (!emailRegex.test(email)) {
+        showMsg("Email wajib menggunakan alamat @gmail.com yang valid (maksimal 64 karakter)!", false);
         return;
+      }
+
+      if (currentTab === "PREMIUM") {
+        if (!kode) {
+          showMsg("Kode Akses Premium wajib diisi!", false);
+          return;
+        }
+        const kodeRegex = /^[a-zA-Z0-9]{10}$/;
+        if (!kodeRegex.test(kode)) {
+          showMsg("Kode Akses Premium harus terdiri dari persis 10 karakter alfanumerik!", false);
+          return;
+        }
       }
 
       // SET DIRTY DAN KUNCI TAB SAAT PROSES LOADING BERLANGSUNG
