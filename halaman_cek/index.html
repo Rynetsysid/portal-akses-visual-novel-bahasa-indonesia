@@ -785,6 +785,7 @@
               placeholder="contoh: namamu@gmail.com" 
               required 
               autocomplete="email"
+              maxlength="64"
             />
           </div>
         </div>
@@ -875,15 +876,16 @@
           <!-- FORM INPUT TOKEN VOUCHER -->
           <form id="extendForm" onsubmit="handleExtendSubmit(event)" style="margin-top: 18px;">
             <div class="form-group">
-              <label class="form-label" for="tokenVoucherInput">Masukkan Token Voucher Top-Up:</label>
+              <label class="form-label" for="tokenVoucherInput">Masukkan Token Voucher Top-Up (10 Karakter):</label>
               <div class="input-wrapper">
                 <input 
                   type="text" 
                   id="tokenVoucherInput" 
                   class="input-field" 
-                  placeholder="isikan kode token di sini" 
+                  placeholder="isikan 10 digit kode token di sini" 
                   required 
                   autocomplete="off"
+                  maxlength="10"
                 />
               </div>
             </div>
@@ -1008,15 +1010,22 @@
     function handleCheckSubmit(e) {
       e.preventDefault();
       
-      const emailInput = document.getElementById("userEmailInput").value.trim();
+      const rawEmailInput = document.getElementById("userEmailInput").value.trim().toLowerCase();
+      const emailInput = rawEmailInput.slice(0, 64);
       const btnCheck = document.getElementById("btnCheck");
       const btnSpinner = document.getElementById("btnSpinner");
       const btnText = document.getElementById("btnText");
       const alertBox = document.getElementById("alertBox");
       const resultContainer = document.getElementById("resultContainer");
 
-      if (!emailInput.endsWith("@gmail.com")) {
-        showAlert("error", "Akses Ditolak! Alamat email harus berakhiran @gmail.com.");
+      if (rawEmailInput.includes(",") || rawEmailInput.includes(" ")) {
+        showAlert("error", "Akses Ditolak! Pengisian email ganda atau mengandung koma/spasi tidak diizinkan.");
+        return;
+      }
+
+      const emailRegex = /^[a-zA-Z0-9._%+-]{1,50}@gmail\.com$/;
+      if (!emailRegex.test(emailInput)) {
+        showAlert("error", "Akses Ditolak! Alamat email harus menggunakan @gmail.com yang valid (maksimal 64 karakter).");
         return;
       }
 
@@ -1488,7 +1497,8 @@
       e.preventDefault();
 
       const tokenInputElem = document.getElementById("tokenVoucherInput");
-      const tokenInput = tokenInputElem ? tokenInputElem.value.trim() : "";
+      const rawTokenInput = tokenInputElem ? tokenInputElem.value.trim() : "";
+      const tokenInput = rawTokenInput.slice(0, 10);
       const btnSubmit = document.getElementById("btnExtendSubmit");
       const spinner = document.getElementById("extendSpinner");
       const btnText = document.getElementById("extendBtnText");
@@ -1496,6 +1506,12 @@
 
       if (!tokenInput) {
         showExtendAlert("error", "Silakan masukkan Token Voucher Top-Up!");
+        return;
+      }
+
+      const tokenRegex = /^[a-zA-Z0-9]{10}$/;
+      if (!tokenRegex.test(tokenInput)) {
+        showExtendAlert("error", "Token Voucher Top-Up harus terdiri dari persis 10 karakter alfanumerik!");
         return;
       }
 
