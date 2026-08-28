@@ -1268,7 +1268,8 @@
           if (data.status === "success" || data.success || data.status === "burned_fallback") {
             isTokenBurned = false; // Token aktif belum di-burn
 
-            const durationMs = (data.durationSeconds || 300) * 1000;
+            const durationSec = data.remainingSeconds !== undefined ? data.remainingSeconds : (data.durationSeconds || 300);
+            const durationMs = Math.max(1, durationSec) * 1000;
             const targetTime = Date.now() + durationMs;
 
             masterGamesData = data.games || [];
@@ -1291,7 +1292,7 @@
           } else {
             isTokenBurned = true;
             unlockUserExit();
-            lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid atau sudah digunakan!"));
+            lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid, sudah digunakan, atau kedaluwarsa!"));
           }
         } catch (err) {
           console.error("Error Validasi Token:", err);
@@ -1304,7 +1305,7 @@
         return;
       }
 
-      // SKENARIO B: REFRESH / SESI TERLINDUNGI LOKAL (TANPA PARAMETER TOKEN DI URL)
+      // SKENARIO B: REFRESH / AKSED RIWAYAT BROWSER / COOKIE (TANPA PARAMETER TOKEN DI URL)
       if (sessionData) {
         try {
           const remainingMs = sessionData.targetTime - Date.now();
@@ -1325,7 +1326,7 @@
           } else {
             removeSessionData();
             unlockUserExit();
-            lockPortalState("⏰ Sesi aktif telah habis. Silakan verifikasi ulang melalui Blogspot.");
+            lockPortalState("⏰ Sesi aktif telah habis (EXPIRED). Silakan verifikasi ulang melalui WCaptcha di blog.");
             hideLoadingModal();
             return;
           }
@@ -1334,10 +1335,10 @@
         }
       }
 
-      // TANPA TOKEN & SESI
+      // TANPA TOKEN & SESI KEDALUWARSA / DIBUN
       isTokenBurned = true;
       unlockUserExit();
-      lockPortalState("⚠️ Akses Ditolak: Anda belum menyelesaikan verifikasi WCaptcha di postingan blog!");
+      lockPortalState("⚠️ Akses Ditolak: Anda belum menyelesaikan verifikasi WCaptcha di postingan blog atau sesi telah berakhir!");
       hideLoadingModal();
     });
 
