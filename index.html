@@ -828,9 +828,83 @@
       .maintenance-title {
         font-size: 1.05rem;
       }
-      .maintenance-body {
-        font-size: 0.88rem;
-      }
+    /* KARTU INFORMASI STATUS SYSTEM PORTAL (QUERY_PORTAL_REMOTE) */
+    .system-status-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border: 1.5px solid #cbd5e1;
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin: 0 0 20px 0;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      animation: fadeIn 0.4s ease-out;
+      width: 100%;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      transition: all 0.3s ease;
+    }
+
+    .system-status-header {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .system-status-badge-row {
+      margin-bottom: 8px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 16px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    /* BADGE COLORS (ROW B) */
+    .badge-stable {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .badge-update {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .badge-repair {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .badge-down {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    /* CARD BORDER & BG VARIANTS */
+    .system-status-card.status-active { border-color: #a7f3d0; }
+    .system-status-card.status-update { border-color: #bfdbfe; background: #eff6ff; }
+    .system-status-card.status-repair { border-color: #fde68a; background: #fffbeb; }
+    .system-status-card.status-disable { border-color: #fca5a5; background: #fef2f2; }
+
+    .system-status-message-row {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #475569;
+      text-align: center;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -852,6 +926,20 @@
     </div>
 
     <h2 class="portal-title">Akses Link<br>Arsip Visual Novel</h2>
+
+    <!-- KARTU INFORMASI STATUS SYSTEM PORTAL (QUERY_PORTAL_REMOTE) -->
+    <div id="systemStatusCard" class="system-status-card status-active">
+      <div class="system-status-header">
+        🛡️ Status System Portal Akses
+      </div>
+      <div class="system-status-badge-row">
+        <span id="systemStatusBadge" class="status-badge badge-stable">🟢 STABLE SYSTEM</span>
+      </div>
+      <div id="systemStatusMessage" class="system-status-message-row">
+        Sistem berjalan normal.
+      </div>
+    </div>
+
 
     <!-- BADGE INFORMASI TOKEN & TIMER -->
     <div class="token-status-box" id="tokenStatusBox">
@@ -1251,13 +1339,123 @@
     }
 
     // =========================================================================
+    // 🛰️ REMOTE PORTAL CONTROL UI ENGINE (QUERY_PORTAL_REMOTE)
+    // =========================================================================
+    let remoteServerState = {
+      status: "ACTIVE",
+      kondisiServer: "STABLE SYSTEM",
+      pesan: ""
+    };
+
+    function checkRemoteServerStatus() {
+      fetch(SCRIPT_URL + "?action=get_server_config")
+        .then(res => res.json())
+        .then(data => {
+          if (data && (data.success || data.status || data.serverStatus)) {
+            const rawStatus = String(data.serverStatus || data.status || "ACTIVE").toUpperCase();
+            let normalizedStatus = "ACTIVE";
+            if (rawStatus.includes("UPDATE")) normalizedStatus = "UPDATE";
+            else if (rawStatus.includes("REPAIR")) normalizedStatus = "REPAIR";
+            else if (rawStatus.includes("DISABLE") || rawStatus.includes("OFF")) normalizedStatus = "DISABLE";
+            else if (rawStatus.includes("ACTIVE") || rawStatus.includes("ONLINE")) normalizedStatus = "ACTIVE";
+
+            const kondisi = data.kondisiServer || (normalizedStatus === "ACTIVE" ? "STABLE SYSTEM" : (normalizedStatus + " SYSTEM"));
+            const pesan = data.pesan || data.message || (normalizedStatus === "ACTIVE" ? "Sistem berjalan normal." : "");
+
+            remoteServerState = {
+              status: normalizedStatus,
+              kondisiServer: kondisi,
+              pesan: pesan
+            };
+
+            renderSystemStatusUI(remoteServerState);
+          }
+        })
+        .catch(err => {
+          console.warn("Gagal mengecek status remote server:", err);
+        });
+    }
+
+    function renderSystemStatusUI(state) {
+      const card = document.getElementById("systemStatusCard");
+      const badge = document.getElementById("systemStatusBadge");
+      const msg = document.getElementById("systemStatusMessage");
+      const btn = document.getElementById("btnSubmit");
+      const selectCat = document.getElementById("selectCategory");
+      const selectGame = document.getElementById("selectGame");
+      const emailInput = document.getElementById("emailUser");
+
+      if (!card || !badge || !msg) return;
+
+      const st = state.status;
+      const kondisi = state.kondisiServer || "STABLE SYSTEM";
+      const pesan = state.pesan || "Sistem berjalan normal.";
+
+      // Reset style variant classes
+      card.className = "system-status-card";
+      badge.className = "status-badge";
+
+      if (st === "ACTIVE") {
+        card.classList.add("status-active");
+        badge.classList.add("badge-stable");
+        badge.innerHTML = "🟢 " + kondisi;
+        msg.innerHTML = pesan || "Sistem berjalan normal.";
+
+        if (btn && btn.innerText.includes("Server")) {
+          btn.disabled = false;
+          btn.innerText = "KLAIM AKSES";
+        }
+      } else if (st === "UPDATE") {
+        card.classList.add("status-update");
+        badge.classList.add("badge-update");
+        badge.innerHTML = "🔵 " + kondisi;
+        msg.innerHTML = pesan || "Sistem backend sedang dalam pemeliharaan ringan/update.";
+
+        if (btn) {
+          btn.disabled = true;
+          btn.innerText = "🔒 Server Sedang Dalam Update Backend";
+        }
+      } else if (st === "REPAIR") {
+        card.classList.add("status-repair");
+        badge.classList.add("badge-repair");
+        badge.innerHTML = "🟠 " + kondisi;
+        msg.innerHTML = pesan || "Sistem portal sedang dalam perbaikan (REPAIR). Token & klaim ditahan sementara.";
+
+        if (btn) {
+          btn.disabled = true;
+          btn.innerText = "🛠️ Server Dalam Perbaikan (REPAIR)";
+        }
+        if (selectCat) selectCat.disabled = true;
+        if (selectGame) selectGame.disabled = true;
+        if (emailInput) emailInput.disabled = true;
+      } else if (st === "DISABLE") {
+        card.classList.add("status-disable");
+        badge.classList.add("badge-down");
+        badge.innerHTML = "🔴 " + kondisi;
+        msg.innerHTML = pesan || "Server portal dinonaktifkan (OFF SERVER DOWN). Portal hanya tampilan statis.";
+
+        if (btn) {
+          btn.disabled = true;
+          btn.innerText = "⛔ Server Portal Nonaktif (OFF)";
+        }
+        if (selectCat) selectCat.disabled = true;
+        if (selectGame) selectGame.disabled = true;
+        if (emailInput) emailInput.disabled = true;
+      }
+    }
+
+    // =========================================================================
     // INITIALIZATION & LIFECYCLE MANAGEMENT
     // =========================================================================
     document.addEventListener("DOMContentLoaded", async function() {
       pageLoadTime = Date.now();
       
+      // CEK STATUS REMOTE SERVER PERTAMA KALI (QUERY_PORTAL_REMOTE)
+      checkRemoteServerStatus();
+
       // MENGAMBIL DATA GEO IP DENGAN LOGIKA 3-TIER SMART IP
       getSmartUserIp();
+
 
       // MEMASANG LISTENER UTAMA PENANDA FORM DIRTY
       attachFormDirtyListeners();
