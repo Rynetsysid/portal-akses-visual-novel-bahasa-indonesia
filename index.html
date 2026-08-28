@@ -1536,7 +1536,7 @@
       isFormDirty = true;
 
       const gameObj = masterGamesData.find(g => String(g.id || "").trim() === selectedGameId);
-      const aksesLevel = gameObj ? String(gameObj.aksesLevel || gameObj.akses || gameObj.akses_level || "").toUpperCase() : "";
+      const aksesLevel = gameObj ? String(gameObj.accessLevel || gameObj.aksesLevel || gameObj.akses || gameObj.access || gameObj.akses_level || gameObj.access_level || "").toUpperCase() : "";
 
       // TAMPILKAN CARD WARN HANYA JIKA GAME BERLABEL PREMIUM_ONLY
       if (aksesLevel === "PREMIUM_ONLY") {
