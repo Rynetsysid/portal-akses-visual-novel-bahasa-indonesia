@@ -642,6 +642,35 @@
       padding: 16px;
     }
 
+    /* CARD INFORMASI KHUSUS GAME PREMIUM (REAL-TIME DROPDOWN WARNING) */
+    .premium-warning-card {
+      margin-top: 12px;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 1.5px solid #f59e0b;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+      line-height: 1.5;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .premium-warning-title {
+      color: #92400e;
+      font-weight: 700;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .premium-warning-body {
+      color: #78350f;
+      font-weight: 400;
+      font-size: 0.84rem;
+    }
+
     #downloadArea { 
       display: none; 
       margin-top: 20px; 
@@ -822,7 +851,7 @@
       <img alt="Hime Arikawa Chibi Mascot" class="hero-chibi-img" src="https://blogger.googleusercontent.com/img/a/AVvXsEhZvDLBbNOd89RJyMk2UrAPvVl_ruymkH8hMU5ycLaEbmQdf6tqJoJhblVJ3eCawhT1GcI5VJZGc_x2eYEKqJfeU1qSy4jrDJ5k6TScV5770lB5JOh-0Pu2eZIDVChDIB5-7flXaI5NsoSJAK8XnT2jnDkp-N9o66aDvukA3nA8TnVJOUoeav_lYS9tCosc" />
     </div>
 
-    <h2 class="portal-title">Akses Link Arsip Visual Novel</h2>
+    <h2 class="portal-title">Akses Link<br>Arsip Visual Novel</h2>
 
     <!-- BADGE INFORMASI TOKEN & TIMER -->
     <div class="token-status-box" id="tokenStatusBox">
@@ -868,9 +897,20 @@
         <!-- 2. PILIH GAME / VISUAL NOVEL -->
         <div class="portal-field">
           <label for="selectGame">Pilih Game / Visual Novel:</label>
-          <select id="selectGame" disabled required="">
+          <select id="selectGame" disabled onchange="onGameChange()" required="">
             <option value="">-- Pilih Kategori Terlebih Dahulu --</option>
           </select>
+        </div>
+
+        <!-- CARD INFORMASI KHUSUS GAME PREMIUM -->
+        <div id="premiumWarningCard" class="premium-warning-card" style="display: none;">
+          <div class="premium-warning-title">
+            <span>👑</span> <strong>Arsip/Game ini berlabel Premium Akses!</strong>
+          </div>
+          <div class="premium-warning-body">
+            Catatan:<br>
+            Pastikan untuk mengklaim menggunakan kode akses yang dimiliki (jika belum punya silahkan ajukan ke mimin).
+          </div>
         </div>
 
         <div class="portal-field" style="margin-top: 18px;">
@@ -1427,7 +1467,10 @@
     function onCategoryChange() {
       const categorySelect = document.getElementById("selectCategory");
       const gameSelect = document.getElementById("selectGame");
+      const warningCard = document.getElementById("premiumWarningCard");
       const selectedCategory = categorySelect.value.trim().toUpperCase();
+
+      if (warningCard) warningCard.style.display = "none";
 
       if (selectedCategory !== "") {
         isFormDirty = true;
@@ -1477,6 +1520,30 @@
         opt.textContent = g.title || g.namaGame || g.id;
         gameSelect.appendChild(opt);
       });
+    }
+
+    function onGameChange() {
+      const gameSelect = document.getElementById("selectGame");
+      const warningCard = document.getElementById("premiumWarningCard");
+      if (!gameSelect || !warningCard) return;
+
+      const selectedGameId = gameSelect.value.trim();
+      if (!selectedGameId || !Array.isArray(masterGamesData)) {
+        warningCard.style.display = "none";
+        return;
+      }
+
+      isFormDirty = true;
+
+      const gameObj = masterGamesData.find(g => String(g.id || "").trim() === selectedGameId);
+      const aksesLevel = gameObj ? String(gameObj.aksesLevel || gameObj.akses || gameObj.akses_level || "").toUpperCase() : "";
+
+      // TAMPILKAN CARD WARN HANYA JIKA GAME BERLABEL PREMIUM_ONLY
+      if (aksesLevel === "PREMIUM_ONLY") {
+        warningCard.style.display = "block";
+      } else {
+        warningCard.style.display = "none";
+      }
     }
 
     function updateStatsUI(stats) {
@@ -1587,6 +1654,9 @@
     }
 
     function submitClaim() {
+      const warningCard = document.getElementById("premiumWarningCard");
+      if (warningCard) warningCard.style.display = "none";
+
       const selectCategory = document.getElementById("selectCategory");
       const selectGame = document.getElementById("selectGame");
       
