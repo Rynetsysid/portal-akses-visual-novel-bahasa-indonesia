@@ -1315,6 +1315,32 @@
       document.body.removeChild(textarea);
     }
 
+    // Helper Generator Device Fingerprint ID (Ringan & Unik)
+    function generateDeviceFingerprint() {
+      try {
+        const nav = navigator;
+        const scr = window.screen;
+        const components = [
+          nav.userAgent || "",
+          nav.language || "",
+          scr.colorDepth || "",
+          scr.width + "x" + scr.height,
+          new Date().getTimezoneOffset(),
+          nav.hardwareConcurrency || "",
+          nav.maxTouchPoints || 0
+        ];
+        let hash = 0x811c9dc5;
+        const str = components.join("|||");
+        for (let i = 0; i < str.length; i++) {
+          hash ^= str.charCodeAt(i);
+          hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+        }
+        return "FP_" + (hash >>> 0).toString(16);
+      } catch (e) {
+        return "FP_UNKNOWN";
+      }
+    }
+
     // =========================================================================
     // 3-TIER SMART IP DETECTOR LOGIC (SAMA PERSIS DENGAN WCAPTCHA V2.7)
     // =========================================================================
@@ -1516,7 +1542,8 @@
           setLoadingText("Memverifikasi & Mengamankan Sesi...", "Mohon jangan tutup atau refresh halaman ini agar token Anda tidak hangus.");
           lockUserExit();
 
-          const validateUrl = `${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}&tabId=${encodeURIComponent(urlTabId || currentTabId)}`;
+          const fpId = generateDeviceFingerprint();
+          const validateUrl = `${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}&tabId=${encodeURIComponent(urlTabId || currentTabId)}&fingerprintId=${encodeURIComponent(fpId)}`;
           const res = await fetch(validateUrl);
           const data = await res.json();
 
