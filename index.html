@@ -1937,13 +1937,24 @@
       }
 
       if (currentTab === "PREMIUM") {
+        const lockUntil = localStorage.getItem("RYNET_PREMIUM_LOCK_UNTIL");
+        if (lockUntil && Date.now() < Number(lockUntil)) {
+          const remainingMins = Math.ceil((Number(lockUntil) - Date.now()) / (60 * 1000));
+          showMsg(`🔒 Isian dikunci, coba lagi nanti (${remainingMins} menit lagi).`, false);
+          return;
+        }
+
         if (!kode) {
           showMsg("Kode Akses Premium wajib diisi!", false);
           return;
         }
-        const kodeRegex = /^[a-zA-Z0-9]{10}$/;
+        if (kode.length > 10) {
+          showMsg("Kode Akses Premium maksimal 10 karakter!", false);
+          return;
+        }
+        const kodeRegex = /^\S{1,10}$/;
         if (!kodeRegex.test(kode)) {
-          showMsg("Kode Akses Premium harus terdiri dari persis 10 karakter alfanumerik!", false);
+          showMsg("Kode Akses Premium harus berupa 1 s.d. 10 karakter non-spasi!", false);
           return;
         }
       }
@@ -2019,6 +2030,11 @@
         }
 
         if (data.success) {
+          if (currentTab === "PREMIUM") {
+            localStorage.removeItem("RYNET_PREMIUM_FAILED_ATTEMPTS");
+            localStorage.removeItem("RYNET_PREMIUM_LOCK_UNTIL");
+          }
+
           // STEP 4: SUKSES 100%
           updateProgressUI(100, "🎉 Akses Terbuka Sempurna!", "✓ Step 4 dari 4: Link Google Drive Siap!", true);
 
@@ -2051,6 +2067,24 @@
           hideProgressUI();
           btn.disabled = false;
           btn.innerText = "KLAIM AKSES";
+
+          if (currentTab === "PREMIUM") {
+            let attempts = parseInt(localStorage.getItem("RYNET_PREMIUM_FAILED_ATTEMPTS") || "0", 10) + 1;
+            localStorage.setItem("RYNET_PREMIUM_FAILED_ATTEMPTS", attempts.toString());
+
+            if (attempts >= 6) {
+              const lockTime = Date.now() + (15 * 60 * 1000); // Kunci selama 15 menit
+              localStorage.setItem("RYNET_PREMIUM_LOCK_UNTIL", lockTime.toString());
+              showMsg("🔒 Percobaan tebak kode gagal 6x. Isian dikunci, coba lagi nanti.", false);
+              return;
+            } else {
+              const sisa = 6 - attempts;
+              const errorMsg = (data.message || "Kode Akses tidak cocok dengan database.") + ` (Sisa percobaan: ${sisa}x)`;
+              showMsg(errorMsg, false);
+              return;
+            }
+          }
+
           const errorMsg = data.message || "Gagal memproses klaim akses. Silakan coba lagi.";
           showMsg(errorMsg, false);
         }
