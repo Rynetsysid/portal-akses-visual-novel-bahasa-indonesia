@@ -1509,9 +1509,14 @@
         return;
       }
 
-      const tokenRegex = /^[a-zA-Z0-9]{10}$/;
+      if (tokenInput.length > 10) {
+        showExtendAlert("error", "Token Voucher Top-Up maksimal 10 karakter!");
+        return;
+      }
+
+      const tokenRegex = /^\S{1,10}$/;
       if (!tokenRegex.test(tokenInput)) {
-        showExtendAlert("error", "Token Voucher Top-Up harus terdiri dari persis 10 karakter alfanumerik!");
+        showExtendAlert("error", "Token Voucher Top-Up harus berupa 1 s.d. 10 karakter non-spasi!");
         return;
       }
 
