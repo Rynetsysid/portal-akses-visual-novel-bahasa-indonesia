@@ -179,8 +179,9 @@
     }
 
     /* WIDGET STATISTIK */
+    /* Default: disembunyikan. Ditampilkan via JS setelah token tervalidasi. */
     .stats-box {
-      display: grid;
+      display: none;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
       margin-bottom: 20px;
@@ -831,8 +832,9 @@
     }
 
     /* KARTU INFORMASI STATUS SYSTEM PORTAL (QUERY_PORTAL_REMOTE) */
+    /* Default: disembunyikan. Ditampilkan via JS setelah token tervalidasi. */
     .system-status-card {
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
@@ -1487,14 +1489,25 @@
       }
     }
 
+    /**
+     * [OPTIMIZED] Helper: Tampilkan kartu status (dari hidden) lalu render datanya.
+     * Dipanggil setelah validasi token berhasil atau saat restore session.
+     */
+    function showAndRenderServerStatus(serverConfig) {
+      const card = document.getElementById("systemStatusCard");
+      if (card) card.style.display = "flex";
+      renderSystemStatusUI(serverConfig);
+    }
+
     // =========================================================================
     // INITIALIZATION & LIFECYCLE MANAGEMENT
     // =========================================================================
     document.addEventListener("DOMContentLoaded", async function() {
       pageLoadTime = Date.now();
       
-      // CEK STATUS REMOTE SERVER PERTAMA KALI (QUERY_PORTAL_REMOTE)
-      checkRemoteServerStatus();
+      // [OPTIMIZED] Status server TIDAK lagi di-fetch otomatis di sini.
+      // Data status server kini dikirim bersama respons validasi token (action=validate),
+      // sehingga kunjungan tanpa token (portal ompong) tidak membuang kuota GAS API.
 
       // MENGAMBIL DATA GEO IP DENGAN LOGIKA 3-TIER SMART IP
       getSmartUserIp();
@@ -1557,23 +1570,46 @@
             masterGamesData = data.games || [];
             populateCategoryDropdown();
 
+            // [OPTIMIZED] Render status server real dari respons validate (tanpa fetch terpisah)
+            const serverConfig = {
+              status: data.serverStatus || "ACTIVE",
+              kondisiServer: data.kondisiServer || "STABLE SYSTEM",
+              pesan: data.pesan || "Sistem berjalan normal."
+            };
+            showAndRenderServerStatus(serverConfig);
+
             saveSessionData({
               token: token,
               tabId: currentTabId,
               games: masterGamesData,
               stats: data.stats || {},
+              serverConfig: serverConfig,
               targetTime: targetTime
             });
 
             window.history.replaceState({}, document.title, window.location.pathname);
 
             updateStatsUI(data.stats);
+            // Tampilkan widget statistik setelah data real tersedia
+            const statsBox = document.querySelector(".stats-box");
+            if (statsBox) statsBox.style.display = "grid";
+
             startCountdownTimer(targetTime);
             
             lockUserExit();
           } else {
             isTokenBurned = true;
             unlockUserExit();
+
+            // [OPTIMIZED] Jika backend mengirim data server status (misal DISABLE/REPAIR), render ke UI
+            if (data.serverStatus) {
+              showAndRenderServerStatus({
+                status: data.serverStatus,
+                kondisiServer: data.kondisiServer || data.serverStatus,
+                pesan: data.pesan || data.message || ""
+              });
+            }
+
             lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid, sudah digunakan, atau kedaluwarsa!"));
           }
         } catch (err) {
@@ -1598,8 +1634,17 @@
 
             masterGamesData = sessionData.games || [];
             populateCategoryDropdown();
-            
+
+            // [OPTIMIZED] Restore status server dari session storage
+            if (sessionData.serverConfig) {
+              showAndRenderServerStatus(sessionData.serverConfig);
+            }
+
             updateStatsUI(sessionData.stats);
+            // Tampilkan widget statistik dari data session
+            const statsBox = document.querySelector(".stats-box");
+            if (statsBox) statsBox.style.display = "grid";
+
             startCountdownTimer(sessionData.targetTime);
             
             lockUserExit();
