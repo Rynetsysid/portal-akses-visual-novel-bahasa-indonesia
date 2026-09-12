@@ -925,6 +925,52 @@
       width: 100%;
     }
 
+    /* PROMO HEADER PREMIUM CARD */
+    .promo-header {
+      background: linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%);
+      padding: 22px 20px 18px 20px;
+      text-align: center;
+    }
+
+    .promo-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 10px;
+    }
+
+    .promo-title-white {
+      color: #ffffff;
+    }
+
+    .promo-title-accent {
+      color: #fb923c;
+    }
+
+    .promo-price {
+      color: #ffffff;
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      -webkit-text-stroke: 2.5px #fb923c;
+      paint-order: stroke fill;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+
+    .promo-duration {
+      color: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .promo-divider {
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent 0%, #a7f3d0 50%, transparent 100%);
+    }
+
   </style>
 </head>
 <body>
@@ -941,7 +987,7 @@
   <!-- CONTAINER UTAMA -->
   <div class="portal-container">
     <div class="hero-chibi">
-      <img alt="Hime Arikawa Chibi Mascot" class="hero-chibi-img" src="https://blogger.googleusercontent.com/img/a/AVvXsEhZvDLBbNOd89RJyMk2UrAPvVl_ruymkH8hMU5ycLaEbmQdf6tqJoJhblVJ3eCawhT1GcI5VJZGc_x2eYEKqJfeU1qSy4jrDJ5k6TScV5770lB5JOh-0Pu2eZIDVChDIB5-7flXaI5NsoSJAK8XnT2jnDkp-N9o66aDvukA3nA8TnVJOUoeav_lYS9tCosc" />
+      <img alt="Hime Arikawa Chibi Mascot" class="hero-chibi-img" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjAAhmrfMT0sD3-fAB5-ZHzILjGM1AKBRZPzNk0qG2O91kW25AtEl9zcbYINhE3Q-qU8v6NAAudnAfB65KzHlWIeeupEmH76kVZ_NiY_laiYNUFrJkhCNyT78SqhwGVL3jdicKSAzcymEVlH8gt2TOFHimVf9plYOrVVMe1TerAXhYj4N4/s1600/IMG_20260909_121024.png" />
     </div>
 
     <h2 class="portal-title">Akses Link<br>Arsip Visual Novel</h2>
@@ -1037,34 +1083,50 @@
             <input autocomplete="off" id="kodeAkses" maxlength="10" placeholder="Masukkan 10 digit kode akses premium" type="text" />
           </div>
 
-          <!-- KOTAK PAYMENT & WA MIMIN -->
-          <div class="wa-card-custom">
-            <div class="payment-title">Dapatkan kode akses dengan:</div>
-            
-            <div class="payment-grid">
-              <!-- SAWERIA BUTTON -->
-              <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank">
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
-                Saweria
-              </a>
+          <!-- KOTAK PAYMENT & WA MIMIN (REDESIGNED WITH PROMO HEADER) -->
+          <div class="wa-card-custom" style="padding: 0; overflow: hidden;">
 
-              <!-- SHOPEEPAY BUTTON -->
-              <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
-                ShopeePay
-              </button>
+            <!-- BAGIAN ATAS: PROMOSI PREMIUM -->
+            <div class="promo-header">
+              <div class="promo-title">
+                <span class="promo-title-white">Upgrade Jadi </span><span class="promo-title-accent">User Premium!</span>
+              </div>
+              <div class="promo-price">Rp. 5.000</div>
+              <div class="promo-duration">Masa aktif 15 hari!</div>
             </div>
 
-            <div class="confirm-wa-box">
-              <div class="confirm-text">Konfirmasi Via WA Mimin untuk mendapatkan kode akses</div>
-              <div class="confirm-note">arigatou gozaimasu~</div>
+            <!-- GARIS PEMBATAS -->
+            <div class="promo-divider"></div>
+
+            <!-- BAGIAN BAWAH: DAPATKAN KODE AKSES -->
+            <div style="padding: 16px 16px 18px 16px; text-align: center;">
+              <div class="payment-title">Dapatkan kode akses dengan:</div>
               
-              <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" target="_blank">
-                <svg class="wa-icon-svg" viewBox="0 0 24 24">
-                  <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
-                </svg>
-                Konfirmasi via WA Mimin
-              </a>
+              <div class="payment-grid">
+                <!-- SAWERIA BUTTON -->
+                <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank">
+                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
+                  Saweria
+                </a>
+
+                <!-- SHOPEEPAY BUTTON -->
+                <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
+                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
+                  ShopeePay
+                </button>
+              </div>
+
+              <div class="confirm-wa-box">
+                <div class="confirm-text">Konfirmasi Via WA Mimin untuk mendapatkan kode akses</div>
+                <div class="confirm-note">arigatou gozaimasu~</div>
+                
+                <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" target="_blank">
+                  <svg class="wa-icon-svg" viewBox="0 0 24 24">
+                    <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
+                  </svg>
+                  Konfirmasi via WA Mimin
+                </a>
+              </div>
             </div>
           </div>
         </div>
