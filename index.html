@@ -481,6 +481,19 @@
       transform: translateY(-1px);
     }
 
+    .pay-dana {
+      background: #ffffff !important;
+      color: #108ee9 !important;
+      border: 1.5px solid #108ee9 !important;
+    }
+
+    .pay-dana:hover {
+      background: #f0f8ff !important;
+      border-color: #0d7bd4 !important;
+      color: #0d7bd4 !important;
+      transform: translateY(-1px);
+    }
+
     .pay-icon-img {
       width: 20px;
       height: 20px;
@@ -1102,18 +1115,27 @@
             <div style="padding: 16px 16px 18px 16px; text-align: center;">
               <div class="payment-title">Dapatkan kode akses dengan:</div>
               
+              <!-- BARIS 1: DANA & SHOPEEPAY (JEJER 2) -->
               <div class="payment-grid">
-                <!-- SAWERIA BUTTON -->
-                <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank">
-                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
-                  Saweria
-                </a>
+                <!-- DANA BUTTON -->
+                <button class="pay-btn pay-dana" onclick="copyDana(this)" type="button">
+                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj3QPn1RtEDgJFqVwXov_M99jE3Z_HHLFiljQjowsRchb31AeZ91MfKM0Yj5POSMrIc_4sZOOQDEGMWhwWzI9M6Mh4C84Di9-NxCcF8949Qv855KliE9u4znhaRkqSi7zfVRlBll3WgBFmVJyyO9h-p-e_tmd006h3JNZ0TwELwsS5lUBs/s1600/Dana-logo.png" alt="Dana Logo" class="pay-icon-img" />
+                  Dana
+                </button>
 
                 <!-- SHOPEEPAY BUTTON -->
                 <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
                   <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
                   ShopeePay
                 </button>
+              </div>
+
+              <!-- BARIS 2: SAWERIA (TENGAH, UKURAN SAMA) -->
+              <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+                <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank" style="width: calc(50% - 5px);">
+                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
+                  Saweria
+                </a>
               </div>
 
               <div class="confirm-wa-box">
@@ -1351,8 +1373,35 @@
       }, 2000);
     }
 
+    function copyDana(btnElem) {
+      const danaNum = "083813129280";
+      
+      const copyAction = () => {
+        const originalHTML = btnElem.innerHTML;
+        btnElem.innerHTML = "&#10003; Disalin!";
+        btnElem.style.background = "#16a34a";
+        btnElem.style.color = "#ffffff";
+        btnElem.style.borderColor = "#16a34a";
+        alert("Nomor Dana (" + danaNum + ") berhasil disalin!");
+        setTimeout(() => {
+          btnElem.innerHTML = originalHTML;
+          btnElem.style.background = "";
+          btnElem.style.color = "";
+          btnElem.style.borderColor = "";
+        }, 2000);
+      };
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(danaNum).then(copyAction).catch(() => {
+          fallbackCopyText(danaNum, copyAction);
+        });
+      } else {
+        fallbackCopyText(danaNum, copyAction);
+      }
+    }
+
     function copyShopeePay(btnElem) {
-      const shopeeNum = "085175409246";
+      const shopeeNum = "083813129280";
       
       const copyAction = () => {
         const originalHTML = btnElem.innerHTML;
