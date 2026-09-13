@@ -1132,7 +1132,7 @@
 
               <!-- BARIS 2: SAWERIA (TENGAH, UKURAN SAMA) -->
               <div style="display: flex; justify-content: center; margin-bottom: 14px;">
-                <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank" style="width: calc(50% - 5px);">
+                <a class="pay-btn pay-saweria" href="#" onclick="openSaweria(this); return false;" rel="noopener" style="width: calc(50% - 5px);">
                   <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
                   Saweria
                 </a>
@@ -1373,54 +1373,95 @@
       }, 2000);
     }
 
-    function copyDana(btnElem) {
-      const danaNum = "083813129280";
-      
-      const copyAction = () => {
-        const originalHTML = btnElem.innerHTML;
-        btnElem.innerHTML = "&#10003; Disalin!";
-        btnElem.style.background = "#16a34a";
-        btnElem.style.color = "#ffffff";
-        btnElem.style.borderColor = "#16a34a";
-        alert("Nomor Dana (" + danaNum + ") berhasil disalin!");
-        setTimeout(() => {
-          btnElem.innerHTML = originalHTML;
-          btnElem.style.background = "";
-          btnElem.style.color = "";
-          btnElem.style.borderColor = "";
-        }, 2000);
+    async function fetchPaymentGateway(paymentId, btnElem, onSuccess) {
+      if (!btnElem) return;
+      if (btnElem.dataset.loading === "true") return;
+
+      btnElem.dataset.loading = "true";
+      const originalHTML = btnElem.innerHTML;
+      btnElem.innerHTML = "Memuat...";
+      btnElem.style.opacity = "0.7";
+      btnElem.style.pointerEvents = "none";
+
+      const restoreBtn = () => {
+        btnElem.dataset.loading = "false";
+        btnElem.innerHTML = originalHTML;
+        btnElem.style.opacity = "";
+        btnElem.style.pointerEvents = "";
       };
 
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(danaNum).then(copyAction).catch(() => {
-          fallbackCopyText(danaNum, copyAction);
-        });
-      } else {
-        fallbackCopyText(danaNum, copyAction);
+      try {
+        const url = SCRIPT_URL + "?action=get_payment_info&paymentId=" + encodeURIComponent(paymentId);
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data && data.success && data.content) {
+          restoreBtn();
+          onSuccess(data.content, data.namaInfo || paymentId);
+        } else {
+          restoreBtn();
+          alert("Gagal mengambil info pembayaran: " + (data && data.message ? data.message : "Error tidak diketahui"));
+        }
+      } catch (err) {
+        restoreBtn();
+        alert("Gagal terhubung ke server payment: " + err.message);
       }
     }
 
-    function copyShopeePay(btnElem) {
-      const shopeeNum = "083813129280";
-      
-      const copyAction = () => {
-        const originalHTML = btnElem.innerHTML;
-        btnElem.innerHTML = "&#10003; Disalin!";
-        btnElem.style.background = "#16a34a";
-        alert("Nomor ShopeePay (" + shopeeNum + ") berhasil disalin!");
-        setTimeout(() => {
-          btnElem.innerHTML = originalHTML;
-          btnElem.style.background = "#ee4d2d";
-        }, 2000);
-      };
+    function copyDana(btnElem) {
+      fetchPaymentGateway("PAY_DANA", btnElem, (danaNum) => {
+        const copyAction = () => {
+          const originalHTML = btnElem.innerHTML;
+          btnElem.innerHTML = "&#10003; Disalin!";
+          btnElem.style.background = "#16a34a";
+          btnElem.style.color = "#ffffff";
+          btnElem.style.borderColor = "#16a34a";
+          alert("Nomor Dana (" + danaNum + ") berhasil disalin!");
+          setTimeout(() => {
+            btnElem.innerHTML = originalHTML;
+            btnElem.style.background = "";
+            btnElem.style.color = "";
+            btnElem.style.borderColor = "";
+          }, 2000);
+        };
 
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(shopeeNum).then(copyAction).catch(() => {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(danaNum).then(copyAction).catch(() => {
+            fallbackCopyText(danaNum, copyAction);
+          });
+        } else {
+          fallbackCopyText(danaNum, copyAction);
+        }
+      });
+    }
+
+    function copyShopeePay(btnElem) {
+      fetchPaymentGateway("PAY_SHOPEEPAY", btnElem, (shopeeNum) => {
+        const copyAction = () => {
+          const originalHTML = btnElem.innerHTML;
+          btnElem.innerHTML = "&#10003; Disalin!";
+          btnElem.style.background = "#16a34a";
+          alert("Nomor ShopeePay (" + shopeeNum + ") berhasil disalin!");
+          setTimeout(() => {
+            btnElem.innerHTML = originalHTML;
+            btnElem.style.background = "#ee4d2d";
+          }, 2000);
+        };
+
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(shopeeNum).then(copyAction).catch(() => {
+            fallbackCopyText(shopeeNum, copyAction);
+          });
+        } else {
           fallbackCopyText(shopeeNum, copyAction);
-        });
-      } else {
-        fallbackCopyText(shopeeNum, copyAction);
-      }
+        }
+      });
+    }
+
+    function openSaweria(btnElem) {
+      fetchPaymentGateway("PAY_SAWERIA", btnElem, (saweriaUrl) => {
+        window.open(saweriaUrl, "_blank", "noopener");
+      });
     }
 
     function fallbackCopyText(text, callback) {
