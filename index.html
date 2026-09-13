@@ -1113,29 +1113,32 @@
 
             <!-- BAGIAN BAWAH: DAPATKAN KODE AKSES -->
             <div style="padding: 16px 16px 18px 16px; text-align: center;">
-              <div class="payment-title">Dapatkan kode akses dengan:</div>
-              
-              <!-- BARIS 1: DANA & SHOPEEPAY (JEJER 2) -->
-              <div class="payment-grid">
-                <!-- DANA BUTTON -->
-                <button class="pay-btn pay-dana" onclick="copyDana(this)" type="button">
-                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj3QPn1RtEDgJFqVwXov_M99jE3Z_HHLFiljQjowsRchb31AeZ91MfKM0Yj5POSMrIc_4sZOOQDEGMWhwWzI9M6Mh4C84Di9-NxCcF8949Qv855KliE9u4znhaRkqSi7zfVRlBll3WgBFmVJyyO9h-p-e_tmd006h3JNZ0TwELwsS5lUBs/s1600/Dana-logo.png" alt="Dana Logo" class="pay-icon-img" />
-                  Dana
-                </button>
+              <!-- KOTAK 3 TOMBOL PAYMENT (DEFAULT: HIDDEN UNTUK PORTAL OMPONG) -->
+              <div id="paymentButtonsArea" style="display: none;">
+                <div class="payment-title">Dapatkan kode akses dengan:</div>
+                
+                <!-- BARIS 1: DANA & SHOPEEPAY (JEJER 2) -->
+                <div class="payment-grid">
+                  <!-- DANA BUTTON -->
+                  <button class="pay-btn pay-dana" onclick="copyDana(this)" type="button">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj3QPn1RtEDgJFqVwXov_M99jE3Z_HHLFiljQjowsRchb31AeZ91MfKM0Yj5POSMrIc_4sZOOQDEGMWhwWzI9M6Mh4C84Di9-NxCcF8949Qv855KliE9u4znhaRkqSi7zfVRlBll3WgBFmVJyyO9h-p-e_tmd006h3JNZ0TwELwsS5lUBs/s1600/Dana-logo.png" alt="Dana Logo" class="pay-icon-img" />
+                    Dana
+                  </button>
 
-                <!-- SHOPEEPAY BUTTON -->
-                <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
-                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
-                  ShopeePay
-                </button>
-              </div>
+                  <!-- SHOPEEPAY BUTTON -->
+                  <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
+                    ShopeePay
+                  </button>
+                </div>
 
-              <!-- BARIS 2: SAWERIA (TENGAH, UKURAN SAMA) -->
-              <div style="display: flex; justify-content: center; margin-bottom: 14px;">
-                <a class="pay-btn pay-saweria" href="#" onclick="openSaweria(this); return false;" rel="noopener" style="width: calc(50% - 5px);">
-                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
-                  Saweria
-                </a>
+                <!-- BARIS 2: SAWERIA (TENGAH, UKURAN SAMA) -->
+                <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+                  <a class="pay-btn pay-saweria" href="#" onclick="openSaweria(this); return false;" rel="noopener" style="width: calc(50% - 5px);">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
+                    Saweria
+                  </a>
+                </div>
               </div>
 
               <div class="confirm-wa-box">
@@ -1656,6 +1659,11 @@
      * [OPTIMIZED] Helper: Tampilkan kartu status (dari hidden) lalu render datanya.
      * Dipanggil setelah validasi token berhasil atau saat restore session.
      */
+        function showPaymentButtonsUI() {
+      const area = document.getElementById("paymentButtonsArea");
+      if (area) area.style.display = "block";
+    }
+
     function showAndRenderServerStatus(serverConfig) {
       const card = document.getElementById("systemStatusCard");
       if (card) card.style.display = "flex";
@@ -1757,6 +1765,9 @@
             const statsBox = document.querySelector(".stats-box");
             if (statsBox) statsBox.style.display = "grid";
 
+            // Tampilkan 3 tombol pembayaran untuk user dengan token valid
+            showPaymentButtonsUI();
+
             startCountdownTimer(targetTime);
             
             lockUserExit();
@@ -1807,6 +1818,9 @@
             // Tampilkan widget statistik dari data session
             const statsBox = document.querySelector(".stats-box");
             if (statsBox) statsBox.style.display = "grid";
+
+            // Tampilkan 3 tombol pembayaran untuk user dengan token valid
+            showPaymentButtonsUI();
 
             startCountdownTimer(sessionData.targetTime);
             
@@ -2234,6 +2248,9 @@
       if (kodeAkses) kodeAkses.disabled = true;
 
       const statusBox = document.getElementById("tokenStatusBox");
+      const payArea = document.getElementById("paymentButtonsArea");
+      if (payArea) payArea.style.display = "none";
+
       if (statusBox) {
         statusBox.style.background = "#fee2e2";
         statusBox.style.borderColor = "#fecaca";
