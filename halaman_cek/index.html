@@ -1,504 +1,427 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pemeriksaan Status & Riwayat Akses User - Portal Access System</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Akses Visual Novel</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-  <!-- FAVICON -->
-  <link rel="icon" href="../favicon.ico" type="image/x-icon" />
-  <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
-
-  <!-- GOOGLE FONTS: PLUS JAKARTA SANS -->
+  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --primary: #ea580c;
-      --primary-hover: #c2410c;
-      --primary-light: #fff7ed;
-      --primary-border: #ffedd5;
-      --bg-main: #f8fafc;
-      --bg-card: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --text-dark: #334155;
-      --success: #16a34a;
-      --success-bg: #f0fdf4;
-      --danger: #dc2626;
-      --danger-bg: #fef2f2;
-      --warning: #d97706;
-      --warning-bg: #fffbeb;
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
-    }
-
+    /* Global Reset & Latar Belakang Responsif */
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      line-height: 1.5;
-      padding: 24px 14px;
+      margin: 0;
+      padding: 0;
       min-height: 100vh;
+      width: 100%;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+      /* Latar Belakang Default (Mobile) */
+      background-image: url('mobile_bg.webp');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
     }
 
-    .container {
+    /* Responsive Breakpoint untuk Desktop */
+    @media (min-width: 768px) {
+      body {
+        background-image: url('desktop_bg.webp');
+      }
+    }
+
+    :root {
+      --primary: #ea580c;
+      --primary-hover: #c2410c;
+      --primary-light: #ffedd5;
+      --primary-border: #fed7aa;
+      --success: #16a34a;
+      --success-hover: #15803d;
+      --success-bg: #dcfce7;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-card: #ffffff;
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-soft: 0 10px 25px -5px rgba(234, 88, 12, 0.08);
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* CONTAINER UTAMA */
+    .portal-container {
+      max-width: 580px;
       width: 100%;
-      max-width: 680px;
-      margin: auto 0;
-    }
-
-    /* HEADER CARD */
-    .header-card {
-      background: var(--bg-card);
-      border: 1px solid #e2e8f0;
-      border-radius: var(--radius-lg);
+      margin: 20px auto;
       padding: 24px 20px;
-      text-align: center;
-      box-shadow: var(--shadow-soft);
-      margin-bottom: 20px;
-    }
-
-    .brand-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.82rem;
-      font-weight: 800;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      background: var(--primary-light);
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--primary-border);
-      margin-bottom: 10px;
-    }
-
-    .header-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin-bottom: 6px;
-      letter-spacing: -0.3px;
-    }
-
-    .header-subtitle {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-    }
-
-    /* SEARCH CARD */
-    .search-card {
-      background: var(--bg-card);
-      border: 1px solid #e2e8f0;
-      border-radius: var(--radius-lg);
-      padding: 22px;
-      box-shadow: var(--shadow-soft);
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 8px;
-    }
-
-    .input-wrapper {
+      color: var(--text-main);
+      line-height: 1.6;
       position: relative;
     }
 
-    .input-field {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1.5px solid #cbd5e1;
-      font-size: 0.92rem;
-      outline: none;
-      transition: all 0.2s ease;
-      font-family: inherit;
-    }
-
-    .input-field:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3.5px rgba(234, 88, 12, 0.15);
-    }
-
-    .ip-info-tag {
+    /* POP-UP LOADING OVERLAY */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-top: 6px;
-      padding: 0 2px;
-    }
-
-    /* NOTICE & ALERT BOX (DIDALAM CARD FORM, DI ATAS TOMBOL) */
-    .alert-box {
-      padding: 12px 14px;
-      border-radius: var(--radius-md);
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-top: 14px;
-      margin-bottom: 14px;
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .alert-error {
-      background: var(--danger-bg);
-      border: 1px solid #fca5a5;
-      color: #991b1b;
-    }
-
-    .alert-warning {
-      background: var(--warning-bg);
-      border: 1px solid #fde68a;
-      color: #92400e;
-    }
-
-    .alert-info {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e40af;
-    }
-
-    .btn-submit {
-      width: 100%;
-      padding: 13px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-      color: #ffffff;
-      font-size: 0.95rem;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      gap: 8px;
+      align-items: center;
+      z-index: 99999;
+      opacity: 1;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
     }
 
-    .btn-submit:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(234, 88, 12, 0.28);
+    .loading-box {
+      background: var(--bg-card);
+      border: 1px solid var(--primary-border);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      text-align: center;
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.25);
+      max-width: 340px;
+      width: 85%;
     }
 
-    .btn-submit:disabled {
-      background: #cbd5e1;
-      cursor: not-allowed;
-      box-shadow: none;
-      transform: none;
-    }
-
-    /* SPINNER */
     .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid #ffffff;
-      border-top-color: transparent;
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--primary-light);
+      border-top: 4px solid var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      display: none;
+      margin: 0 auto 16px auto;
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
-    /* RESULT AREA & TABS */
-    .result-container {
+    .loading-text {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .loading-subtext {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* CHIBI MASCOT HEADER */
+    .hero-chibi {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .hero-chibi-img {
+      max-height: 180px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.12));
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .hero-chibi-img:hover {
+      transform: scale(1.06) rotate(-2deg);
+    }
+
+    .portal-title {
+      text-align: center;
+      color: var(--primary);
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin: 0 0 16px 0;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+
+    /* BADGE TOKEN STATUS & TIMER COUNTDOWN */
+    .token-status-box {
       display: none;
-      animation: fadeIn 0.4s ease;
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 0.88rem;
+      color: #166534;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(22, 163, 74, 0.08);
     }
 
-    .tabs-header {
+    .token-timer {
+      font-weight: 800;
+      color: #dc2626;
+      font-size: 1.05rem;
+    }
+
+    /* WIDGET STATISTIK */
+    /* Default: disembunyikan. Ditampilkan via JS setelah token tervalidasi. */
+    .stats-box {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--primary-light);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(255, 122, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 122, 0, 0.08);
+    }
+
+    .stat-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* TAB SWITCHER */
+    .portal-tabs {
       display: flex;
       gap: 8px;
-      background: #e2e8f0;
-      padding: 4px;
+      margin-bottom: 20px;
+      background: rgba(241, 245, 249, 0.9);
+      padding: 6px;
       border-radius: var(--radius-md);
-      margin-bottom: 16px;
     }
 
     .tab-btn {
       flex: 1;
       padding: 10px 14px;
-      border-radius: 8px;
       border: none;
       background: transparent;
-      font-size: 0.88rem;
+      color: var(--text-muted);
       font-weight: 700;
-      color: var(--text-dark);
+      border-radius: var(--radius-sm);
       cursor: pointer;
+      text-align: center;
       transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      font-size: 0.88rem;
     }
 
     .tab-btn.active {
       background: var(--bg-card);
       color: var(--primary);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* DATA CARD */
-    .data-card {
+    /* FORM CARD */
+    .portal-card {
       background: var(--bg-card);
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--primary-border);
       border-radius: var(--radius-lg);
-      padding: 20px;
+      padding: 24px;
       box-shadow: var(--shadow-soft);
-      margin-bottom: 16px;
     }
 
-    .data-row {
+    .portal-field {
+      margin-bottom: 18px;
+    }
+
+    .portal-field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .portal-field input, 
+    .portal-field select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #cbd5e1;
+      background: var(--bg-card);
+      color: #0f172a;
+      box-sizing: border-box;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .portal-field input:focus, 
+    .portal-field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3.5px rgba(234, 88, 12, 0.15);
+    }
+
+    .portal-field input:disabled,
+    .portal-field select:disabled {
+      background-color: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+      border-color: #e2e8f0;
+    }
+
+    /* INLINE PROGRESS BAR UI (DI ATAS TOMBOL AKSES) */
+    .inline-progress-container {
+      display: none;
+      margin-top: 18px;
+      margin-bottom: 14px;
+      padding: 14px 16px;
+      background: #fff7ed;
+      border: 1.5px solid var(--primary-border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.08);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .inline-progress-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      padding: 10px 0;
-      border-bottom: 1px dashed #f1f5f9;
-      font-size: 0.88rem;
+      align-items: center;
+      margin-bottom: 8px;
     }
 
-    .data-row:last-child {
-      border-bottom: none;
-    }
-
-    .data-label {
-      font-weight: 600;
-      color: var(--text-muted);
-      width: 40%;
-      flex-shrink: 0;
-    }
-
-    .data-value {
+    .inline-progress-title {
+      font-size: 0.85rem;
       font-weight: 700;
-      color: var(--text-main);
-      width: 60%;
-      text-align: right;
-      word-break: break-word;
-    }
-
-    /* BADGES */
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .badge-active {
-      background: var(--success-bg);
-      color: var(--success);
-      border: 1px solid #bbf7d0;
-    }
-
-    .badge-expired {
-      background: #f1f5f9;
-      color: #64748b;
-      border: 1px solid #cbd5e1;
-    }
-
-    .badge-blocked {
-      background: var(--danger-bg);
-      color: var(--danger);
-      border: 1px solid #fecaca;
-    }
-
-    .badge-full {
-      background: #fff7ed;
-      color: #ea580c;
-      border: 1px solid #fed7aa;
-    }
-
-    /* KODE VIP BOX */
-    .vip-code-box {
-      background: var(--primary-light);
-      border: 1.5px dashed var(--primary);
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
+      color: #92400e;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-top: 4px;
+      gap: 6px;
     }
 
-    .vip-code-text {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.95rem;
+    .inline-progress-percent {
+      font-size: 0.88rem;
       font-weight: 800;
-      color: #9a3412;
+      color: var(--primary);
     }
 
-    .btn-copy {
-      background: var(--primary);
-      color: #ffffff;
+    .inline-progress-track {
+      width: 100%;
+      height: 10px;
+      background: #fed7aa;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .inline-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ea580c, #f97316);
+      border-radius: 20px;
+      transition: width 0.4s ease, background 0.3s ease;
+      box-shadow: 0 0 10px rgba(234, 88, 12, 0.5);
+    }
+
+    .inline-progress-fill.success {
+      background: linear-gradient(90deg, #16a34a, #22c55e) !important;
+      box-shadow: 0 0 10px rgba(22, 163, 74, 0.5) !important;
+    }
+
+    .inline-progress-step {
+      font-size: 0.78rem;
+      color: #7c2d12;
+      font-weight: 600;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .portal-btn {
+      width: 100%;
+      padding: 14px;
       border: none;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.75rem;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #ff7a00, #ea580c);
+      color: #ffffff;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .btn-copy:hover {
-      background: var(--primary-hover);
-    }
-
-    /* CATATAN STATIS BOX */
-    .static-notes-card {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: var(--radius-md);
-      padding: 16px;
-      margin-top: 16px;
-    }
-
-    .notes-title {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: #92400e;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .notes-list {
-      list-style-type: decimal;
-      padding-left: 20px;
-      font-size: 0.82rem;
-      color: #78350f;
-    }
-
-    .notes-list li {
-      margin-bottom: 6px;
-      line-height: 1.4;
-    }
-
-    .notes-list li:last-child {
-      margin-bottom: 0;
-    }
-
-    /* EMPTY STATE CARD */
-    .empty-card {
-      background: var(--bg-card);
-      border: 1px dashed #cbd5e1;
-      border-radius: var(--radius-lg);
-      padding: 30px 20px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .empty-icon {
-      font-size: 2rem;
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    /* FOOTER LINK */
-    .footer-box {
-      margin-top: 30px;
-      text-align: center;
-      padding-bottom: 20px;
-    }
-
-    .btn-back {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-dark);
-      font-size: 0.88rem;
-      font-weight: 700;
-      text-decoration: none;
-      background: var(--bg-card);
-      padding: 10px 18px;
-      border-radius: 20px;
-      border: 1px solid #cbd5e1;
-      box-shadow: var(--shadow-soft);
+      font-size: 0.98rem;
       transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
     }
 
-    .btn-back:hover {
-      border-color: var(--primary);
-      color: var(--primary);
+    .portal-btn:hover:not(:disabled) { 
+      background: linear-gradient(135deg, #e66e00, #c2410c);
       transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
     }
 
-    /* KOTAK TOP-UP MASA AKTIF PREMIUM */
-    .topup-card {
-      background: var(--bg-card);
-      border: 1.5px solid #fed7aa;
-      border-radius: var(--radius-lg);
-      padding: 22px;
-      box-shadow: var(--shadow-soft);
-      margin-top: 20px;
-      animation: fadeIn 0.3s ease-in-out;
+    .portal-btn:active:not(:disabled) {
+      transform: translateY(0);
     }
 
-    .topup-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--primary);
+    .portal-btn:disabled { 
+      background: #cbd5e1 !important; 
+      cursor: not-allowed; 
+      box-shadow: none !important; 
+      transform: none !important;
+    }
+
+    /* BOT HONEYPOT TRAP */
+    .trap-field {
+      display: none !important;
+      visibility: hidden !important;
+    }
+
+    .badge-info {
+      display: block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid var(--primary-light);
+      font-size: 0.82rem;
+      font-weight: 600;
       margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 6px;
-    }
-
-    .topup-subtitle {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 14px;
       line-height: 1.4;
     }
 
     /* CARD WHATSAPP & PAYMENT */
     .wa-card-custom {
-      margin-top: 10px;
+      margin-top: 16px;
       padding: 18px 16px;
       background: #f0fdf4;
       border: 1.5px solid #bbf7d0;
@@ -555,6 +478,19 @@
       background: #fff5f3 !important;
       border-color: #d73a1c !important;
       color: #d73a1c !important;
+      transform: translateY(-1px);
+    }
+
+    .pay-dana {
+      background: #ffffff !important;
+      color: #108ee9 !important;
+      border: 1.5px solid #108ee9 !important;
+    }
+
+    .pay-dana:hover {
+      background: #f0f8ff !important;
+      border-color: #0d7bd4 !important;
+      color: #0d7bd4 !important;
       transform: translateY(-1px);
     }
 
@@ -615,121 +551,217 @@
       fill: currentColor;
     }
 
-    .badge-updated {
-      display: inline-flex;
+    /* CATATAN MIMIN */
+    .mimin-note-box {
+      margin-top: 18px;
+      padding: 14px 16px;
+      background: #fffbebf5;
+      border-left: 4px solid #f59e0b;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      color: #78350f;
+      line-height: 1.5;
+    }
+
+    .mimin-note-title {
+      font-weight: 800;
+      display: flex;
       align-items: center;
-      gap: 4px;
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #86efac;
-      padding: 2px 8px;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: #92400e;
+    }
+
+    /* BOX PASSWORD ZIP */
+    .pass-box-highlight {
+      background: #ffffff;
+      border: 1.5px dashed #f59e0b;
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      margin-top: 8px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pass-key-code {
+      background: #f1f5f9;
+      color: var(--danger);
+      padding: 4px 10px;
       border-radius: 6px;
-      font-size: 0.78rem;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 800;
+      font-size: 0.95rem;
+      border: 1px solid #cbd5e1;
+      user-select: all;
+    }
+
+    .copy-btn {
+      background: #f59e0b;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
       font-weight: 700;
-      margin-left: 6px;
-      animation: fadeIn 0.3s ease-in-out;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
     }
 
-    .alert-success {
-      background: #f0fdf4;
-      color: #15803d;
-      border: 1px solid #bbf7d0;
+    .copy-btn:hover {
+      background: #d97706;
     }
 
-    /* GIFT VOUCHER SPECIAL CARD STYLES */
-    @keyframes bellRock {
-      0% { transform: rotate(0deg); }
-      15% { transform: rotate(14deg); }
-      30% { transform: rotate(-12deg); }
-      45% { transform: rotate(10deg); }
-      60% { transform: rotate(-8deg); }
-      75% { transform: rotate(4deg); }
-      100% { transform: rotate(0deg); }
+    .copy-btn:active {
+      transform: scale(0.96);
     }
 
-    .swing-bell {
-      display: inline-block;
-      font-size: 2.4rem;
-      animation: bellRock 2s infinite ease-in-out;
-      transform-origin: top center;
+    #portalMsg {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+      line-height: 1.4;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .msg-success { 
+      background: var(--success-bg); 
+      color: var(--success-hover); 
+      border: 1px solid #bbf7d0; 
+    }
+
+    .msg-error { 
+      background: var(--danger-bg); 
+      color: var(--danger); 
+      border: 1px solid #fecaca; 
+    }
+
+    .msg-premium-only {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      color: #92400e;
+      border: 2px solid #f59e0b;
+      box-shadow: 0 4px 15px rgba(217, 119, 6, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 16px;
+    }
+
+    /* CARD INFORMASI KHUSUS GAME PREMIUM (REAL-TIME DROPDOWN WARNING) */
+    .premium-warning-card {
+      margin-top: 12px;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 1.5px solid #f59e0b;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+      line-height: 1.5;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .premium-warning-title {
+      color: #92400e;
+      font-weight: 700;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       margin-bottom: 4px;
     }
 
-    .gift-card-special {
-      background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);
-      border: 2px solid #fdba74;
-      border-radius: var(--radius-lg);
-      padding: 22px;
-      box-shadow: 0 12px 28px -6px rgba(234, 88, 12, 0.12);
-      margin-top: 20px;
-      text-align: center;
-      animation: fadeIn 0.4s ease-in-out;
+    .premium-warning-body {
+      color: #78350f;
+      font-weight: 400;
+      font-size: 0.84rem;
     }
 
-    .gift-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #c2410c;
-      margin-top: 4px;
-      margin-bottom: 6px;
+    #downloadArea { 
+      display: none; 
+      margin-top: 20px; 
+      text-align: center; 
+      animation: fadeIn 0.4s ease;
     }
 
-    .gift-subtitle {
-      font-size: 0.88rem;
-      color: #7c2d12;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-
-    .gift-btn-group {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-top: 14px;
-    }
-
-    .btn-gift-claim {
-      padding: 11px 24px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #ea580c, #c2410c);
-      color: #ffffff;
-      font-weight: 800;
-      font-size: 0.92rem;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3);
-      transition: all 0.2s ease;
-    }
-
-    .btn-gift-claim:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(234, 88, 12, 0.4);
-    }
-
-    .btn-gift-dismiss {
-      padding: 11px 20px;
-      border-radius: 10px;
-      background: #f1f5f9;
-      color: #64748b;
+    .download-btn {
+      display: inline-block;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--success), var(--success-hover));
+      color: #ffffff !important;
+      text-decoration: none;
       font-weight: 700;
-      font-size: 0.9rem;
-      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .btn-gift-dismiss:hover {
-      background: #e2e8f0;
-      color: #334155;
+    .download-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(22, 163, 74, 0.4);
     }
 
-    .gift-details-box {
-      background: #ffffff;
-      border: 1.5px solid #fed7aa;
-      border-radius: var(--radius-md);
-      padding: 16px;
-      margin-top: 16px;
-      text-align: left;
+    /* TRUST & PRIVACY ALERT BOX */
+    .trust-alert-box {
+      margin-top: 20px;
+      padding: 16px 18px;
+      background: #fff7ed;
+      border: 1.5px solid var(--primary-light);
+      border-radius: 14px;
+    }
+
+    .trust-alert-title {
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed var(--primary-border);
+      padding-bottom: 8px;
+    }
+
+    .trust-alert-list {
+      margin: 0 0 14px 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.82rem;
+      color: #7c2d12;
+    }
+
+    .trust-alert-list li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+
+    .trust-alert-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .trust-alert-list li::before {
+      content: "📌";
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 0.78rem;
+    }
+
+    .trust-wa-action {
+      padding-top: 10px;
+      border-top: 1px dashed var(--primary-border);
+      text-align: center;
     }
 
     @keyframes fadeIn {
@@ -737,867 +769,639 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* KARTU INFORMASI PEMELIHARAAN (RESPONSIF & RAPI) */
+    .maintenance-card {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      border: 1.5px solid #fed7aa;
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      margin: 0 0 24px 0;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(234, 88, 12, 0.08);
+      animation: fadeIn 0.4s ease-out;
+      width: 100%;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .maintenance-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .maintenance-title {
+      color: #c2410c;
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+    }
+
+    .maintenance-divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #fdba74, transparent);
+      margin: 12px auto 16px auto;
+      width: 85%;
+      border: none;
+    }
+
+    .maintenance-jp-text {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #9a3412;
+      margin: 12px 0;
+      line-height: 1.45;
+    }
+
+    .maintenance-jp-kanji {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: #ea580c;
+      display: inline-block;
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+
+    .maintenance-body {
+      font-size: 0.92rem;
+      color: #431407;
+      line-height: 1.6;
+      margin: 14px 0;
+      font-weight: 500;
+    }
+
     @media (max-width: 480px) {
-      .payment-grid {
-        grid-template-columns: 1fr;
+      .maintenance-card {
+        padding: 18px 14px;
       }
-      .data-row {
-        flex-direction: column;
-        gap: 4px;
+      .maintenance-title {
+        font-size: 1.05rem;
       }
-      .data-label, .data-value {
-        width: 100%;
-        text-align: left;
-      }
-      .gift-btn-group {
-        flex-direction: column;
-        width: 100%;
-      }
-      .btn-gift-claim, .btn-gift-dismiss {
-        width: 100%;
+      .maintenance-body {
+        font-size: 0.88rem;
       }
     }
+
+    /* KARTU INFORMASI STATUS SYSTEM PORTAL (QUERY_PORTAL_REMOTE) */
+    /* Default: disembunyikan. Ditampilkan via JS setelah token tervalidasi. */
+    .system-status-card {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      margin: 16px 0 20px 0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      animation: fadeIn 0.4s ease-out;
+      width: 100%;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      transition: all 0.3s ease;
+    }
+
+    .system-status-header {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .system-status-badge-row {
+      margin-bottom: 10px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-align: center;
+    }
+
+    /* BADGE COLORS (ROW B) */
+    .badge-stable {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1.5px solid #a7f3d0;
+    }
+
+    .badge-update {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1.5px solid #bfdbfe;
+    }
+
+    .badge-repair {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1.5px solid #fde68a;
+    }
+
+    .badge-down {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1.5px solid #fca5a5;
+    }
+
+    /* CARD BORDER & BG VARIANTS */
+    .system-status-card.status-active { border-color: #a7f3d0; background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); }
+    .system-status-card.status-update { border-color: #bfdbfe; background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%); }
+    .system-status-card.status-repair { border-color: #fde68a; background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); }
+    .system-status-card.status-disable { border-color: #fca5a5; background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%); }
+
+    .system-status-message-row {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #475569;
+      text-align: center;
+      line-height: 1.5;
+      width: 100%;
+    }
+
+    /* PROMO HEADER PREMIUM CARD */
+    .promo-header {
+      background: linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%);
+      padding: 22px 20px 18px 20px;
+      text-align: center;
+    }
+
+    .promo-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 10px;
+    }
+
+    .promo-title-white {
+      color: #ffffff;
+    }
+
+    .promo-title-accent {
+      color: #fb923c;
+    }
+
+    .promo-price {
+      color: #ffffff;
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      -webkit-text-stroke: 2.5px #fb923c;
+      paint-order: stroke fill;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+
+    .promo-duration {
+      color: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .promo-divider {
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent 0%, #a7f3d0 50%, transparent 100%);
+    }
+
   </style>
 </head>
 <body>
 
-  <div class="container">
-    
-    <!-- HEADER BRANDING -->
-    <div class="header-card">
-      <div class="brand-logo">
-        <span>🛡️</span> SYSTEM ACCESS CHECKER
-      </div>
-      <h1 class="header-title">Pemeriksaan Status Akses User</h1>
-      <p class="header-subtitle">Masukkan email terdaftar untuk melihat riwayat &amp; sisa masa aktif akses Anda.</p>
+  <!-- POP-UP LOADING MODAL -->
+  <div aria-live="polite" class="loading-overlay" id="loadingModal">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loadingModalTitle">Memuat Data Portal...</div>
+      <div class="loading-subtext" id="loadingModalSubtext">Mohon tunggu sebentar ya ~</div>
+    </div>
+  </div>
+
+  <!-- CONTAINER UTAMA -->
+  <div class="portal-container">
+    <div class="hero-chibi">
+      <img alt="Hime Arikawa Chibi Mascot" class="hero-chibi-img" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjAAhmrfMT0sD3-fAB5-ZHzILjGM1AKBRZPzNk0qG2O91kW25AtEl9zcbYINhE3Q-qU8v6NAAudnAfB65KzHlWIeeupEmH76kVZ_NiY_laiYNUFrJkhCNyT78SqhwGVL3jdicKSAzcymEVlH8gt2TOFHimVf9plYOrVVMe1TerAXhYj4N4/s1600/IMG_20260909_121024.png" />
     </div>
 
-    <!-- CARI CARD FORM -->
-    <div class="search-card">
-      <form id="checkForm" onsubmit="handleCheckSubmit(event)">
-        <div class="form-group">
-          <label class="form-label" for="userEmailInput">Alamat Email (@gmail.com):</label>
-          <div class="input-wrapper">
-            <input 
-              type="email" 
-              id="userEmailInput" 
-              class="input-field" 
-              placeholder="contoh: namamu@gmail.com" 
-              required 
-              autocomplete="email"
-              maxlength="64"
-            />
+    <h2 class="portal-title">Akses Link<br>Arsip Visual Novel</h2>
+
+    <!-- KARTU INFORMASI STATUS SYSTEM PORTAL (QUERY_PORTAL_REMOTE) -->
+    <div id="systemStatusCard" class="system-status-card status-active">
+      <div class="system-status-header">
+        Status System Portal Akses
+      </div>
+      <div class="system-status-badge-row">
+        <span id="systemStatusBadge" class="status-badge badge-stable">🟢 STABLE SYSTEM</span>
+      </div>
+      <div id="systemStatusMessage" class="system-status-message-row">
+        Sistem berjalan normal.
+      </div>
+    </div>
+
+
+    <!-- BADGE INFORMASI TOKEN & TIMER -->
+    <div class="token-status-box" id="tokenStatusBox">
+      🟢 <strong>Token Terverifikasi:</strong> Sesi aktif berakhir dalam <span class="token-timer" id="timerDisplay">05:00</span>
+    </div>
+
+    <div class="stats-box">
+      <div class="stat-card">
+        <div class="stat-value" id="valTotalUser">...</div>
+        <div class="stat-label">Total User Terdaftar</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-value" id="valQuotaFree">...</div>
+        <div class="stat-label">Kuota Gratis Terpakai</div>
+      </div>
+    </div>
+
+    <div class="portal-tabs" role="tablist">
+      <button aria-selected="true" class="tab-btn active" id="tabFreeBtn" onclick="switchTab('FREE')" role="tab" type="button">🎁 Akses Gratis</button>
+      <button aria-selected="false" class="tab-btn" id="tabPremBtn" onclick="switchTab('PREMIUM')" role="tab" type="button">👑 Akses Premium (5k)</button>
+    </div>
+
+    <div class="portal-card">
+      <form id="portalForm" onsubmit="event.preventDefault(); submitClaim();">
+
+        <!-- BOT HONEYPOT TRAP -->
+        <div class="trap-field">
+          <input autocomplete="off" id="websiteUrlTrap" name="website_url" tabindex="-1" type="text" />
+        </div>
+
+        <!-- 1. PILIH KATEGORI ARSIP -->
+        <div class="portal-field">
+          <label for="selectCategory">Pilih Kategori Arsip:</label>
+          <select id="selectCategory" onchange="onCategoryChange()" required="">
+            <option value="">-- Pilih Kategori Arsip --</option>
+            <option value="RPG">RPG (Role-Playing Game)</option>
+            <option value="RVN">RVN (Raising Visual Novel)</option>
+            <option value="VN">VN (Visual Novel)</option>
+          </select>
+        </div>
+
+        <!-- 2. PILIH GAME / VISUAL NOVEL -->
+        <div class="portal-field">
+          <label for="selectGame">Pilih Game / Visual Novel:</label>
+          <select id="selectGame" disabled onchange="onGameChange()" required="">
+            <option value="">-- Pilih Kategori Terlebih Dahulu --</option>
+          </select>
+        </div>
+
+        <!-- CARD INFORMASI KHUSUS GAME PREMIUM -->
+        <div id="premiumWarningCard" class="premium-warning-card" style="display: none;">
+          <div class="premium-warning-title">
+            <span>👑</span> <strong>Arsip ini berlabel Premium Akses!</strong>
+          </div>
+          <div class="premium-warning-body">
+            Catatan:<br>
+            Pastikan untuk mengklaim menggunakan kode akses yang dimiliki (jika belum punya silahkan ajukan ke mimin).
           </div>
         </div>
 
-        <button type="submit" id="btnCheck" class="btn-submit">
-          <div class="spinner" id="btnSpinner"></div>
-          <span id="btnText">CARI DATA AKSES</span>
-        </button>
-
-        <!-- ALERT / ERROR MESSAGE CONTAINER (DIDALAM CARD FORM, DIPINDAH KE BAWAH TOMBOL) -->
-        <div id="alertBox" class="alert-box alert-error" style="margin-top: 14px; margin-bottom: 0;"></div>
-      </form>
-    </div>
-
-    <!-- RESULT CONTAINER (TABS & DETAILS) -->
-    <div id="resultContainer" class="result-container">
-      
-      <!-- TABS HEADER -->
-      <div class="tabs-header">
-        <button class="tab-btn active" id="tabFreeBtn" onclick="switchTab('FREE')">
-          <span>🎁</span> Tab FREE
-        </button>
-        <button class="tab-btn" id="tabPremBtn" onclick="switchTab('PREMIUM')">
-          <span>👑</span> Tab PREMIUM
-        </button>
-      </div>
-
-      <!-- CONTENT TAB FREE -->
-      <div id="contentFree" class="tab-content active">
-        <!-- DATA CONTAINER (FILLED BY JS) -->
-        <div id="freeDataWrapper"></div>
-        
-        <!-- CATATAN STATIS FREE (HIDDEN IF NO DATA) -->
-        <div id="freeStaticNotes" class="static-notes-card" style="display: none;">
-          <div class="notes-title">
-            <span>📌</span> Catatan Penting User Gratis (FREE):
-          </div>
-          <ol class="notes-list">
-            <li>User Gratis hanya boleh mengakses 1 file arsip dalam 1x akses.</li>
-            <li>Masa aktif User Gratis hanyalah 1 hari dengan masa tunggu 3 hari dari masa aktif.</li>
-            <li>Selama masa aktif berlaku, user gratis tidak diizinkan mengubah koneksi dan mengganti email akses yang mengakibatkan pemancingan sistem keamanan.</li>
-          </ol>
+        <div class="portal-field" style="margin-top: 18px;">
+          <label for="emailUser">Alamat Email (@gmail.com):</label>
+          <input autocomplete="email" id="emailUser" maxlength="64" placeholder="contoh: namamu@gmail.com" required="" type="email" />
         </div>
-      </div>
 
-      <!-- CONTENT TAB PREMIUM -->
-      <div id="contentPrem" class="tab-content">
-        <!-- DATA CONTAINER (FILLED BY JS) -->
-        <div id="premDataWrapper"></div>
+        <div id="freeInfoArea">
+          <span class="badge-info">📌 Syarat Gratis: Akses Jangka Pendek!</span>
+        </div>
 
-        <!-- KOTAK TOP-UP MASA AKTIF PREMIUM (TAMPIL KHUSUS USER PREMIUM AKTIF) -->
-        <div id="topupCardSection" class="topup-card" style="display: none;">
-          <div class="topup-header">
-            <h3 class="topup-title">Ingin Menambah Masa Aktif dan Slot Premium?</h3>
+        <div id="premInfoArea" style="display: none;">
+          <span class="badge-info" style="background: rgb(240, 249, 255); border-color: rgb(186, 230, 253); color: #0369a1;">👑 Keuntungan Premium: Akses Jangka Panjang!</span>
+
+          <div class="portal-field" style="margin-top: 14px;">
+            <label for="kodeAkses">Kode Akses Premium (10 Karakter):</label>
+            <input autocomplete="off" id="kodeAkses" maxlength="10" placeholder="Masukkan 10 digit kode akses premium" type="text" />
           </div>
 
-          <!-- KOTAK PAYMENT & WA MIMIN -->
-          <div class="wa-card-custom">
-            <div class="payment-title">Dapatkan Token Voucher Dengan:</div>
-            
-            <div class="payment-grid">
-              <!-- SAWERIA BUTTON -->
-              <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank">
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
-                Saweria
-              </a>
+          <!-- KOTAK PAYMENT & WA MIMIN (REDESIGNED WITH PROMO HEADER) -->
+          <div class="wa-card-custom" style="padding: 0; overflow: hidden;">
 
-              <!-- SHOPEEPAY BUTTON -->
-              <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
-                ShopeePay
-              </button>
+            <!-- BAGIAN ATAS: PROMOSI PREMIUM -->
+            <div class="promo-header">
+              <div class="promo-title">
+                <span class="promo-title-white">Upgrade Jadi </span><span class="promo-title-accent">User Premium!</span>
+              </div>
+              <div class="promo-price">Rp. 5.000</div>
+              <div class="promo-duration">Masa aktif 15 hari!</div>
             </div>
 
-            <div class="confirm-wa-box">
-              <div class="confirm-text">Silahkan hubungi mimin untuk mendapatkan token voucher</div>
-              <div class="confirm-note">arigatou gozaimasu~</div>
+            <!-- GARIS PEMBATAS -->
+            <div class="promo-divider"></div>
+
+            <!-- BAGIAN BAWAH: DAPATKAN KODE AKSES -->
+            <div style="padding: 16px 16px 18px 16px; text-align: center;">
+              <div class="payment-title">Dapatkan kode akses dengan:</div>
               
-              <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" target="_blank">
-                <svg class="wa-icon-svg" viewBox="0 0 24 24">
-                  <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
-                </svg>
-                Konfirmasi via WA Mimin
-              </a>
-            </div>
-          </div>
+              <!-- BARIS 1: DANA & SHOPEEPAY (JEJER 2) -->
+              <div class="payment-grid">
+                <!-- DANA BUTTON -->
+                <button class="pay-btn pay-dana" onclick="copyDana(this)" type="button">
+                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj3QPn1RtEDgJFqVwXov_M99jE3Z_HHLFiljQjowsRchb31AeZ91MfKM0Yj5POSMrIc_4sZOOQDEGMWhwWzI9M6Mh4C84Di9-NxCcF8949Qv855KliE9u4znhaRkqSi7zfVRlBll3WgBFmVJyyO9h-p-e_tmd006h3JNZ0TwELwsS5lUBs/s1600/Dana-logo.png" alt="Dana Logo" class="pay-icon-img" />
+                  Dana
+                </button>
 
-          <!-- FORM INPUT TOKEN VOUCHER -->
-          <form id="extendForm" onsubmit="handleExtendSubmit(event)" style="margin-top: 18px;">
-            <div class="form-group">
-              <label class="form-label" for="tokenVoucherInput">Masukkan Token Voucher Top-Up (10 Karakter):</label>
-              <div class="input-wrapper">
-                <input 
-                  type="text" 
-                  id="tokenVoucherInput" 
-                  class="input-field" 
-                  placeholder="isikan 10 digit kode token di sini" 
-                  required 
-                  autocomplete="off"
-                  maxlength="10"
-                />
+                <!-- SHOPEEPAY BUTTON -->
+                <button class="pay-btn pay-shopeepay" onclick="copyShopeePay(this)" type="button">
+                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFynutMiPXus9YrSpjbCfMdKhwWxLsc1Q-yvs7Ntl2ha9GERdnG2bD999iCQQtWKLIRPIPwPT1MJSb6IgQkfFSXwy4RS5AtoKplbiXJIpCRyPYZ6HyTQF-HuEgUi6Jgxm-r-uIsR2yirbfRqyl7DyJPuMF2JCMEj14yS7izM9YufhKeN5Btn2Xe0ibRvee/s1600/Logo-ShopeePay-PNG-CDR-SVG-EPS-Kualitas-HD-768x430.png" alt="ShopeePay Logo" class="pay-icon-img" />
+                  ShopeePay
+                </button>
+              </div>
+
+              <!-- BARIS 2: SAWERIA (TENGAH, UKURAN SAMA) -->
+              <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+                <a class="pay-btn pay-saweria" href="https://saweria.co/Rynet" rel="noopener" target="_blank" style="width: calc(50% - 5px);">
+                  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1-d_0gaS-nSZ50sKMnckTjqYTPlEvLIfad3YoZGPt8vJcRNmztLzOM7bDM9eUbswgw5XaGBAIsKW9PX78fVJv3frlhjX2UjefdGY7aqNKhbW3JKjur6V67WoqSTXNAha9I13h1iGeeF2Qz5hUrVREYWHxT7Y_QjeM8EzKzPu9tKMkz5ldwb-hlFcQw36/s1600/saweria.png" alt="Saweria Logo" class="pay-icon-img" />
+                  Saweria
+                </a>
+              </div>
+
+              <div class="confirm-wa-box">
+                <div class="confirm-text">Konfirmasi Via WA Mimin untuk mendapatkan kode akses</div>
+                <div class="confirm-note">arigatou gozaimasu~</div>
+                
+                <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" target="_blank">
+                  <svg class="wa-icon-svg" viewBox="0 0 24 24">
+                    <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
+                  </svg>
+                  Konfirmasi via WA Mimin
+                </a>
               </div>
             </div>
-
-            <button type="submit" id="btnExtendSubmit" class="btn-submit">
-              <div class="spinner" id="extendSpinner" style="display: none;"></div>
-              <span id="extendBtnText">TAMBAH MASA AKTIF</span>
-            </button>
-
-            <!-- ALERT ERROR / SUCCESS FOR EXTEND TOPUP -->
-            <div id="extendAlertBox" class="alert-box" style="display: none; margin-top: 14px; margin-bottom: 0;"></div>
-          </form>
-        </div>
-
-        <!-- CATATAN STATIS PREMIUM (HIDDEN IF NO DATA) -->
-        <div id="premStaticNotes" class="static-notes-card" style="display: none;">
-          <div class="notes-title">
-            <span>👑</span> Catatan Penting User Akses Premium:
-          </div>
-          <ol class="notes-list">
-            <li>User Premium mendapatkan masa aktif 15 hari dari masa berlakunya kode.</li>
-            <li>User Premium memiliki batasan 3x akses arsip berbeda dalam batasan 24 jam demi menjaga stabilitas sistem arsip.</li>
-            <li>User Premium tidak perlu melakukan klaim Akses Gratis jika masa aktif Premium masih berlaku.</li>
-            <li>User Premium dilarang melakukan akses tidak sah, melakukan anomali klaim dan membuat spam portal yang memicu sistem keamanan.</li>
-			<li>User Premium dapat menambah masa aktif menggunakan voucher token khusus yang bisa dibuatkan oleh Mimin.</li>
-          </ol>
-        </div>
-      </div>
-
-      <!-- KOTAK GIFT VOUCHER SPESIAL (TAMPIL HANYA JIKA ELIGIBLE) -->
-      <div id="giftVoucherSection" class="gift-card-special" style="display: none;">
-        <div class="swing-bell">🔔</div>
-        <h3 class="gift-title">Ada Gift khusus nih dari mimin!</h3>
-        <p class="gift-subtitle">Email kamu terdaftar sebagai penerima voucher gift spesial!</p>
-
-        <div id="giftPromptBox">
-          <div class="gift-btn-group">
-            <button type="button" class="btn-gift-claim" onclick="claimGiftVoucherAction()">
-              🎁 AMBIL GIFT
-            </button>
-            <button type="button" class="btn-gift-dismiss" onclick="dismissGiftVoucher()">
-              NANTI
-            </button>
           </div>
         </div>
 
-        <div id="giftResultBox" class="gift-details-box" style="display: none;"></div>
-      </div>
+        <!-- CATATAN MIMIN -->
+        <div class="mimin-note-box">
+          <div class="mimin-note-title">
+            <span>💡</span> Catatan Mimin:
+          </div>
+          1. Pastikan email yang diinputkan adalah email aktif. Jika email salah, akses tidak akan terverifikasi.<br />
+          2. Selesaikan verifikasi untuk mendapatkan akses dan kunci file arsip (.zip).
+        </div>
 
+        <!-- INLINE PROGRESS BAR UI (MUNCUL SAAT DIKLIK) -->
+        <div class="inline-progress-container" id="inlineProgressBox">
+          <div class="inline-progress-header">
+            <span class="inline-progress-title" id="progressTitleText">⚡ Memproses Klaim Akses...</span>
+            <span class="inline-progress-percent" id="progressPercentText">0%</span>
+          </div>
+          <div class="inline-progress-track">
+            <div class="inline-progress-fill" id="progressFillBar"></div>
+          </div>
+          <div class="inline-progress-step" id="progressStepText">
+            📌 Step 1 dari 4: Memverifikasi keamanan sesi &amp; token...
+          </div>
+          <!-- KOTAK CATATAN PERINGATAN SUBPROSES PENDING -->
+          <div class="inline-progress-notice" id="progressNoticeCard" style="margin-top: 10px; padding: 10px 12px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 0.82rem; color: #1e40af; line-height: 1.4; display: none;">
+            ⏳ <strong>Mohon jangan menutup atau me-refresh halaman ini</strong> selama proses klaim berlangsung. Sistem sedang menghubungkan dan memverifikasi izin ke Storage Node (maksimal 5 menit).
+          </div>
+        </div>
+
+        <button class="portal-btn" id="btnSubmit" style="margin-top: 14px;" type="submit">KLAIM AKSES</button>
+      </form>
+
+      <div aria-live="assertive" id="portalMsg"></div>
+
+      <!-- AREA DOWNLOAD (MUNCUL JIKA BERHASIL) -->
+      <div id="downloadArea">
+        <hr style="border: 0; border-top: 1px solid var(--primary-border); margin: 24px 0px;" />
+        <p style="color: #334155; font-size: 0.95rem; font-weight: 600; margin-bottom: 14px;">
+          🎉 Verifikasi Berhasil! Akses Google Drive Anda telah terbuka:
+        </p>
+
+        <a class="download-btn" href="javascript:void(0)" id="finalDriveBtn" onclick="handleDriveClick()">📁 Buka Folder Google Drive</a>
+
+        <div class="mimin-note-box" style="margin-top: 24px; text-align: left;">
+          <div class="mimin-note-title">
+            <span>🔑</span> Password Ekstrak File Arsip:
+          </div>
+          Gunakan password di bawah ini untuk membuka dan mengekstrak file arsip (.zip).
+          <div class="pass-box-highlight">
+            <span class="pass-key-code" id="passText2">Memuat password...</span>
+            <button class="copy-btn" onclick="copyPassword('passText2', this)" type="button">Salin Password</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- FOOTER NAVIGASI KEMBALI -->
-    <div class="footer-box">
-      <a href="../" class="btn-back">
-        <span>←</span> Kembali ke Portal Utama
+    <!-- CARD PENGECEKAN STATUS EMAIL (CHECKER LINK) -->
+    <div class="portal-card" style="margin-top: 20px; text-align: center; background: #fff8f6; border-color: #ffedd5;">
+      <div style="font-size: 0.95rem; font-weight: 700; color: #9a3412; margin-bottom: 6px;">
+        Sudah pernah login sebelumnya?
+      </div>
+      <p style="font-size: 0.85rem; color: #7c2d12; margin: 0 0 14px 0;">
+        Yuk, cek status email dan riwayat akses kalian di sini.
+      </p>
+      <a href="./halaman_cek/" class="portal-btn" style="display: inline-block; width: auto; padding: 10px 24px; text-decoration: none; font-size: 0.88rem; background: linear-gradient(135deg, #ea580c, #c2410c);">
+        Cek Akses Terdaftar
       </a>
     </div>
 
+    <!-- TRUST & INFORMASI PRIVASI -->
+    <div class="trust-alert-box">
+      <div class="trust-alert-title">
+        <span>🛡️</span> Informasi &amp; Jaminan Keamanan Portal
+      </div>
+      <ul class="trust-alert-list">
+        <li>Portal akses ini disediakan untuk manajemen data link arsip mencegah terjadinya bot tracking yang merusak situs.</li>
+        <li>Mimin menjamin seluruh enkripsi komunikasi aman dan privat untuk semua user.</li>
+        <li>Mimin bertanggung jawab atas data email kalian dan murni hanya digunakan sebagai daftar akses Google Drive, tidak ada maksud untuk melakukan hacking.</li>
+      </ul>
+      <div class="trust-wa-action">
+        <span style="color: #92400e; display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">Jika kalian masih ragu, kalian boleh tanyakan langsung ke official WA Mimin:</span>
+        <a class="wa-btn-link" href="https://wa.link/c9eihx" rel="noopener" style="font-size: 0.82rem; padding: 8px 16px;" target="_blank">
+          <svg class="wa-icon-svg" style="height: 15px; width: 15px;" viewBox="0 0 24 24">
+            <path d="M12.031 2c-5.514 0-9.996 4.482-9.996 9.996 0 1.8.483 3.535 1.399 5.053l-1.434 5.238 5.37-1.408c1.467.801 3.123 1.22 4.661 1.22 5.514 0 9.996-4.482 9.996-9.996 0-5.514-4.482-9.996-9.996-9.996zm5.817 14.128c-.244.686-1.222 1.258-2.001 1.423-.532.113-1.226.204-3.565-.764-2.992-1.238-4.919-4.282-5.068-4.482-.149-.2-1.213-1.614-1.213-3.078 0-1.464.767-2.185 1.04-2.482.273-.298.595-.372.793-.372.198 0 .396.002.57.01.184.008.431-.07.674.515.244.586.83 2.029.904 2.178.074.149.124.323.025.522-.099.198-.149.323-.298.496-.149.173-.313.387-.447.521-.149.149-.304.312-.131.611.173.298.77 1.272 1.651 2.057 1.134 1.01 2.091 1.323 2.389 1.472.298.149.471.124.645-.074.173-.198.744-.867.942-1.165.198-.298.396-.248.669-.149.273.099 1.733.817 2.031.966.298.149.496.223.57.347.074.124.074.718-.17 1.404z"></path>
+          </svg>
+          Laporkan Masalah / Tanyakan Informasi
+        </a>
+      </div>
+    </div>
   </div>
 
+  <!-- SCRIPT LOGIKA FRONTEND INTEGRATED WITH GAS BACKEND V5.1 + INLINE PROGRESS BAR -->
   <script>
-    // 🔗 SCRIPT ENDPOINT GAS MASTER NODE RESMI
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7igZwLMvjvnzLLV_HghmN0gmxSt4b9OE_m2LOH45FxpB6_MQwhTXcOr1dp-Uztsuzsw/exec";
-    let detectedIp = "Unknown";
+    
+    // TOKEN IPAPI RESMI (SAMA SEPERTI WCAPTCHA V2.7 - AKTIF S.D. 12 SEPT 2026)
+    const IPAPI_TOKEN = "PEX29yL3AOpQy4J05eM8k94oR8YOnpA2xR9j5SrtX0eSTh9JqP";
 
-    let isDataFetched = false;
-    let cdInterval = null;
+    let currentTab = "FREE";
+    let userIp = "Unknown";
+    let userCountry = "Unknown";
+    let pageLoadTime = 0;
+    let rawDriveUrl = ""; 
+    let activeEmail = "";
+    let activeGameId = "";
+    let activeToken = ""; 
+    let isTokenBurned = false; // Flag status token
+    let isProtectionActive = false; // Flag kontrol utama cegah exit tab
+    let isFormDirty = false; // Flag status interaksi input/form user
+    let countdownInterval = null;
+    let masterGamesData = [];
 
-    // 1. OTOMATIS AMBIL IP PUBLIC PENGGUNA UNTUK SHIELD BACKEND & MONITOR INPUT EMAIL
-    window.addEventListener("DOMContentLoaded", () => {
-      fetch("https://api.ipify.org?format=json")
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.ip) {
-            detectedIp = data.ip;
-          }
-        })
-        .catch(() => {});
+    // =========================================================================
+    // INLINE PROGRESS BAR UI LOGIC
+    // =========================================================================
+    function updateProgressUI(percent, titleText, stepText, isSuccess = false) {
+      const box = document.getElementById("inlineProgressBox");
+      const fill = document.getElementById("progressFillBar");
+      const percentTxt = document.getElementById("progressPercentText");
+      const titleTxt = document.getElementById("progressTitleText");
+      const stepTxt = document.getElementById("progressStepText");
 
-      const emailInput = document.getElementById("userEmailInput");
-      if (emailInput) {
-        emailInput.addEventListener("input", () => {
-          if (isDataFetched) {
-            resetButtonToDefault();
-          }
-        });
+      if (!box || !fill) return;
+
+      box.style.display = "block";
+      fill.style.width = percent + "%";
+      if (percentTxt) percentTxt.innerText = percent + "%";
+
+      if (titleText && titleTxt) titleTxt.innerHTML = titleText;
+      if (stepText && stepTxt) stepTxt.innerHTML = stepText;
+
+      const noticeCard = document.getElementById("progressNoticeCard");
+      if (noticeCard) {
+        noticeCard.style.display = isSuccess ? "none" : "block";
       }
-    });
 
-    function resetButtonToDefault() {
-      if (cdInterval) clearInterval(cdInterval);
-      isDataFetched = false;
-      const btnCheck = document.getElementById("btnCheck");
-      const btnSpinner = document.getElementById("btnSpinner");
-      const btnText = document.getElementById("btnText");
-      if (btnCheck) btnCheck.disabled = false;
-      if (btnSpinner) btnSpinner.style.display = "none";
-      if (btnText) btnText.innerText = "CARI DATA AKSES";
-    }
-
-    // 2. SWITCH TAB SYSTEM
-    function switchTab(type) {
-      const freeBtn = document.getElementById("tabFreeBtn");
-      const premBtn = document.getElementById("tabPremBtn");
-      const contentFree = document.getElementById("contentFree");
-      const contentPrem = document.getElementById("contentPrem");
-
-      if (type === 'FREE') {
-        freeBtn.classList.add("active");
-        premBtn.classList.remove("active");
-        contentFree.classList.add("active");
-        contentPrem.classList.remove("active");
+      if (isSuccess) {
+        fill.classList.add("success");
       } else {
-        premBtn.classList.add("active");
-        freeBtn.classList.remove("active");
-        contentPrem.classList.add("active");
-        contentFree.classList.remove("active");
+        fill.classList.remove("success");
       }
     }
 
-    // 3. SUBMIT PENCARIAN STATUS EMAIL WITH CLIENT-SIDE CACHE & MULTI-STRATEGY FETCH
-    function handleCheckSubmit(e) {
-      e.preventDefault();
+    function hideProgressUI() {
+      const box = document.getElementById("inlineProgressBox");
+      if (box) box.style.display = "none";
+      const noticeCard = document.getElementById("progressNoticeCard");
+      if (noticeCard) noticeCard.style.display = "none";
+    }
+
+    // =========================================================================
+    // CLIENT-SIDE TOKEN SHIELD (PENCEKAL TUTUP TAB / REFRESH)
+    // =========================================================================
+    function handleBeforeUnload(e) {
+      // Defender HANYA aktif jika proteksi di-lock DAN user sudah berinteraksi/mengisi form
+      if (isProtectionActive && isFormDirty) {
+        e.preventDefault();
+        e.returnValue = ""; // Wajib ada untuk memicu pop-up dialog bawaan browser
+        return "";
+      }
+    }
+
+    function lockUserExit() {
+      isProtectionActive = true;
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    function unlockUserExit() {
+      isProtectionActive = false;
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    // Catatan: Token tetap ACTIVE ketika tab/browser ditutup agar user dapat me-resume sesi dalam kurun 1 jam.
+
+    // SISTEM STORAGE SESI
+    function saveSessionData(data) {
+      const strData = JSON.stringify(data);
+      try { localStorage.setItem('portal_session', strData); } catch(e){}
+      try { sessionStorage.setItem('portal_session', strData); } catch(e){}
+    }
+
+    function getSessionData() {
+      let data = null;
+      try { data = localStorage.getItem('portal_session'); } catch(e){}
+      if (!data) {
+        try { data = sessionStorage.getItem('portal_session'); } catch(e){}
+      }
+      return data ? JSON.parse(data) : null;
+    }
+
+    function removeSessionData() {
+      try { localStorage.removeItem('portal_session'); } catch(e){}
+      try { sessionStorage.removeItem('portal_session'); } catch(e){}
+    }
+
+    function copyPassword(elementId, btnElem) {
+      const textElement = document.getElementById(elementId);
+      if (!textElement) return;
+      const text = textElement.innerText;
       
-      const rawEmailInput = document.getElementById("userEmailInput").value.trim().toLowerCase();
-      const emailInput = rawEmailInput.slice(0, 64);
-      const btnCheck = document.getElementById("btnCheck");
-      const btnSpinner = document.getElementById("btnSpinner");
-      const btnText = document.getElementById("btnText");
-      const alertBox = document.getElementById("alertBox");
-      const resultContainer = document.getElementById("resultContainer");
-
-      if (rawEmailInput.includes(",") || rawEmailInput.includes(" ")) {
-        showAlert("error", "Akses Ditolak! Pengisian email ganda atau mengandung koma/spasi tidak diizinkan.");
+      if (!navigator.clipboard) {
+        fallbackCopyText(text, () => showCopyFeedback(btnElem));
         return;
       }
 
-      const emailRegex = /^[a-zA-Z0-9._%+-]{1,50}@gmail\.com$/;
-      if (!emailRegex.test(emailInput)) {
-        showAlert("error", "Akses Ditolak! Alamat email harus menggunakan @gmail.com yang valid (maksimal 64 karakter).");
-        return;
-      }
-
-      const cacheKey = "cache_status_" + emailInput;
-      const CACHE_TTL_MS = 60000; // 60 Detik TTL Cache
-
-      // JIKA MODUS REFRESH: Hapus cache session agar mengambil data terbaru dari server
-      if (isDataFetched) {
-        try { sessionStorage.removeItem(cacheKey); } catch(eCache){}
-      } else {
-        // CLIENT-SIDE SESSION CACHE (Dengan TTL 60s): Cek apakah email yang sama pernah dicari pada tab ini
-        const cachedDataStr = sessionStorage.getItem(cacheKey);
-        if (cachedDataStr) {
-          try {
-            const cacheObj = JSON.parse(cachedDataStr);
-            // Cek keabsahan struktur data & umur cache (harus < 60 detik)
-            if (cacheObj && cacheObj.timestamp && (Date.now() - cacheObj.timestamp < CACHE_TTL_MS)) {
-              alertBox.style.display = "none";
-              renderResults(cacheObj.data || cacheObj);
-              enableButtonWithCooldown(btnCheck, btnSpinner, btnText, true);
-              return;
-            } else {
-              // Cache sudah kadaluwarsa (expired > 60s), hapus cache
-              sessionStorage.removeItem(cacheKey);
-            }
-          } catch(eCache) {}
-        }
-      }
-
-      // UI Loading state & Cooldown
-      btnCheck.disabled = true;
-      btnSpinner.style.display = "block";
-      btnText.innerText = isDataFetched ? "MEMUAT ULANG DATA..." : "MEMERIKSA DATA...";
-      alertBox.style.display = "none";
-      resultContainer.style.display = "none";
-
-      // STRATEGI 1: FETCH POST (Tambahkan Cache-Buster _t agar HTTP Cache Browser Selalu Fresh)
-      const payload = {
-        action: "check_user_status",
-        emailUser: emailInput,
-        ipPublic: detectedIp
-      };
-
-      const fetchPostUrl = SCRIPT_URL + (SCRIPT_URL.includes("?") ? "&" : "?") + "_t=" + Date.now();
-
-      fetch(fetchPostUrl, {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.success) {
-          enableButtonWithCooldown(btnCheck, btnSpinner, btnText, false);
-          showAlert("error", data.message || "Email tidak terdaftar.");
-          return;
-        }
-
-        enableButtonWithCooldown(btnCheck, btnSpinner, btnText, true);
-
-        // Cache hasil sukses ke sessionStorage beserta timestamp pemuatan
-        try {
-          sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: data }));
-        } catch(e){}
-
-        renderResults(data);
-      })
-      .catch(errPost => {
-        // STRATEGI 2: FALLBACK TO GET
-        fetchViaGetFallback(emailInput, detectedIp, btnCheck, btnSpinner, btnText, cacheKey);
+      navigator.clipboard.writeText(text).then(() => {
+        showCopyFeedback(btnElem);
+      }).catch(() => {
+        fallbackCopyText(text, () => showCopyFeedback(btnElem));
       });
     }
 
-    function enableButtonWithCooldown(btnCheck, btnSpinner, btnText, success = true) {
-      btnSpinner.style.display = "none";
-      btnCheck.disabled = true;
-
-      if (success) {
-        isDataFetched = true;
-      }
-
-      const targetLabel = isDataFetched ? "REFRESH DATA AKSES" : "CARI DATA AKSES";
-      btnText.innerText = `${targetLabel} (5s)`;
-
-      if (cdInterval) clearInterval(cdInterval);
-      let cooldownSec = 5;
-      cdInterval = setInterval(() => {
-        cooldownSec--;
-        if (cooldownSec > 0) {
-          btnText.innerText = `${targetLabel} (${cooldownSec}s)`;
-        } else {
-          clearInterval(cdInterval);
-          cdInterval = null;
-          btnCheck.disabled = false;
-          btnText.innerText = targetLabel;
-        }
-      }, 1000);
+    function showCopyFeedback(btnElem) {
+      const originalHTML = btnElem.innerHTML;
+      btnElem.innerHTML = "&#10003; Tersalin!";
+      btnElem.style.background = "#16a34a";
+      setTimeout(() => {
+        btnElem.innerHTML = originalHTML;
+        btnElem.style.background = "#f59e0b";
+      }, 2000);
     }
 
-    // STRATEGI 2: GET FALLBACK FOR GAS REDIRECTIONS (DENGAN CACHE BUSTER _t)
-    function fetchViaGetFallback(emailInput, ip, btnCheck, btnSpinner, btnText, cacheKey) {
-      const getUrl = `${SCRIPT_URL}?action=check_user_status&emailUser=${encodeURIComponent(emailInput)}&ipPublic=${encodeURIComponent(ip)}&_t=${Date.now()}`;
-
-      fetch(getUrl, { method: "GET" })
-      .then(res => res.json())
-      .then(data => {
-        enableButtonWithCooldown(btnCheck, btnSpinner, btnText);
-
-        if (!data.success) {
-          showAlert("error", data.message || "Email tidak terdaftar.");
-          return;
-        }
-
-        try {
-          sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: data }));
-        } catch(e){}
-        renderResults(data);
-      })
-      .catch(errGet => {
-        fetchViaJsonp(emailInput, ip, btnCheck, btnSpinner, btnText, cacheKey);
-      });
-    }
-
-    // STRATEGI 3: JSONP SCRIPT INJECTION (DENGAN CACHE BUSTER _t)
-    function fetchViaJsonp(emailInput, ip, btnCheck, btnSpinner, btnText, cacheKey) {
-      const callbackName = "gasCallback_" + Math.round(Math.random() * 1000000);
-      const jsonpUrl = `${SCRIPT_URL}?action=check_user_status&emailUser=${encodeURIComponent(emailInput)}&ipPublic=${encodeURIComponent(ip)}&prefix=${callbackName}&_t=${Date.now()}`;
-
-      window[callbackName] = function(data) {
-        delete window[callbackName];
-        if (scriptElem && scriptElem.parentNode) {
-          scriptElem.parentNode.removeChild(scriptElem);
-        }
-
-        enableButtonWithCooldown(btnCheck, btnSpinner, btnText);
-
-        if (!data.success) {
-          showAlert("error", data.message || "Email tidak terdaftar.");
-          return;
-        }
-
-        try {
-          sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: data }));
-        } catch(e){}
-        renderResults(data);
+    function copyDana(btnElem) {
+      const danaNum = "083813129280";
+      
+      const copyAction = () => {
+        const originalHTML = btnElem.innerHTML;
+        btnElem.innerHTML = "&#10003; Disalin!";
+        btnElem.style.background = "#16a34a";
+        btnElem.style.color = "#ffffff";
+        btnElem.style.borderColor = "#16a34a";
+        alert("Nomor Dana (" + danaNum + ") berhasil disalin!");
+        setTimeout(() => {
+          btnElem.innerHTML = originalHTML;
+          btnElem.style.background = "";
+          btnElem.style.color = "";
+          btnElem.style.borderColor = "";
+        }, 2000);
       };
 
-      const scriptElem = document.createElement("script");
-      scriptElem.src = jsonpUrl;
-      scriptElem.onerror = function() {
-        delete window[callbackName];
-        if (scriptElem && scriptElem.parentNode) {
-          scriptElem.parentNode.removeChild(scriptElem);
-        }
-        enableButtonWithCooldown(btnCheck, btnSpinner, btnText);
-        showAlert("error", "Gagal menghubungkan ke server Master Node! Silakan pastikan skrip ggss.ks pada Master Node sudah di-Deploy sebagai Web App dengan akses 'Anyone'.");
-      };
-
-      document.body.appendChild(scriptElem);
-    }
-
-    // 4. RENDER RESULT TO DOM
-    function renderResults(data) {
-      const resultContainer = document.getElementById("resultContainer");
-      const freeWrapper = document.getElementById("freeDataWrapper");
-      const premWrapper = document.getElementById("premDataWrapper");
-      const freeNotes = document.getElementById("freeStaticNotes");
-      const premNotes = document.getElementById("premStaticNotes");
-
-      freeWrapper.innerHTML = "";
-      premWrapper.innerHTML = "";
-
-      // --- TAB FREE RENDER ---
-      if (data.hasFreeData && data.freeData) {
-        const fd = data.freeData;
-        
-        let badgeClass = "badge-active";
-        if (fd.kondisiAkses === "EXPIRED") badgeClass = "badge-expired";
-        if (fd.kondisiAkses === "BLOCKED") badgeClass = "badge-blocked";
-
-        freeWrapper.innerHTML = `
-          <div class="data-card">
-            <div class="data-row">
-              <span class="data-label">Nama Email:</span>
-              <span class="data-value">${escapeHtml(fd.emailUser)}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Tanggal Akses:</span>
-              <span class="data-value">${escapeHtml(fd.tanggalAkses)}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Tanggal Expired:</span>
-              <span class="data-value">${escapeHtml(fd.tanggalExpired)}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Batas Tunggu (Cooldown):</span>
-              <span class="data-value">${escapeHtml(fd.tanggalMasaTunggu)}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Akses Game:</span>
-              <span class="data-value" style="color: var(--primary);">${escapeHtml(fd.aksesGame)}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Kondisi Akses:</span>
-              <span class="data-value"><span class="badge ${badgeClass}">${escapeHtml(fd.kondisiAkses)}</span></span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Status Deskripsi:</span>
-              <span class="data-value" style="color: ${fd.isUpgradedToPremium ? '#ea580c' : 'inherit'}; font-style: ${fd.isUpgradedToPremium ? 'italic' : 'normal'};">
-                ${escapeHtml(fd.statusDeskripsi)}
-              </span>
-            </div>
-          </div>
-        `;
-        freeNotes.style.display = "block";
-      } else if (data.hasPremiumData) {
-        freeWrapper.innerHTML = `
-          <div class="empty-card" style="border-left: 4px solid var(--primary);">
-            User berstatus <strong>ACTIVE PREMIUM</strong>. Tab Akses Gratis (FREE) non-aktif.
-          </div>
-        `;
-        freeNotes.style.display = "none";
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(danaNum).then(copyAction).catch(() => {
+          fallbackCopyText(danaNum, copyAction);
+        });
       } else {
-        freeWrapper.innerHTML = `
-          <div class="empty-card">
-            <span class="empty-icon">📭</span>
-            Tidak ada riwayat data Akses Gratis (FREE) untuk email ini.
-          </div>
-        `;
-        freeNotes.style.display = "none";
-      }
-
-      // --- TAB PREMIUM RENDER ---
-      if (data.hasPremiumData && data.premiumData) {
-        const pd = data.premiumData;
-
-        let badgeClass = "badge-active";
-        if (pd.status === "EXPIRED PREMIUM") badgeClass = "badge-expired";
-        if (pd.status === "BANNED") badgeClass = "badge-blocked";
-
-        let gamesHtml = '<span class="data-value">-</span>';
-        if (pd.aksesGameList && pd.aksesGameList.length > 0) {
-          gamesHtml = pd.aksesGameList.map(g => `<div style="padding: 3px 0; color: var(--primary); font-weight: 600; text-align: left;">• ${escapeHtml(g)}</div>`).join('');
-        }
-
-        premWrapper.innerHTML = `
-          <div class="data-card">
-            <div class="data-row">
-              <span class="data-label">Kode Transaksi VIP:</span>
-              <span class="data-value" style="font-weight: 700;">${escapeHtml(pd.kodeTransaksi)}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Nama Email:</span>
-              <span class="data-value">${escapeHtml(pd.emailUser)}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Tanggal Klaim Akses:</span>
-              <span class="data-value">${escapeHtml(pd.tanggalKlaim)}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Tanggal Expired Tiket:</span>
-              <span class="data-value" id="premExpiredText">${escapeHtml(pd.tanggalExpired)}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Jumlah Akses (24Jam):</span>
-              <span class="data-value">
-                <span class="badge ${pd.isFullQuota ? 'badge-full' : 'badge-active'}">${escapeHtml(pd.jumlahAkses24Jam)}</span>
-              </span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Jumlah Slot Premium:</span>
-              <span class="data-value">
-                <span class="badge ${pd.isSlotFull ? 'badge-full' : 'badge-active'}">${escapeHtml(pd.jumlahSlotPremium || '0/1 terpakai')}</span>
-              </span>
-            </div>
-            <div class="data-row" style="flex-direction: column; align-items: flex-start; background: #fafafa; padding: 10px 12px; border-radius: 8px; margin: 6px 0;">
-              <span class="data-label" style="margin-bottom: 4px; font-weight: 700;">Akses Game:</span>
-              <div style="width: 100%;">${gamesHtml}</div>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Status Premium:</span>
-              <span class="data-value"><span class="badge ${badgeClass}">${escapeHtml(pd.status)}</span></span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Kondisi Akses:</span>
-              <span class="data-value">${escapeHtml(pd.kondisiAkses)}</span>
-            </div>
-          </div>
-        `;
-        premNotes.style.display = "block";
-
-        // SIMPAN EMAIL DAN ATUR KETERLIHATAN KOTAK TOP-UP
-        currentExtendEmail = pd.emailUser || "";
-        const topupSection = document.getElementById("topupCardSection");
-        const statusUpper = String(pd.status || "").toUpperCase();
-        const kondisiUpper = String(pd.kondisiAkses || "").toUpperCase();
-
-        const isPremStatusActive = statusUpper.includes("ACTIVE") || statusUpper.includes("AKTIF");
-        const isPremKondisiExpired = kondisiUpper.includes("EXPIRED");
-        const isPremKondisiBlocked = kondisiUpper.includes("BLOCKED") || kondisiUpper.includes("BANNED");
-
-        if (topupSection) {
-          if (isPremStatusActive && !isPremKondisiExpired && !isPremKondisiBlocked) {
-            topupSection.style.display = "block";
-          } else {
-            topupSection.style.display = "none";
-          }
-        }
-
-      } else {
-        premWrapper.innerHTML = `
-          <div class="empty-card">
-            <span class="empty-icon">🔕</span>
-            Tidak ada data Akses Premium untuk email ini.
-          </div>
-        `;
-        premNotes.style.display = "none";
-        const topupSection = document.getElementById("topupCardSection");
-        if (topupSection) topupSection.style.display = "none";
-      }
-
-      // Auto Switch ke tab yang sesuai
-      if (data.hasPremiumData) {
-        switchTab('PREMIUM');
-      } else {
-        switchTab('FREE');
-      }
-
-      // RENDER GIFT CARD SPESIAL JIKA ADA VOUCHER GIFT ELIGIBLE
-      renderGiftCardIfAvailable(data);
-
-      resultContainer.style.display = "block";
-    }
-
-    // 5. HANDLER GIFT VOUCHER SPESIAL
-    let currentGiftData = null;
-
-    function renderGiftCardIfAvailable(data) {
-      const giftSection = document.getElementById("giftVoucherSection");
-      const promptBox = document.getElementById("giftPromptBox");
-      const resultBox = document.getElementById("giftResultBox");
-
-      if (data && data.giftVoucher && data.giftVoucher.hasGift) {
-        currentGiftData = data.giftVoucher;
-        if (giftSection) giftSection.style.display = "block";
-        if (promptBox) {
-          promptBox.style.display = "block";
-          promptBox.innerHTML = `
-            <div class="gift-btn-group">
-              <button type="button" class="btn-gift-claim" onclick="claimGiftVoucherAction()">
-                🎁 AMBIL GIFT
-              </button>
-              <button type="button" class="btn-gift-dismiss" onclick="dismissGiftVoucher()">
-                NANTI
-              </button>
-            </div>
-          `;
-        }
-        if (resultBox) {
-          resultBox.style.display = "none";
-          resultBox.innerHTML = "";
-        }
-      } else {
-        if (giftSection) giftSection.style.display = "none";
-        currentGiftData = null;
+        fallbackCopyText(danaNum, copyAction);
       }
     }
 
-    function dismissGiftVoucher() {
-      const giftSection = document.getElementById("giftVoucherSection");
-      if (giftSection) giftSection.style.display = "none";
-    }
-
-    function claimGiftVoucherAction() {
-      if (!currentGiftData || !currentGiftData.kodeGift) return;
-
-      const emailUser = document.getElementById("userEmailInput").value.trim();
-      const promptBox = document.getElementById("giftPromptBox");
-      const resultBox = document.getElementById("giftResultBox");
-
-      if (promptBox) {
-        promptBox.innerHTML = `
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; color: var(--primary); margin: 14px 0;">
-            <div class="spinner" style="display: block; border-top-color: var(--primary);"></div>
-            <span>MEMPROSES KLAIM GIFT VOUCHER...</span>
-          </div>
-        `;
-      }
-
-      const payload = {
-        action: "claim_gift_voucher",
-        emailUser: emailUser,
-        kodeGift: currentGiftData.kodeGift,
-        ipPublic: detectedIp
-      };
-
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(resData => {
-        if (!resData.success) {
-          if (promptBox) {
-            promptBox.innerHTML = `
-              <div class="alert-box alert-error" style="display: block; margin-top: 10px;">
-                ${escapeHtml(resData.message || "Gagal mengklaim gift voucher.")}
-              </div>
-            `;
-          }
-          return;
-        }
-
-        if (promptBox) promptBox.style.display = "none";
-
-        const driveLinkHtml = resData.driveUrl 
-          ? `<a href="${escapeHtml(resData.driveUrl)}" target="_blank" rel="noopener" class="btn-submit" style="display: inline-flex; text-decoration: none; justify-content: center; margin-top: 12px; padding: 10px 18px;">📂 BUKA GOOGLE DRIVE</a>` 
-          : '';
-
-        const passZipHtml = resData.passwordZip 
-          ? `<div class="vip-code-box" style="margin-top: 10px;">
-               <span class="data-label" style="width: auto;">Password Zip:</span>
-               <span class="vip-code-text">${escapeHtml(resData.passwordZip)}</span>
-               <button type="button" class="btn-copy" onclick="copyVipCode('${escapeHtml(resData.passwordZip)}', this)">Salin</button>
-             </div>` 
-          : '';
-
-        if (resultBox) {
-          resultBox.innerHTML = `
-            <div style="font-weight: 800; color: #166534; font-size: 0.95rem; margin-bottom: 12px; text-align: center;">
-              🎉 Selamat! Gift Voucher Berhasil Diklaim!
-            </div>
-            <div class="data-row">
-              <span class="data-label">Tanggal Klaim:</span>
-              <span class="data-value">${escapeHtml(resData.claimedAtStr || "-")}</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Masa Aktif:</span>
-              <span class="data-value" style="color: var(--primary);">${escapeHtml(resData.masaAktifStr || "-")} (Sampai ${escapeHtml(resData.expiresAtStr || "-")})</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Jenis Arsip:</span>
-              <span class="data-value" style="color: var(--primary); font-weight: 800;">${escapeHtml(resData.gameTitle || "-")}</span>
-            </div>
-            <div class="data-row" style="flex-direction: column; align-items: flex-start; background: #fff7ed; padding: 10px 12px; border-radius: 8px; margin: 8px 0; border: 1px solid #ffedd5;">
-              <span class="data-label" style="font-weight: 800; color: #c2410c; margin-bottom: 4px;">Catatan Mimin:</span>
-              <span class="data-value" style="width: 100%; text-align: left; color: #7c2d12; font-weight: 600;">${escapeHtml(resData.catatan || "-")}</span>
-            </div>
-            ${passZipHtml}
-            ${driveLinkHtml}
-          `;
-          resultBox.style.display = "block";
-        }
-
-        try { sessionStorage.removeItem("cache_status_" + emailUser); } catch(eCache){}
-      })
-      .catch(err => {
-        if (promptBox) {
-          promptBox.innerHTML = `
-            <div class="alert-box alert-error" style="display: block; margin-top: 10px;">
-              Gagal menghubungkan ke server! Silakan periksa koneksi Anda.
-            </div>
-          `;
-        }
-      });
-    }
-
-    // 6. HANDLER TOP-UP EXTEND PREMIUM VOUCHER
-    let currentExtendEmail = "";
-
-    function handleExtendSubmit(e) {
-      e.preventDefault();
-
-      const tokenInputElem = document.getElementById("tokenVoucherInput");
-      const rawTokenInput = tokenInputElem ? tokenInputElem.value.trim() : "";
-      const tokenInput = rawTokenInput.slice(0, 10);
-      const btnSubmit = document.getElementById("btnExtendSubmit");
-      const spinner = document.getElementById("extendSpinner");
-      const btnText = document.getElementById("extendBtnText");
-      const alertBox = document.getElementById("extendAlertBox");
-
-      if (!tokenInput) {
-        showExtendAlert("error", "Silakan masukkan Token Voucher Top-Up!");
-        return;
-      }
-
-      if (tokenInput.length > 10) {
-        showExtendAlert("error", "Token Voucher Top-Up maksimal 10 karakter!");
-        return;
-      }
-
-      const tokenRegex = /^\S{1,10}$/;
-      if (!tokenRegex.test(tokenInput)) {
-        showExtendAlert("error", "Token Voucher Top-Up harus berupa 1 s.d. 10 karakter non-spasi!");
-        return;
-      }
-
-      const emailUser = currentExtendEmail || document.getElementById("userEmailInput").value.trim();
-
-      btnSubmit.disabled = true;
-      if (spinner) spinner.style.display = "block";
-      if (btnText) btnText.innerText = "MEMPROSES TOP-UP...";
-      if (alertBox) alertBox.style.display = "none";
-
-      const payload = {
-        action: "claim_extend_premium",
-        emailUser: emailUser,
-        tokenAdd: tokenInput,
-        ipPublic: detectedIp
-      };
-
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(resData => {
-        btnSubmit.disabled = false;
-        if (spinner) spinner.style.display = "none";
-        if (btnText) btnText.innerText = "🚀 TAMBAH MASA AKTIF";
-
-        if (!resData.success) {
-          showExtendAlert("error", resData.message || "Gagal memproses Token Voucher Top-Up.");
-          return;
-        }
-
-        showExtendAlert("success", resData.message);
-        if (tokenInputElem) tokenInputElem.value = "";
-
-        // LIVE UPDATE TANGGAL EXPIRED TIKET & CENTANG ACCENT
-        if (resData.newExpiresAtStr) {
-          const expiredElem = document.getElementById("premExpiredText");
-          if (expiredElem) {
-            expiredElem.innerHTML = `${escapeHtml(resData.newExpiresAtStr)} <span class="badge-updated">✔️ Masa aktif diperbarui!</span>`;
-          }
-        }
-
-        // Hapus cache session agar pencarian berikutnya mengambil data terbaru
-        try { sessionStorage.removeItem("cache_status_" + emailUser); } catch(eCache){}
-      })
-      .catch(err => {
-        btnSubmit.disabled = false;
-        if (spinner) spinner.style.display = "none";
-        if (btnText) btnText.innerText = "TAMBAH MASA AKTIF";
-        showExtendAlert("error", "Gagal memproses request! Periksa koneksi internet Anda.");
-      });
-    }
-
-    function showExtendAlert(type, msg) {
-      const alertBox = document.getElementById("extendAlertBox");
-      if (!alertBox) return;
-      alertBox.className = "alert-box " + (type === "error" ? "alert-error" : "alert-success");
-      alertBox.innerText = msg;
-      alertBox.style.display = "block";
-    }
-
-    // 6. HELPER SHOW ALERT
-    function showAlert(type, msg) {
-      const alertBox = document.getElementById("alertBox");
-      alertBox.className = "alert-box " + (type === "error" ? "alert-error" : "alert-warning");
-      alertBox.innerText = msg;
-      alertBox.style.display = "block";
-    }
-
-    // 7. HELPER COPY SHOPEEPAY & VIP CODE
     function copyShopeePay(btnElem) {
-      const shopeeNum = "085175409246";
+      const shopeeNum = "083813129280";
       
       const copyAction = () => {
         const originalHTML = btnElem.innerHTML;
@@ -1635,27 +1439,1077 @@
       document.body.removeChild(textarea);
     }
 
-    function copyVipCode(code, btn) {
-      navigator.clipboard.writeText(code).then(() => {
-        const oldText = btn.innerText;
-        btn.innerText = "Tersalin! ✓";
-        btn.style.background = "#16a34a";
-        setTimeout(() => {
-          btn.innerText = oldText;
-          btn.style.background = "var(--primary)";
-        }, 2000);
+    // Helper Generator Device Fingerprint ID (Ringan & Unik)
+    function generateDeviceFingerprint() {
+      try {
+        const nav = navigator;
+        const scr = window.screen;
+        const components = [
+          nav.userAgent || "",
+          nav.language || "",
+          scr.colorDepth || "",
+          scr.width + "x" + scr.height,
+          new Date().getTimezoneOffset(),
+          nav.hardwareConcurrency || "",
+          nav.maxTouchPoints || 0
+        ];
+        let hash = 0x811c9dc5;
+        const str = components.join("|||");
+        for (let i = 0; i < str.length; i++) {
+          hash ^= str.charCodeAt(i);
+          hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+        }
+        return "FP_" + (hash >>> 0).toString(16);
+      } catch (e) {
+        return "FP_UNKNOWN";
+      }
+    }
+
+    // =========================================================================
+    // 3-TIER SMART IP DETECTOR LOGIC (SAMA PERSIS DENGAN WCAPTCHA V2.7)
+    // =========================================================================
+    function getSmartUserIp() {
+      // TIER 1: Gunakan IPAPI + Token Resmi (Prioritas Utama)
+      fetch(`https://ipapi.co/json/?key=${IPAPI_TOKEN}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Tier 1 Limit/Error");
+          return res.json();
+        })
+        .then(data => {
+          if (data.ip) userIp = data.ip;
+          if (data.country_code) userCountry = data.country_code;
+          console.log("🌐 GeoIP Loaded (Tier 1):", userIp, userCountry);
+        })
+        .catch(() => {
+          // TIER 2: Fallback ke IPAPI Publik tanpa Token
+          fetch("https://ipapi.co/json/")
+            .then(res => {
+              if (!res.ok) throw new Error("Tier 2 Limit/Error");
+              return res.json();
+            })
+            .then(data => {
+              if (data.ip) userIp = data.ip;
+              if (data.country_code) userCountry = data.country_code;
+              console.log("🌐 GeoIP Loaded (Tier 2):", userIp, userCountry);
+            })
+            .catch(() => {
+              // TIER 3: Fallback akhir ke Ipify (Khusus IP saja)
+              fetch("https://api.ipify.org?format=json")
+                .then(res => res.json())
+                .then(data => {
+                  if (data.ip) userIp = data.ip;
+                  console.log("🌐 GeoIP Loaded (Tier 3 - IP Only):", userIp);
+                })
+                .catch(err => console.error("❌ All GeoIP Tiers Failed:", err));
+            });
+        });
+    }
+
+    // =========================================================================
+    // 🛰️ REMOTE PORTAL CONTROL UI ENGINE (QUERY_PORTAL_REMOTE)
+    // =========================================================================
+    let remoteServerState = {
+      status: "ACTIVE",
+      kondisiServer: "STABLE SYSTEM",
+      pesan: ""
+    };
+
+    function checkRemoteServerStatus() {
+      fetch(SCRIPT_URL + "?action=get_server_config")
+        .then(res => res.json())
+        .then(data => {
+          if (data && (data.success || data.status || data.serverStatus)) {
+            const rawStatus = String(data.serverStatus || data.status || "ACTIVE").toUpperCase();
+            let normalizedStatus = "ACTIVE";
+            if (rawStatus.includes("UPDATE")) normalizedStatus = "UPDATE";
+            else if (rawStatus.includes("REPAIR")) normalizedStatus = "REPAIR";
+            else if (rawStatus.includes("DISABLE") || rawStatus.includes("OFF")) normalizedStatus = "DISABLE";
+            else if (rawStatus.includes("ACTIVE") || rawStatus.includes("ONLINE")) normalizedStatus = "ACTIVE";
+
+            const kondisi = data.kondisiServer || (normalizedStatus === "ACTIVE" ? "STABLE SYSTEM" : (normalizedStatus + " SYSTEM"));
+            const pesan = data.pesan || data.message || (normalizedStatus === "ACTIVE" ? "Sistem berjalan normal." : "");
+
+            remoteServerState = {
+              status: normalizedStatus,
+              kondisiServer: kondisi,
+              pesan: pesan
+            };
+
+            renderSystemStatusUI(remoteServerState);
+          }
+        })
+        .catch(err => {
+          console.warn("Gagal mengecek status remote server:", err);
+        });
+    }
+
+    function renderSystemStatusUI(state) {
+      const card = document.getElementById("systemStatusCard");
+      const badge = document.getElementById("systemStatusBadge");
+      const msg = document.getElementById("systemStatusMessage");
+      const btn = document.getElementById("btnSubmit");
+      const selectCat = document.getElementById("selectCategory");
+      const selectGame = document.getElementById("selectGame");
+      const emailInput = document.getElementById("emailUser");
+
+      if (!card || !badge || !msg) return;
+
+      const st = state.status;
+      const kondisi = state.kondisiServer || "STABLE SYSTEM";
+      const pesan = state.pesan || "Sistem berjalan normal.";
+
+      // Reset style variant classes
+      card.className = "system-status-card";
+      badge.className = "status-badge";
+
+      if (st === "ACTIVE") {
+        card.classList.add("status-active");
+        badge.classList.add("badge-stable");
+        badge.innerHTML = "🟢 " + kondisi;
+        msg.innerHTML = pesan || "Sistem berjalan normal.";
+
+        if (btn && btn.innerText.includes("Server")) {
+          btn.disabled = false;
+          btn.innerText = "KLAIM AKSES";
+        }
+      } else if (st === "UPDATE") {
+        card.classList.add("status-update");
+        badge.classList.add("badge-update");
+        badge.innerHTML = "🔵 " + kondisi;
+        msg.innerHTML = pesan || "Sistem backend sedang dalam pemeliharaan ringan/update.";
+
+        if (btn) {
+          btn.disabled = true;
+          btn.innerText = "🔒 Server Sedang Dalam Update Backend";
+        }
+      } else if (st === "REPAIR") {
+        card.classList.add("status-repair");
+        badge.classList.add("badge-repair");
+        badge.innerHTML = "🟠 " + kondisi;
+        msg.innerHTML = pesan || "Sistem portal sedang dalam perbaikan (REPAIR). Token & klaim ditahan sementara.";
+
+        if (btn) {
+          btn.disabled = true;
+          btn.innerText = "🛠️ Server Dalam Perbaikan (REPAIR)";
+        }
+        if (selectCat) selectCat.disabled = true;
+        if (selectGame) selectGame.disabled = true;
+        if (emailInput) emailInput.disabled = true;
+      } else if (st === "DISABLE") {
+        card.classList.add("status-disable");
+        badge.classList.add("badge-down");
+        badge.innerHTML = "🔴 " + kondisi;
+        msg.innerHTML = pesan || "Server portal dinonaktifkan (OFF SERVER DOWN). Portal hanya tampilan statis.";
+
+        if (btn) {
+          btn.disabled = true;
+          btn.innerText = "⛔ Server Portal Nonaktif (OFF)";
+        }
+        if (selectCat) selectCat.disabled = true;
+        if (selectGame) selectGame.disabled = true;
+        if (emailInput) emailInput.disabled = true;
+      }
+    }
+
+    /**
+     * [OPTIMIZED] Helper: Tampilkan kartu status (dari hidden) lalu render datanya.
+     * Dipanggil setelah validasi token berhasil atau saat restore session.
+     */
+    function showAndRenderServerStatus(serverConfig) {
+      const card = document.getElementById("systemStatusCard");
+      if (card) card.style.display = "flex";
+      renderSystemStatusUI(serverConfig);
+    }
+
+    // =========================================================================
+    // INITIALIZATION & LIFECYCLE MANAGEMENT
+    // =========================================================================
+    document.addEventListener("DOMContentLoaded", async function() {
+      pageLoadTime = Date.now();
+      
+      // [OPTIMIZED] Status server TIDAK lagi di-fetch otomatis di sini.
+      // Data status server kini dikirim bersama respons validasi token (action=validate),
+      // sehingga kunjungan tanpa token (portal ompong) tidak membuang kuota GAS API.
+
+      // MENGAMBIL DATA GEO IP DENGAN LOGIKA 3-TIER SMART IP
+      getSmartUserIp();
+
+
+      // MEMASANG LISTENER UTAMA PENANDA FORM DIRTY
+      attachFormDirtyListeners();
+
+      // BroadcastChannel untuk Sinkronisasi Kunci Dual Tab Real-time
+      const tabChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("rynet_portal_tab_lock") : null;
+      let currentTabId = sessionStorage.getItem("portal_tab_id");
+      if (!currentTabId) {
+        currentTabId = "TAB_PORTAL_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+        sessionStorage.setItem("portal_tab_id", currentTabId);
+      }
+
+      if (tabChannel) {
+        tabChannel.onmessage = function(event) {
+          if (event.data && event.data.type === "PING_ACTIVE_TAB") {
+            // Beri tahu tab baru bahwa tab ini sedang aktif
+            tabChannel.postMessage({ type: "PONG_TAB_ACTIVE", tabId: currentTabId });
+          } else if (event.data && event.data.type === "PONG_TAB_ACTIVE" && event.data.tabId !== currentTabId) {
+            // Jika ada tab lain yang membalas, kunci tab saat ini!
+            lockPortalState("⛔ **Akses Terkunci (Dual Tab Detected):** Portal ini sudah aktif berjalan di Tab Browser lain. Harap selesaikan atau tutup tab pertama terlebih dahulu.");
+            hideLoadingModal();
+          }
+        };
+        // Kirim PING saat dimuat untuk cek tab lain
+        tabChannel.postMessage({ type: "PING_ACTIVE_TAB" });
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      const urlTabId = urlParams.get('tabId');
+      const sessionData = getSessionData();
+
+      // SKENARIO A: KUNJUNGAN DENGAN TOKEN DARI WCAPTCHA (PRIORITAS UTAMA)
+      if (token) {
+        try {
+          // Hapus data sesi lama agar token baru di URL diproses segar
+          removeSessionData();
+          activeToken = token;
+          isTokenBurned = false;
+          
+          setLoadingText("Memverifikasi & Mengamankan Sesi...", "Mohon jangan tutup atau refresh halaman ini agar token Anda tidak hangus.");
+          lockUserExit();
+
+          const fpId = generateDeviceFingerprint();
+          const validateUrl = `${SCRIPT_URL}?action=validate&token=${encodeURIComponent(token)}&tabId=${encodeURIComponent(urlTabId || currentTabId)}&fingerprintId=${encodeURIComponent(fpId)}`;
+          const res = await fetch(validateUrl);
+          const data = await res.json();
+
+          if (data.status === "success" || data.success || data.status === "burned_fallback") {
+            isTokenBurned = false; // Token aktif belum di-burn
+
+            const durationSec = data.remainingSeconds !== undefined ? data.remainingSeconds : (data.durationSeconds || 300);
+            const durationMs = Math.max(1, durationSec) * 1000;
+            const targetTime = Date.now() + durationMs;
+
+            masterGamesData = data.games || [];
+            populateCategoryDropdown();
+
+            // [OPTIMIZED] Render status server real dari respons validate (tanpa fetch terpisah)
+            const serverConfig = {
+              status: data.serverStatus || "ACTIVE",
+              kondisiServer: data.kondisiServer || "STABLE SYSTEM",
+              pesan: data.pesan || "Sistem berjalan normal."
+            };
+            showAndRenderServerStatus(serverConfig);
+
+            saveSessionData({
+              token: token,
+              tabId: currentTabId,
+              games: masterGamesData,
+              stats: data.stats || {},
+              serverConfig: serverConfig,
+              targetTime: targetTime
+            });
+
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            updateStatsUI(data.stats);
+            // Tampilkan widget statistik setelah data real tersedia
+            const statsBox = document.querySelector(".stats-box");
+            if (statsBox) statsBox.style.display = "grid";
+
+            startCountdownTimer(targetTime);
+            
+            lockUserExit();
+          } else {
+            isTokenBurned = true;
+            unlockUserExit();
+
+            // [OPTIMIZED] Jika backend mengirim data server status (misal DISABLE/REPAIR), render ke UI
+            if (data.serverStatus) {
+              showAndRenderServerStatus({
+                status: data.serverStatus,
+                kondisiServer: data.kondisiServer || data.serverStatus,
+                pesan: data.pesan || data.message || ""
+              });
+            }
+
+            lockPortalState("⚠️ Akses Ditolak: " + (data.message || "Token WCaptcha tidak valid, sudah digunakan, atau kedaluwarsa!"));
+          }
+        } catch (err) {
+          console.error("Error Validasi Token:", err);
+          isTokenBurned = true;
+          unlockUserExit();
+          lockPortalState("⚠️ Gagal terhubung ke server verifikasi. Silakan coba lagi nanti.");
+        } finally {
+          hideLoadingModal();
+        }
+        return;
+      }
+
+      // SKENARIO B: REFRESH / AKSED RIWAYAT BROWSER / COOKIE (TANPA PARAMETER TOKEN DI URL)
+      if (sessionData) {
+        try {
+          const remainingMs = sessionData.targetTime - Date.now();
+
+          if (remainingMs > 0) {
+            if (sessionData.token) activeToken = sessionData.token;
+            isTokenBurned = false;
+
+            masterGamesData = sessionData.games || [];
+            populateCategoryDropdown();
+
+            // [OPTIMIZED] Restore status server dari session storage
+            if (sessionData.serverConfig) {
+              showAndRenderServerStatus(sessionData.serverConfig);
+            }
+
+            updateStatsUI(sessionData.stats);
+            // Tampilkan widget statistik dari data session
+            const statsBox = document.querySelector(".stats-box");
+            if (statsBox) statsBox.style.display = "grid";
+
+            startCountdownTimer(sessionData.targetTime);
+            
+            lockUserExit();
+            hideLoadingModal();
+            return;
+          } else {
+            removeSessionData();
+            unlockUserExit();
+            lockPortalState("⏰ Sesi aktif telah habis (EXPIRED). Silakan verifikasi ulang melalui WCaptcha di blog.");
+            hideLoadingModal();
+            return;
+          }
+        } catch (e) {
+          removeSessionData();
+        }
+      }
+
+      // TANPA TOKEN & SESI KEDALUWARSA / DIBUN
+      isTokenBurned = true;
+      unlockUserExit();
+      lockPortalState("⚠️ Akses Ditolak: Anda belum menyelesaikan verifikasi WCaptcha di postingan blog atau sesi telah berakhir!");
+      hideLoadingModal();
+    });
+
+    function attachFormDirtyListeners() {
+      const inputs = ["emailUser", "kodeAkses"];
+      inputs.forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) {
+          elem.addEventListener("input", function() {
+            if (this.value.trim() !== "") {
+              isFormDirty = true;
+            }
+          });
+        }
+      });
+
+      const selects = ["selectCategory", "selectGame"];
+      selects.forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) {
+          elem.addEventListener("change", function() {
+            if (this.value !== "") {
+              isFormDirty = true;
+            }
+          });
+        }
       });
     }
 
-    // HELPER ESCAPE HTML
-    function escapeHtml(str) {
-      if (!str) return "-";
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    function setLoadingText(title, subtext) {
+      const t = document.getElementById("loadingModalTitle");
+      const s = document.getElementById("loadingModalSubtext");
+      if (t) t.innerText = title;
+      if (s) s.innerText = subtext;
+    }
+
+    function hideLoadingModal() {
+      const modal = document.getElementById("loadingModal");
+      if (modal) {
+        modal.style.opacity = "0";
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, 300);
+      }
+    }
+
+    // =========================================================================
+    // DYNAMIC CATEGORY POPULATOR & DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME)
+    // =========================================================================
+    function populateCategoryDropdown() {
+      const categorySelect = document.getElementById("selectCategory");
+      if (!categorySelect || !Array.isArray(masterGamesData)) return;
+
+      const categoryLabelMap = {
+        "RPG": "RPG (Role-Playing Game)",
+        "RVN": "RVN (Raising Visual Novel)",
+        "VN": "VN (Visual Novel)",
+        "BAKA": "BAKA (Baka Archive)"
+      };
+
+      const categoriesSet = new Set();
+      masterGamesData.forEach(g => {
+        let cat = g.kategori ? String(g.kategori).trim().toUpperCase() : "";
+        if (!cat && g.id) {
+          const parts = String(g.id).split("_");
+          if (parts.length > 1) {
+            cat = parts[1].replace(/[0-9]/g, "").toUpperCase();
+          }
+        }
+        if (cat) categoriesSet.add(cat);
+      });
+
+      categorySelect.innerHTML = '<option value="">-- Pilih Kategori Arsip --</option>';
+
+      // Urutkan kategori agar Tampilan Dropdown Konsisten
+      const sortedCategories = Array.from(categoriesSet).sort();
+
+      sortedCategories.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = categoryLabelMap[cat] || `${cat} (Kategori Arsip)`;
+        categorySelect.appendChild(opt);
+      });
+    }
+
+    function onCategoryChange() {
+      const categorySelect = document.getElementById("selectCategory");
+      const gameSelect = document.getElementById("selectGame");
+      const warningCard = document.getElementById("premiumWarningCard");
+      const selectedCategory = categorySelect.value.trim().toUpperCase();
+
+      if (warningCard) warningCard.style.display = "none";
+
+      if (selectedCategory !== "") {
+        isFormDirty = true;
+      }
+
+      gameSelect.innerHTML = "";
+
+      if (!selectedCategory) {
+        gameSelect.disabled = true;
+        gameSelect.innerHTML = '<option value="">-- Pilih Kategori Terlebih Dahulu --</option>';
+        return;
+      }
+
+      if (!Array.isArray(masterGamesData) || masterGamesData.length === 0) {
+        gameSelect.disabled = true;
+        gameSelect.innerHTML = '<option value="">-- Data Game Belum Dimuat --</option>';
+        return;
+      }
+
+      const filteredGames = masterGamesData.filter(g => {
+        let gameCat = g.kategori ? String(g.kategori).trim().toUpperCase() : "";
+
+        // Fallback ekstraksi presisi dari ID Game jika kolom kategori di sheet kosong (cth: RYNET_RVN001 -> RVN)
+        if (!gameCat && g.id) {
+          const parts = String(g.id).split("_");
+          if (parts.length > 1) {
+            gameCat = parts[1].replace(/[0-9]/g, "").toUpperCase();
+          }
+        }
+
+        // Strict Exact Match: Hanya cocokkan jika kategori persis sama
+        return gameCat === selectedCategory;
+      });
+
+      if (filteredGames.length === 0) {
+        gameSelect.disabled = true;
+        gameSelect.innerHTML = '<option value="">-- Tidak Ada Game Tersedia di Kategori Ini --</option>';
+        return;
+      }
+
+      gameSelect.disabled = false;
+      gameSelect.innerHTML = '<option value="">-- Pilih Game / Visual Novel --</option>';
+      
+      filteredGames.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = String(g.id).trim();
+        opt.textContent = g.title || g.namaGame || g.id;
+        gameSelect.appendChild(opt);
+      });
+    }
+
+    function onGameChange() {
+      const gameSelect = document.getElementById("selectGame");
+      const warningCard = document.getElementById("premiumWarningCard");
+      if (!gameSelect || !warningCard) return;
+
+      const selectedGameId = gameSelect.value.trim();
+      if (!selectedGameId || !Array.isArray(masterGamesData)) {
+        warningCard.style.display = "none";
+        return;
+      }
+
+      isFormDirty = true;
+
+      const gameObj = masterGamesData.find(g => String(g.id || "").trim() === selectedGameId);
+      const aksesLevel = gameObj ? String(gameObj.accessLevel || gameObj.aksesLevel || gameObj.akses || gameObj.access || gameObj.akses_level || gameObj.access_level || "").toUpperCase() : "";
+
+      // TAMPILKAN CARD WARN HANYA JIKA GAME BERLABEL PREMIUM_ONLY
+      if (aksesLevel === "PREMIUM_ONLY") {
+        warningCard.style.display = "block";
+      } else {
+        warningCard.style.display = "none";
+      }
+    }
+
+    function updateStatsUI(stats) {
+      if (!stats) return;
+      const elTotal = document.getElementById("valTotalUser");
+      const elQuota = document.getElementById("valQuotaFree");
+      
+      if (elTotal) elTotal.innerText = (stats.totalUser || 0) + " User";
+      if (elQuota) elQuota.innerText = (stats.freeToday || 0) + " / " + (stats.maxFree || 3);
+    }
+
+    function switchTab(type) {
+      currentTab = type;
+      
+      const freeBtn = document.getElementById("tabFreeBtn");
+      const premBtn = document.getElementById("tabPremBtn");
+
+      if (freeBtn && premBtn) {
+        freeBtn.className = type === "FREE" ? "tab-btn active" : "tab-btn";
+        premBtn.className = type === "PREMIUM" ? "tab-btn active" : "tab-btn";
+
+        freeBtn.setAttribute("aria-selected", type === "FREE");
+        premBtn.setAttribute("aria-selected", type === "PREMIUM");
+      }
+
+      document.getElementById("freeInfoArea").style.display = type === "FREE" ? "block" : "none";
+      document.getElementById("premInfoArea").style.display = type === "PREMIUM" ? "block" : "none";
+      
+      const kodeElem = document.getElementById("kodeAkses");
+      if (kodeElem) {
+        kodeElem.required = (type === "PREMIUM");
+      }
+    }
+
+    let currentSessionTargetTime = null;
+    let savedRemainingSeconds = null;
+    let isTimerPaused = false;
+    let flowPollingInterval = null;
+
+    function startCountdownTimer(targetTime) {
+      const statusBox = document.getElementById("tokenStatusBox");
+      const timerDisplay = document.getElementById("timerDisplay");
+
+      currentSessionTargetTime = targetTime;
+      isTimerPaused = false;
+
+      if (statusBox) statusBox.style.display = "block";
+
+      function updateTimer() {
+        if (isTimerPaused) return;
+
+        const remaining = currentSessionTargetTime - Date.now();
+
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+          removeSessionData();
+          unlockUserExit(); // Buka proteksi jika waktu habis
+          if (timerDisplay) timerDisplay.innerText = "00:00";
+          lockPortalState("⏰ Sesi WCaptcha telah kadaluwarsa. Silakan lewati captcha dari blog kembali!");
+          return;
+        }
+
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        const formatted = String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+
+        if (timerDisplay) timerDisplay.innerText = formatted;
+      }
+
+      updateTimer();
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownInterval = setInterval(updateTimer, 1000);
+    }
+
+    // ⏸️ JEDA / FREEZE TIMER SESI (MENDUKUNG SUBPROSES TIDAK DIHAPUS)
+    function pauseSessionTimer() {
+      if (!currentSessionTargetTime || isTimerPaused) return;
+      isTimerPaused = true;
+      const remainingMs = Math.max(0, currentSessionTargetTime - Date.now());
+      savedRemainingSeconds = Math.ceil(remainingMs / 1000);
+      
+      const timerDisplay = document.getElementById("timerDisplay");
+      if (timerDisplay) {
+        timerDisplay.innerHTML = `<span style="font-size:0.85rem; color:#2563eb;">⏸️ DITAHAN (${savedRemainingSeconds}s)</span>`;
+      }
+      try {
+        localStorage.setItem("RYNET_SAVED_SESSION_REMAINING", String(savedRemainingSeconds));
+      } catch(e){}
+    }
+
+    // ▶️ LANJUTKAN / RESUME TIMER SESI
+    function resumeSessionTimer() {
+      if (!isTimerPaused) return;
+      let remSec = savedRemainingSeconds;
+      if (!remSec) {
+        try {
+          remSec = parseInt(localStorage.getItem("RYNET_SAVED_SESSION_REMAINING") || "0", 10);
+        } catch(e){}
+      }
+      if (!remSec || remSec <= 0) remSec = 180; // Default fallback 3 menit
+      
+      const newTarget = Date.now() + (remSec * 1000);
+      try {
+        localStorage.removeItem("RYNET_SAVED_SESSION_REMAINING");
+      } catch(e){}
+      
+      startCountdownTimer(newTarget);
+    }
+
+    // =========================================================================
+    // 🛡️ PERSISTENT SUBPROCESS LOCKING & POLLING SYSTEM
+    // =========================================================================
+    function savePendingSubprocess(flowInfo) {
+      try {
+        localStorage.setItem("RYNET_PENDING_SUBPROCESS", JSON.stringify(flowInfo));
+      } catch(e){}
+    }
+
+    function getPendingSubprocess() {
+      try {
+        const raw = localStorage.getItem("RYNET_PENDING_SUBPROCESS");
+        return raw ? JSON.parse(raw) : null;
+      } catch(e) {
+        return null;
+      }
+    }
+
+    function clearPendingSubprocess() {
+      try {
+        localStorage.removeItem("RYNET_PENDING_SUBPROCESS");
+      } catch(e){}
+      if (flowPollingInterval) {
+        clearInterval(flowPollingInterval);
+        flowPollingInterval = null;
+      }
+    }
+
+    // 📡 POLLING STATUS SUBPROSES KE MASTER SETIAP 6 DETIK
+    function startFlowPolling(flowId, email, gameId, tipeAkses) {
+      if (flowPollingInterval) clearInterval(flowPollingInterval);
+
+      const btn = document.getElementById("btnSubmit");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "⏳ Memproses Antrean...";
+      }
+
+      const noticeCard = document.getElementById("progressNoticeCard");
+      if (noticeCard) noticeCard.style.display = "block";
+
+      flowPollingInterval = setInterval(() => {
+        const pending = getPendingSubprocess();
+        if (!pending) {
+          clearInterval(flowPollingInterval);
+          return;
+        }
+
+        const ageMs = Date.now() - (pending.timestamp || Date.now());
+        // Jika sudah lebih dari 5 Menit -> Timeout
+        if (ageMs > 5 * 60 * 1000) {
+          clearPendingSubprocess();
+          hideProgressUI();
+          resumeSessionTimer();
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = "KLAIM AKSES";
+          }
+          showMsg("⏰ Permintaan akses mengalami timeout (>5 menit). Silakan coba klik Klaim Akses kembali.", false);
+          return;
+        }
+
+        // Fetch status ke backend
+        const pollPayload = {
+          action: "check_flow_status",
+          flowId: flowId || pending.flowId || "",
+          emailUser: email || pending.email || "",
+          gameId: gameId || pending.gameId || ""
+        };
+
+        fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(pollPayload)
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success) {
+            if (res.status === "SUCCESS") {
+              // SUKSES TERVERIFIKASI
+              clearPendingSubprocess();
+              updateProgressUI(100, "🎉 Akses Terbuka Sempurna!", "✓ Step 4 dari 4: Link Google Drive Siap!", true);
+              
+              setTimeout(() => {
+                if (btn) {
+                  btn.disabled = false;
+                  btn.innerText = "KLAIM AKSES";
+                }
+                if (countdownInterval) clearInterval(countdownInterval);
+                removeSessionData();
+                showMsg("Klaim Akses Berhasil!", true);
+                document.getElementById("portalForm").style.display = "none";
+                document.getElementById("downloadArea").style.display = "block";
+                
+                rawDriveUrl = res.driveUrl || "#";
+                lockUserExit();
+              }, 600);
+            } else if (res.status === "FAILED" || res.status === "BLOCKED") {
+              clearPendingSubprocess();
+              hideProgressUI();
+              resumeSessionTimer();
+              if (btn) {
+                btn.disabled = false;
+                btn.innerText = "KLAIM AKSES";
+              }
+              showMsg("⛔ " + (res.message || "Proses antrean gagal atau dibatalkan oleh server."), false);
+            }
+          }
+        })
+        .catch(err => {
+          console.warn("Polling retry error:", err);
+        });
+      }, 6000);
+    }
+
+    function lockPortalState(errorMessage) {
+      showMsg(errorMessage, false);
+      
+      const submitBtn = document.getElementById("btnSubmit");
+      const selectCategory = document.getElementById("selectCategory");
+      const selectGame = document.getElementById("selectGame");
+      const emailUser = document.getElementById("emailUser");
+      const kodeAkses = document.getElementById("kodeAkses");
+
+      if (submitBtn) submitBtn.disabled = true;
+      if (selectCategory) selectCategory.disabled = true;
+      if (selectGame) selectGame.disabled = true;
+      if (emailUser) emailUser.disabled = true;
+      if (kodeAkses) kodeAkses.disabled = true;
+
+      const statusBox = document.getElementById("tokenStatusBox");
+      if (statusBox) {
+        statusBox.style.background = "#fee2e2";
+        statusBox.style.borderColor = "#fecaca";
+        statusBox.style.color = "#dc2626";
+        statusBox.innerHTML = "🔴 <strong>Akses Terkunci:</strong> Silakan verifikasi ulang melalui tombol download di blog.";
+      }
+    }
+
+    function getDevicePayload() {
+      try {
+        const ua = navigator.userAgent || "";
+        let device = "Desktop";
+        if (/mobile/i.test(ua)) device = "Mobile";
+        else if (/tablet|ipad/i.test(ua)) device = "Tablet";
+
+        let browser = "Unknown Browser";
+        if (ua.includes("Firefox")) browser = "Firefox";
+        else if (ua.includes("SamsungBrowser")) browser = "Samsung Internet";
+        else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
+        else if (ua.includes("Edge") || ua.includes("Edg")) browser = "Edge";
+        else if (ua.includes("Chrome")) browser = "Chrome";
+        else if (ua.includes("Safari")) browser = "Safari";
+
+        return { device: device, browser: browser };
+      } catch (err) {
+        return { device: "Unknown Device", browser: "Unknown Browser" };
+      }
+    }
+
+    function submitClaim() {
+      const warningCard = document.getElementById("premiumWarningCard");
+      if (warningCard) warningCard.style.display = "none";
+
+      const selectCategory = document.getElementById("selectCategory");
+      const selectGame = document.getElementById("selectGame");
+      
+      const categoryVal = selectCategory ? selectCategory.value : "";
+      const gameId = selectGame ? selectGame.value : "";
+      const rawEmail = document.getElementById("emailUser").value.trim().toLowerCase();
+      const email = rawEmail.slice(0, 64);
+      
+      const kodeInput = document.getElementById("kodeAkses");
+      const rawKode = kodeInput ? kodeInput.value.trim() : "";
+      const kode = rawKode.slice(0, 10);
+      
+      const botTrap = document.getElementById("websiteUrlTrap").value;
+      const btn = document.getElementById("btnSubmit");
+      const submitDuration = Date.now() - pageLoadTime;
+
+      if (!categoryVal) {
+        showMsg("Silakan pilih Kategori Arsip terlebih dahulu!", false);
+        return;
+      }
+
+      if (!gameId) {
+        showMsg("Silakan pilih Game / Visual Novel terlebih dahulu!", false);
+        return;
+      }
+
+      if (rawEmail.includes(",") || rawEmail.includes(" ")) {
+        showMsg("Pengisian email ganda atau mengandung koma/spasi tidak diizinkan!", false);
+        return;
+      }
+
+      const emailRegex = /^[a-zA-Z0-9._%+-]{1,50}@gmail\.com$/;
+      if (!emailRegex.test(email)) {
+        showMsg("Email wajib menggunakan alamat @gmail.com yang valid (maksimal 64 karakter)!", false);
+        return;
+      }
+
+      if (currentTab === "PREMIUM") {
+        const lockUntil = localStorage.getItem("RYNET_PREMIUM_LOCK_UNTIL");
+        if (lockUntil && Date.now() < Number(lockUntil)) {
+          const remainingMins = Math.ceil((Number(lockUntil) - Date.now()) / (60 * 1000));
+          showMsg(`🔒 Isian dikunci, coba lagi nanti (${remainingMins} menit lagi).`, false);
+          return;
+        }
+
+        if (!kode) {
+          showMsg("Kode Akses Premium wajib diisi!", false);
+          return;
+        }
+        if (kode.length > 10) {
+          showMsg("Kode Akses Premium maksimal 10 karakter!", false);
+          return;
+        }
+        const kodeRegex = /^\S{1,10}$/;
+        if (!kodeRegex.test(kode)) {
+          showMsg("Kode Akses Premium harus berupa 1 s.d. 10 karakter non-spasi!", false);
+          return;
+        }
+      }
+
+      // SET DIRTY DAN KUNCI TAB SAAT PROSES LOADING BERLANGSUNG
+      isFormDirty = true;
+      lockUserExit();
+
+      // ⏸️ HENTIKAN SEMENTARA TIMER SESI SELAMA SUBPROSES BERJALAN
+      pauseSessionTimer();
+
+      // SIMPAN STATE SUBPROSES PENDING
+      savePendingSubprocess({
+        email: email,
+        gameId: gameId,
+        tipeAkses: currentTab,
+        timestamp: Date.now()
+      });
+
+      btn.disabled = true;
+      btn.innerText = "⏳ Memproses Klaim...";
+
+      // ANIMASI INLINE PROGRESS BAR (4 STEP INDICATOR)
+      updateProgressUI(25, "⚡ Memverifikasi Keamanan Sesi...", "📌 Step 1 dari 4: Mengecek token captcha &amp; validasi IP...");
+
+      setTimeout(() => {
+        updateProgressUI(50, "🌐 Menghubungkan Storage Node...", "📌 Step 2 dari 4: Menentukan Node Storage...");
+      }, 500);
+
+      setTimeout(() => {
+        updateProgressUI(75, "🔑 Mengirimkan Izin Silent Viewer...", "📌 Step 3 dari 4: Eksekusi Drive API Worker Node...");
+      }, 1000);
+
+      let devInfo = { device: "Unknown Device", browser: "Unknown Browser" };
+      try {
+        devInfo = getDevicePayload();
+      } catch (e) {
+        console.warn("Device info fallback:", e);
+      }
+
+      const payload = {
+        action: "claim_access",
+        token: activeToken,
+        wcaptchaToken: activeToken,
+        sessionToken: activeToken,
+        tipeAkses: currentTab,
+        emailUser: email,
+        idGame: gameId,
+        ipPublic: userIp,
+        userCountry: userCountry,
+        userDevice: devInfo.device,
+        userBrowser: devInfo.browser,
+        device: devInfo.device,
+        browser: devInfo.browser,
+        kodeAkses: kode,
+        botTrap: botTrap,
+        submitDuration: submitDuration
+      };
+
+      // Safety controller with 35s timeout to prevent script from hanging indefinitely
+      const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), 35000) : null;
+
+      const fetchOptions = {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      };
+      if (controller) fetchOptions.signal = controller.signal;
+
+      fetch(SCRIPT_URL, fetchOptions)
+      .then(async res => {
+        if (timeoutId) clearTimeout(timeoutId);
+        const rawText = await res.text();
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (jsonErr) {
+          throw new Error("Respon server bukan format JSON yang valid.");
+        }
+
+        if (!data || typeof data !== "object") {
+          throw new Error("Respon server kosong atau format tidak valid.");
+        }
+
+        if (data.success) {
+          clearPendingSubprocess();
+          if (currentTab === "PREMIUM") {
+            localStorage.removeItem("RYNET_PREMIUM_FAILED_ATTEMPTS");
+            localStorage.removeItem("RYNET_PREMIUM_LOCK_UNTIL");
+          }
+
+          // STEP 4: SUKSES 100%
+          updateProgressUI(100, "🎉 Akses Terbuka Sempurna!", "✓ Step 4 dari 4: Link Google Drive Siap!", true);
+
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.innerText = "KLAIM AKSES";
+
+            if (countdownInterval) clearInterval(countdownInterval);
+            removeSessionData(); 
+            const successMsg = data.message || "Klaim Akses Berhasil!";
+            showMsg(successMsg, true);
+            document.getElementById("portalForm").style.display = "none";
+            document.getElementById("downloadArea").style.display = "block";
+
+            rawDriveUrl = data.driveUrl || "#";
+            
+            // MAP PASSWORD ZIP DARI BACKEND
+            if (data.passwordZip) {
+              const passElem = document.getElementById("passText2");
+              if (passElem) passElem.innerText = data.passwordZip;
+            }
+
+            activeEmail = email;
+            activeGameId = gameId;
+            
+            // TETAP JAGA PROTEKSI SAAT HALAMAN DOWNLOAD MUNCUL (AGAR USER BISA MENGAMBIL PASSWORD ZIP)
+            lockUserExit();
+          }, 800);
+        } else if (data.status === "PENDING_IN_PROGRESS" || data.status === "PENDING") {
+          // ⏳ SUBPROSES SEDANG BERJALAN DI MASTER NODE (JANGAN RE-SUBMIT, TAMPILKAN PROGRESS & POLLING)
+          showMsg(data.message || "Permintaan Anda sedang dalam antrean pemrosesan...", false);
+          updateProgressUI(75, "⏳ Menunggu Antrean Node...", "📌 Menghubungkan ke Storage Worker...");
+          savePendingSubprocess({
+            flowId: data.flowId || "",
+            email: email,
+            gameId: gameId,
+            tipeAkses: currentTab,
+            timestamp: Date.now()
+          });
+          startFlowPolling(data.flowId || "", email, gameId, currentTab);
+        } else {
+          clearPendingSubprocess();
+          hideProgressUI();
+          resumeSessionTimer();
+          btn.disabled = false;
+          btn.innerText = "KLAIM AKSES";
+
+          if (currentTab === "PREMIUM") {
+            let attempts = parseInt(localStorage.getItem("RYNET_PREMIUM_FAILED_ATTEMPTS") || "0", 10) + 1;
+            localStorage.setItem("RYNET_PREMIUM_FAILED_ATTEMPTS", attempts.toString());
+
+            if (attempts >= 6) {
+              const lockTime = Date.now() + (15 * 60 * 1000); // Kunci selama 15 menit
+              localStorage.setItem("RYNET_PREMIUM_LOCK_UNTIL", lockTime.toString());
+              showMsg("🔒 Percobaan tebak kode gagal 6x. Isian dikunci, coba lagi nanti.", false);
+              return;
+            } else {
+              const sisa = 6 - attempts;
+              const errorMsg = (data.message || "Kode Akses tidak cocok dengan database.") + ` (Sisa percobaan: ${sisa}x)`;
+              showMsg(errorMsg, false);
+              return;
+            }
+          }
+
+          const errorMsg = data.message || "Gagal memproses klaim akses. Silakan coba lagi.";
+          showMsg(errorMsg, false);
+        }
+      })
+      .catch(err => {
+        if (timeoutId) clearTimeout(timeoutId);
+        hideProgressUI();
+        btn.disabled = false;
+        btn.innerText = "KLAIM AKSES";
+        if (err.name === "AbortError") {
+          showMsg("⏱️ Respon server membutuhkan waktu terlalu lama (Timeout). Silakan coba beberapa saat lagi.", false);
+        } else {
+          showMsg("⚠️ Terjadi gangguan koneksi jaringan saat menerima balasan server.<br><small style='font-size:0.82rem; font-weight:normal;'>Karena sistem diproses di latar belakang server, klaim Anda mungkin sudah sukses terdaftar. Silakan cek status di menu <strong>Cek Akses Terdaftar</strong>.</small>", false);
+        }
+        console.error("Error Claim:", err);
+      });
+    }
+
+    function handleDriveClick() {
+      if (!rawDriveUrl) {
+        alert("Akses link sudah dibuka/di-reset. Silakan lakukan verifikasi ulang jika ingin membuka kembali.");
+        return;
+      }
+
+      const targetUrl = rawDriveUrl;
+      rawDriveUrl = ""; 
+      
+      // BEBASKAN CEGAH TUTUP TAB SAAT USER SUDAH KLIK BUKA DRIVE
+      unlockUserExit(); 
+
+      const trackPayload = {
+        action: "track_click",
+        emailUser: activeEmail,
+        idGame: activeGameId,
+        ipPublic: userIp,
+        userCountry: userCountry
+      };
+
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(SCRIPT_URL, JSON.stringify(trackPayload));
+      } else {
+        fetch(SCRIPT_URL, { 
+          method: "POST", 
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(trackPayload) 
+        }).catch(err => console.error("Track click error:", err));
+      }
+
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+
+      const dlBtn = document.getElementById("finalDriveBtn");
+      if (dlBtn) {
+        dlBtn.style.display = "none";
+      }
+
+      showMsg("✅ Link Google Drive telah dibuka di tab baru.", true);
+    }
+
+    function showMsg(text, isSuccess, isPremiumOnly = false) {
+      const msg = document.getElementById("portalMsg");
+      if (!msg) return;
+
+      const isPremOnly = isPremiumOnly || (typeof text === "string" && text.includes("KHUSUS untuk Akses Premium"));
+
+      if (isPremOnly) {
+        msg.innerHTML = '<div style="font-size: 28px; line-height: 1; margin-bottom: 4px;">👑</div><div style="font-weight: 700; color: #78350f; font-size: 0.92rem;">Arsip Ini Khusus Untuk Akses Premium.<br>Silahkan Klaim Menggunakan Kode Akses!</div>';
+        msg.className = "msg-premium-only";
+      } else {
+        msg.innerHTML = text;
+        msg.className = isSuccess ? "msg-success" : "msg-error";
+      }
+      msg.style.display = "block";
     }
   </script>
 </body>
