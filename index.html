@@ -1076,7 +1076,7 @@
         </div>
 
         <div id="premInfoArea" style="display: none;">
-          <span class="badge-info" style="background: rgb(240, 249, 255); border-color: rgb(186, 230, 253); color: #0369a1;">👑 Manfaat Premium: Akses Jangka Panjang!</span>
+          <span class="badge-info" style="background: rgb(240, 249, 255); border-color: rgb(186, 230, 253); color: #0369a1;">👑 Keuntungan Premium: Akses Jangka Panjang!</span>
 
           <div class="portal-field" style="margin-top: 14px;">
             <label for="kodeAkses">Kode Akses Premium (10 Karakter):</label>
@@ -1151,6 +1151,10 @@
           </div>
           <div class="inline-progress-step" id="progressStepText">
             📌 Step 1 dari 4: Memverifikasi keamanan sesi &amp; token...
+          </div>
+          <!-- KOTAK CATATAN PERINGATAN SUBPROSES PENDING -->
+          <div class="inline-progress-notice" id="progressNoticeCard" style="margin-top: 10px; padding: 10px 12px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 0.82rem; color: #1e40af; line-height: 1.4; display: none;">
+            ⏳ <strong>Mohon jangan menutup atau me-refresh halaman ini</strong> selama proses klaim berlangsung. Sistem sedang menghubungkan dan memverifikasi izin ke Storage Node (maksimal 5 menit).
           </div>
         </div>
 
@@ -1256,6 +1260,11 @@
       if (titleText && titleTxt) titleTxt.innerHTML = titleText;
       if (stepText && stepTxt) stepTxt.innerHTML = stepText;
 
+      const noticeCard = document.getElementById("progressNoticeCard");
+      if (noticeCard) {
+        noticeCard.style.display = isSuccess ? "none" : "block";
+      }
+
       if (isSuccess) {
         fill.classList.add("success");
       } else {
@@ -1266,6 +1275,8 @@
     function hideProgressUI() {
       const box = document.getElementById("inlineProgressBox");
       if (box) box.style.display = "none";
+      const noticeCard = document.getElementById("progressNoticeCard");
+      if (noticeCard) noticeCard.style.display = "none";
     }
 
     // =========================================================================
@@ -1927,14 +1938,24 @@
       }
     }
 
+    let currentSessionTargetTime = null;
+    let savedRemainingSeconds = null;
+    let isTimerPaused = false;
+    let flowPollingInterval = null;
+
     function startCountdownTimer(targetTime) {
       const statusBox = document.getElementById("tokenStatusBox");
       const timerDisplay = document.getElementById("timerDisplay");
 
+      currentSessionTargetTime = targetTime;
+      isTimerPaused = false;
+
       if (statusBox) statusBox.style.display = "block";
 
       function updateTimer() {
-        const remaining = targetTime - Date.now();
+        if (isTimerPaused) return;
+
+        const remaining = currentSessionTargetTime - Date.now();
 
         if (remaining <= 0) {
           clearInterval(countdownInterval);
@@ -1955,6 +1976,156 @@
       updateTimer();
       if (countdownInterval) clearInterval(countdownInterval);
       countdownInterval = setInterval(updateTimer, 1000);
+    }
+
+    // ⏸️ JEDA / FREEZE TIMER SESI (MENDUKUNG SUBPROSES TIDAK DIHAPUS)
+    function pauseSessionTimer() {
+      if (!currentSessionTargetTime || isTimerPaused) return;
+      isTimerPaused = true;
+      const remainingMs = Math.max(0, currentSessionTargetTime - Date.now());
+      savedRemainingSeconds = Math.ceil(remainingMs / 1000);
+      
+      const timerDisplay = document.getElementById("timerDisplay");
+      if (timerDisplay) {
+        timerDisplay.innerHTML = `<span style="font-size:0.85rem; color:#2563eb;">⏸️ DITAHAN (${savedRemainingSeconds}s)</span>`;
+      }
+      try {
+        localStorage.setItem("RYNET_SAVED_SESSION_REMAINING", String(savedRemainingSeconds));
+      } catch(e){}
+    }
+
+    // ▶️ LANJUTKAN / RESUME TIMER SESI
+    function resumeSessionTimer() {
+      if (!isTimerPaused) return;
+      let remSec = savedRemainingSeconds;
+      if (!remSec) {
+        try {
+          remSec = parseInt(localStorage.getItem("RYNET_SAVED_SESSION_REMAINING") || "0", 10);
+        } catch(e){}
+      }
+      if (!remSec || remSec <= 0) remSec = 180; // Default fallback 3 menit
+      
+      const newTarget = Date.now() + (remSec * 1000);
+      try {
+        localStorage.removeItem("RYNET_SAVED_SESSION_REMAINING");
+      } catch(e){}
+      
+      startCountdownTimer(newTarget);
+    }
+
+    // =========================================================================
+    // 🛡️ PERSISTENT SUBPROCESS LOCKING & POLLING SYSTEM
+    // =========================================================================
+    function savePendingSubprocess(flowInfo) {
+      try {
+        localStorage.setItem("RYNET_PENDING_SUBPROCESS", JSON.stringify(flowInfo));
+      } catch(e){}
+    }
+
+    function getPendingSubprocess() {
+      try {
+        const raw = localStorage.getItem("RYNET_PENDING_SUBPROCESS");
+        return raw ? JSON.parse(raw) : null;
+      } catch(e) {
+        return null;
+      }
+    }
+
+    function clearPendingSubprocess() {
+      try {
+        localStorage.removeItem("RYNET_PENDING_SUBPROCESS");
+      } catch(e){}
+      if (flowPollingInterval) {
+        clearInterval(flowPollingInterval);
+        flowPollingInterval = null;
+      }
+    }
+
+    // 📡 POLLING STATUS SUBPROSES KE MASTER SETIAP 6 DETIK
+    function startFlowPolling(flowId, email, gameId, tipeAkses) {
+      if (flowPollingInterval) clearInterval(flowPollingInterval);
+
+      const btn = document.getElementById("btnSubmit");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "⏳ Memproses Antrean...";
+      }
+
+      const noticeCard = document.getElementById("progressNoticeCard");
+      if (noticeCard) noticeCard.style.display = "block";
+
+      flowPollingInterval = setInterval(() => {
+        const pending = getPendingSubprocess();
+        if (!pending) {
+          clearInterval(flowPollingInterval);
+          return;
+        }
+
+        const ageMs = Date.now() - (pending.timestamp || Date.now());
+        // Jika sudah lebih dari 5 Menit -> Timeout
+        if (ageMs > 5 * 60 * 1000) {
+          clearPendingSubprocess();
+          hideProgressUI();
+          resumeSessionTimer();
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = "KLAIM AKSES";
+          }
+          showMsg("⏰ Permintaan akses mengalami timeout (>5 menit). Silakan coba klik Klaim Akses kembali.", false);
+          return;
+        }
+
+        // Fetch status ke backend
+        const pollPayload = {
+          action: "check_flow_status",
+          flowId: flowId || pending.flowId || "",
+          emailUser: email || pending.email || "",
+          gameId: gameId || pending.gameId || ""
+        };
+
+        fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(pollPayload)
+        })
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success) {
+            if (res.status === "SUCCESS") {
+              // SUKSES TERVERIFIKASI
+              clearPendingSubprocess();
+              updateProgressUI(100, "🎉 Akses Terbuka Sempurna!", "✓ Step 4 dari 4: Link Google Drive Siap!", true);
+              
+              setTimeout(() => {
+                if (btn) {
+                  btn.disabled = false;
+                  btn.innerText = "KLAIM AKSES";
+                }
+                if (countdownInterval) clearInterval(countdownInterval);
+                removeSessionData();
+                showMsg("Klaim Akses Berhasil!", true);
+                document.getElementById("portalForm").style.display = "none";
+                document.getElementById("downloadArea").style.display = "block";
+                
+                rawDriveUrl = res.driveUrl || "#";
+                lockUserExit();
+              }, 600);
+            } else if (res.status === "FAILED" || res.status === "BLOCKED") {
+              clearPendingSubprocess();
+              hideProgressUI();
+              resumeSessionTimer();
+              if (btn) {
+                btn.disabled = false;
+                btn.innerText = "KLAIM AKSES";
+              }
+              showMsg("⛔ " + (res.message || "Proses antrean gagal atau dibatalkan oleh server."), false);
+            }
+          }
+        })
+        .catch(err => {
+          console.warn("Polling retry error:", err);
+        });
+      }, 6000);
     }
 
     function lockPortalState(errorMessage) {
@@ -2070,6 +2241,17 @@
       isFormDirty = true;
       lockUserExit();
 
+      // ⏸️ HENTIKAN SEMENTARA TIMER SESI SELAMA SUBPROSES BERJALAN
+      pauseSessionTimer();
+
+      // SIMPAN STATE SUBPROSES PENDING
+      savePendingSubprocess({
+        email: email,
+        gameId: gameId,
+        tipeAkses: currentTab,
+        timestamp: Date.now()
+      });
+
       btn.disabled = true;
       btn.innerText = "⏳ Memproses Klaim...";
 
@@ -2137,6 +2319,7 @@
         }
 
         if (data.success) {
+          clearPendingSubprocess();
           if (currentTab === "PREMIUM") {
             localStorage.removeItem("RYNET_PREMIUM_FAILED_ATTEMPTS");
             localStorage.removeItem("RYNET_PREMIUM_LOCK_UNTIL");
@@ -2170,8 +2353,22 @@
             // TETAP JAGA PROTEKSI SAAT HALAMAN DOWNLOAD MUNCUL (AGAR USER BISA MENGAMBIL PASSWORD ZIP)
             lockUserExit();
           }, 800);
+        } else if (data.status === "PENDING_IN_PROGRESS" || data.status === "PENDING") {
+          // ⏳ SUBPROSES SEDANG BERJALAN DI MASTER NODE (JANGAN RE-SUBMIT, TAMPILKAN PROGRESS & POLLING)
+          showMsg(data.message || "Permintaan Anda sedang dalam antrean pemrosesan...", false);
+          updateProgressUI(75, "⏳ Menunggu Antrean Node...", "📌 Menghubungkan ke Storage Worker...");
+          savePendingSubprocess({
+            flowId: data.flowId || "",
+            email: email,
+            gameId: gameId,
+            tipeAkses: currentTab,
+            timestamp: Date.now()
+          });
+          startFlowPolling(data.flowId || "", email, gameId, currentTab);
         } else {
+          clearPendingSubprocess();
           hideProgressUI();
+          resumeSessionTimer();
           btn.disabled = false;
           btn.innerText = "KLAIM AKSES";
 
