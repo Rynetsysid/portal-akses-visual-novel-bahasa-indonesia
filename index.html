@@ -1855,6 +1855,7 @@
             if (this.value.trim() !== "") {
               isFormDirty = true;
             }
+            evalSubmitButtonState();
           });
         }
       });
@@ -1867,6 +1868,7 @@
             if (this.value !== "") {
               isFormDirty = true;
             }
+            evalSubmitButtonState();
           });
         }
       });
@@ -1928,6 +1930,36 @@
       });
     }
 
+    let isQuotaFull = false;
+
+    function evalSubmitButtonState() {
+      const btn = document.getElementById("btnSubmit");
+      if (!btn) return;
+
+      // Jangan matikan/ubah tombol jika sedang dalam proses submit / polling antrean
+      const currentText = btn.innerText || "";
+      if (currentText.includes("Memproses") || currentText.includes("Loading") || currentText.includes("Mengirim")) {
+        return;
+      }
+
+      const catVal = (document.getElementById("selectCategory")?.value || "").trim();
+      const gameVal = (document.getElementById("selectGame")?.value || "").trim();
+      const kodeVal = (document.getElementById("kodeAkses")?.value || "").trim();
+
+      if (isQuotaFull) {
+        // Jika Kuota Gratis 3/3 (penuh):
+        // Tombol HANYA aktif jika Kategori, Game, DAN Kode Akses terisi (meskipun kodenya asal diisi)
+        if (catVal !== "" && gameVal !== "" && kodeVal !== "") {
+          btn.disabled = false;
+        } else {
+          btn.disabled = true;
+        }
+      } else {
+        // Kuota belum 3/3 (normal)
+        btn.disabled = false;
+      }
+    }
+
     function onCategoryChange() {
       const categorySelect = document.getElementById("selectCategory");
       const gameSelect = document.getElementById("selectGame");
@@ -1945,12 +1977,14 @@
       if (!selectedCategory) {
         gameSelect.disabled = true;
         gameSelect.innerHTML = '<option value="">-- Pilih Kategori Terlebih Dahulu --</option>';
+        evalSubmitButtonState();
         return;
       }
 
       if (!Array.isArray(masterGamesData) || masterGamesData.length === 0) {
         gameSelect.disabled = true;
         gameSelect.innerHTML = '<option value="">-- Data Game Belum Dimuat --</option>';
+        evalSubmitButtonState();
         return;
       }
 
@@ -1972,6 +2006,7 @@
       if (filteredGames.length === 0) {
         gameSelect.disabled = true;
         gameSelect.innerHTML = '<option value="">-- Tidak Ada Game Tersedia di Kategori Ini --</option>';
+        evalSubmitButtonState();
         return;
       }
 
@@ -1984,16 +2019,22 @@
         opt.textContent = g.title || g.namaGame || g.id;
         gameSelect.appendChild(opt);
       });
+
+      evalSubmitButtonState();
     }
 
     function onGameChange() {
       const gameSelect = document.getElementById("selectGame");
       const warningCard = document.getElementById("premiumWarningCard");
-      if (!gameSelect || !warningCard) return;
+      if (!gameSelect || !warningCard) {
+        evalSubmitButtonState();
+        return;
+      }
 
       const selectedGameId = gameSelect.value.trim();
       if (!selectedGameId || !Array.isArray(masterGamesData)) {
         warningCard.style.display = "none";
+        evalSubmitButtonState();
         return;
       }
 
@@ -2008,6 +2049,8 @@
       } else {
         warningCard.style.display = "none";
       }
+
+      evalSubmitButtonState();
     }
 
     function updateStatsUI(stats) {
@@ -2017,6 +2060,12 @@
       
       if (elTotal) elTotal.innerText = (stats.totalUser || 0) + " User";
       if (elQuota) elQuota.innerText = (stats.freeToday || 0) + " / " + (stats.maxFree || 3);
+
+      const freeToday = Number(stats.freeToday || 0);
+      const maxFree = Number(stats.maxFree || 3);
+      isQuotaFull = (freeToday >= maxFree);
+
+      evalSubmitButtonState();
     }
 
     function switchTab(type) {
@@ -2040,6 +2089,8 @@
       if (kodeElem) {
         kodeElem.required = (type === "PREMIUM");
       }
+
+      evalSubmitButtonState();
     }
 
     let currentSessionTargetTime = null;
