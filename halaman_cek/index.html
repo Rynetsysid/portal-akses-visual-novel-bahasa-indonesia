@@ -1265,11 +1265,22 @@
         `;
         freeNotes.style.display = "block";
       } else if (data.hasPremiumData) {
-        freeWrapper.innerHTML = `
-          <div class="empty-card" style="border-left: 4px solid var(--primary);">
-            User berstatus <strong>ACTIVE PREMIUM</strong>. Tab Akses Gratis (FREE) non-aktif.
-          </div>
-        `;
+        const pd = data.premiumData;
+        const statusUpper = pd ? String(pd.status || "").toUpperCase() : "";
+        if (statusUpper.includes("ACTIVE") || statusUpper.includes("AKTIF")) {
+          freeWrapper.innerHTML = `
+            <div class="empty-card" style="border-left: 4px solid var(--primary);">
+              User berstatus <strong>ACTIVE PREMIUM</strong>. Tab Akses Gratis (FREE) non-aktif.
+            </div>
+          `;
+        } else {
+          freeWrapper.innerHTML = `
+            <div class="empty-card">
+              <span class="empty-icon">📭</span>
+              Tidak ada riwayat data Akses Gratis (FREE) untuk email ini.
+            </div>
+          `;
+        }
         freeNotes.style.display = "none";
       } else {
         freeWrapper.innerHTML = `
@@ -1371,8 +1382,15 @@
       }
 
       // Auto Switch ke tab yang sesuai
-      if (data.hasPremiumData) {
-        switchTab('PREMIUM');
+      if (data.hasPremiumData && data.premiumData) {
+        const premStatus = String(data.premiumData.status || "").toUpperCase();
+        if (premStatus.includes("ACTIVE") || premStatus.includes("AKTIF")) {
+          switchTab('PREMIUM');
+        } else if (data.hasFreeData && data.freeData) {
+          switchTab('FREE');
+        } else {
+          switchTab('PREMIUM');
+        }
       } else {
         switchTab('FREE');
       }
