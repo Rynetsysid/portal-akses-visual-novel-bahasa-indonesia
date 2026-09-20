@@ -1056,6 +1056,150 @@
       background: linear-gradient(90deg, transparent 0%, #a7f3d0 50%, transparent 100%);
     }
 
+  
+    /* INFORMASI AKSES CEPAT STYLES */
+    .section-divider {
+      border: 0;
+      border-top: 1.5px dashed var(--primary-border);
+      margin: 20px 0;
+    }
+
+    .quick-info-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .quick-access-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      text-align: left;
+    }
+
+    .quick-access-card .data-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 9px 0;
+      border-bottom: 1px dashed #f1f5f9;
+      font-size: 0.88rem;
+    }
+
+    .quick-access-card .data-row:last-child {
+      border-bottom: none;
+    }
+
+    .quick-access-card .data-label {
+      font-weight: 600;
+      color: var(--text-muted);
+      width: 42%;
+      flex-shrink: 0;
+    }
+
+    .quick-access-card .data-value {
+      font-weight: 700;
+      color: var(--text-main);
+      width: 58%;
+      text-align: right;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .quick-access-card .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .quick-access-card .badge-active {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+    }
+
+    .quick-access-card .badge-full {
+      background: #fff7ed;
+      color: #ea580c;
+      border: 1px solid #fed7aa;
+    }
+
+    .quick-access-card .vip-code-box {
+      background: var(--primary-light);
+      border: 1.5px dashed var(--primary);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .quick-access-card .vip-code-text {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #9a3412;
+      word-break: break-all;
+    }
+
+    .quick-access-card .game-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: right;
+    }
+
+    .quick-access-card .game-list li {
+      margin-bottom: 4px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .quick-access-card .btn-action-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 480px) {
+      .quick-access-card .data-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+      .quick-access-card .data-label {
+        width: 100%;
+      }
+      .quick-access-card .data-value {
+        width: 100%;
+        text-align: left;
+      }
+      .quick-access-card .game-list {
+        text-align: left;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1297,6 +1441,10 @@
             <button class="copy-btn" onclick="copyPassword('passText2', this)" type="button">Salin Password</button>
           </div>
         </div>
+
+        <!-- INFORMASI AKSES CEPAT (AUTO RENDER) -->
+        <hr class="section-divider" />
+        <div id="quickAccessInfoArea"></div>
       </div>
     </div>
 
@@ -2351,6 +2499,20 @@
                 showMsg("Klaim Akses Berhasil!", true);
                 document.getElementById("portalForm").style.display = "none";
                 document.getElementById("downloadArea").style.display = "block";
+            const selectGameElem = document.getElementById("selectGame");
+            const gameTitleText = selectGameElem && selectGameElem.selectedIndex >= 0 ? selectGameElem.options[selectGameElem.selectedIndex].text : "";
+            renderQuickAccessInfo({
+              email: email,
+              gameTitle: gameTitleText,
+              isPremium: currentTab === "PREMIUM",
+              vipCode: kode,
+              tanggalAkses: data.tanggalAkses || data.tanggalKlaim,
+              tanggalExpired: data.tanggalExpired,
+              tanggalMasaTunggu: data.tanggalMasaTunggu || data.batasTunggu,
+              jumlahAkses: data.jumlahAkses || "0 / 3",
+              jumlahSlot: data.jumlahSlot || "1 / 1 TERPAKAI",
+              gamesList: data.gamesList || (data.aksesGame ? [data.aksesGame] : null)
+            });
           const bGroup = document.getElementById("downloadButtonsGroup"); if (bGroup) bGroup.style.display = "flex";
                 
                 rawDriveUrl = res.driveUrl || "#";
@@ -2587,6 +2749,20 @@
             showMsg(successMsg, true);
             document.getElementById("portalForm").style.display = "none";
             document.getElementById("downloadArea").style.display = "block";
+            const selectGameElem = document.getElementById("selectGame");
+            const gameTitleText = selectGameElem && selectGameElem.selectedIndex >= 0 ? selectGameElem.options[selectGameElem.selectedIndex].text : "";
+            renderQuickAccessInfo({
+              email: email,
+              gameTitle: gameTitleText,
+              isPremium: currentTab === "PREMIUM",
+              vipCode: kode,
+              tanggalAkses: data.tanggalAkses || data.tanggalKlaim,
+              tanggalExpired: data.tanggalExpired,
+              tanggalMasaTunggu: data.tanggalMasaTunggu || data.batasTunggu,
+              jumlahAkses: data.jumlahAkses || "0 / 3",
+              jumlahSlot: data.jumlahSlot || "1 / 1 TERPAKAI",
+              gamesList: data.gamesList || (data.aksesGame ? [data.aksesGame] : null)
+            });
           const bGroup = document.getElementById("downloadButtonsGroup"); if (bGroup) bGroup.style.display = "flex";
 
             rawDriveUrl = data.driveUrl || "#";
@@ -2744,6 +2920,126 @@
       }
       msg.style.display = "block";
     }
-  </script>
+  
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderQuickAccessInfo(params) {
+      const container = document.getElementById("quickAccessInfoArea");
+      if (!container) return;
+
+      const now = params.timestamp ? new Date(params.timestamp) : new Date();
+      
+      function formatDate(d) {
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const mins = String(d.getMinutes()).padStart(2, '0');
+        return `${day}/${month}/${year} ${hours}:${mins} WIB`;
+      }
+
+      const tanggalAksesStr = params.tanggalAkses || formatDate(now);
+      
+      // Expired: 1 hari (FREE) / 15 hari (PREMIUM)
+      const expDate = params.tanggalExpired ? new Date(params.tanggalExpired) : new Date(now.getTime() + (params.isPremium ? 15 : 1) * 24 * 60 * 60 * 1000);
+      const tanggalExpiredStr = params.tanggalExpired || formatDate(expDate);
+
+      // Cooldown: 3 hari dari Expired (FREE)
+      const coolDate = params.tanggalMasaTunggu ? new Date(params.tanggalMasaTunggu) : new Date(expDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+      const tanggalMasaTungguStr = params.tanggalMasaTunggu || formatDate(coolDate);
+
+      const email = params.email || "-";
+      const gameTitle = params.gameTitle || "-";
+      const isPremium = params.isPremium || false;
+      const vipCode = params.vipCode || ("VIP" + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + "RYNET" + email.split('@')[0]);
+
+      let html = `<div class="quick-info-header"><span>🛡️ INFORMASI AKSES CEPAT</span></div>`;
+
+      if (!isPremium) {
+        html += `
+          <div class="quick-access-card">
+            <div class="data-row">
+              <span class="data-label">Nama Email:</span>
+              <span class="data-value">${escapeHtml(email)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tanggal Akses:</span>
+              <span class="data-value">${escapeHtml(tanggalAksesStr)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tanggal Expired:</span>
+              <span class="data-value">${escapeHtml(tanggalExpiredStr)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Batas Tunggu (Cooldown):</span>
+              <span class="data-value">${escapeHtml(tanggalMasaTungguStr)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Akses Game:</span>
+              <span class="data-value" style="color: var(--primary);">${escapeHtml(gameTitle)}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        const gamesList = params.gamesList && params.gamesList.length > 0 ? params.gamesList : [gameTitle];
+        let gameItemsHtml = gamesList.map(g => `<li>• ${escapeHtml(g)}</li>`).join('');
+
+        html += `
+          <div class="quick-access-card">
+            <div class="data-row" style="align-items: center;">
+              <span class="data-label">Kode Transaksi VIP:</span>
+              <span class="data-value">
+                <div class="vip-code-box">
+                  <span class="vip-code-text">${escapeHtml(vipCode)}</span>
+                </div>
+              </span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Nama Email:</span>
+              <span class="data-value">${escapeHtml(email)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tanggal Klaim Akses:</span>
+              <span class="data-value">${escapeHtml(tanggalAksesStr)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Tanggal Expired Tiket:</span>
+              <span class="data-value">${escapeHtml(tanggalExpiredStr)}</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Jumlah Akses (24Jam):</span>
+              <span class="data-value">
+                <span class="badge badge-active">${escapeHtml(params.jumlahAkses || "0 / 3")}</span>
+                <a href="javascript:void(0)" onclick="if(typeof checkRemoteServerStatus==='function')checkRemoteServerStatus();" class="btn-action-sm">⚡ + Aksi</a>
+              </span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Jumlah Slot Premium:</span>
+              <span class="data-value"><span class="badge badge-full">${escapeHtml(params.jumlahSlot || "1 / 1 TERPAKAI")}</span></span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Akses Game:</span>
+              <span class="data-value">
+                <ul class="game-list">
+                  ${gameItemsHtml}
+                </ul>
+              </span>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+</script>
 </body>
 </html>
