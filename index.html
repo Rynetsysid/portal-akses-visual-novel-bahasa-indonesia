@@ -692,6 +692,78 @@
       animation: fadeIn 0.4s ease;
     }
 
+    
+    .download-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    @media (min-width: 640px) {
+      .download-btn-group {
+        flex-direction: row;
+      }
+    }
+
+    .btn-android-direct {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex: 1;
+      padding: 14px 18px;
+      background: #16a34a;
+      color: #ffffff !important;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .btn-android-direct:hover {
+      background: #15803d;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35);
+    }
+
+    .btn-gdrive-official {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex: 1;
+      padding: 14px 18px;
+      background: #ea580c;
+      color: #ffffff !important;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .btn-gdrive-official:hover {
+      background: #c2410c;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(234, 88, 12, 0.35);
+    }
+
+    .gdrive-icon-img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 2px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
     .download-btn {
       display: inline-block;
       padding: 14px 28px;
@@ -1195,7 +1267,25 @@
           🎉 Verifikasi Berhasil! Akses Google Drive Anda telah terbuka:
         </p>
 
-        <a class="download-btn" href="javascript:void(0)" id="finalDriveBtn" onclick="handleDriveClick()">📁 Buka Folder Google Drive</a>
+                <div class="download-btn-group" id="downloadButtonsGroup">
+          <a class="btn-android-direct" href="javascript:void(0)" id="androidDriveBtn" onclick="handleDriveClick('android')">
+            <svg style="width:20px; height:20px; flex-shrink:0;" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.523 15.3414C17.0375 15.3414 16.6437 14.9476 16.6437 14.4621C16.6437 13.9766 17.0375 13.5828 17.523 13.5828C18.0085 13.5828 18.4023 13.9766 18.4023 14.4621C18.4023 14.9476 18.0085 15.3414 17.523 15.3414ZM6.47702 15.3414C5.99152 15.3414 5.59772 14.9476 5.59772 14.4621C5.59772 13.9766 5.99152 13.5828 6.47702 13.5828C6.96252 13.5828 7.35632 13.9766 7.35632 14.4621C7.35632 14.9476 6.96252 15.3414 6.47702 15.3414ZM17.9734 9.94828L19.4678 7.36021C19.6106 7.11293 19.5259 6.79727 19.2786 6.65449C19.0313 6.5117 18.7157 6.5964 18.5729 6.84368L17.0425 9.49419C15.5492 8.81432 13.8407 8.43103 12 8.43103C10.1593 8.43103 8.45076 8.81432 6.9575 9.49419L5.42709 6.84368C5.28431 6.5964 4.96864 6.5117 4.72136 6.65449C4.47408 6.79727 4.38938 7.11293 4.53216 7.36021L6.02656 9.94828C2.61058 11.8105 0.288281 15.2265 0 19.2241H24C23.7117 15.2265 21.3894 11.8105 17.9734 9.94828Z"/>
+            </svg>
+            <div>
+              <div style="font-size: 0.88rem; font-weight: 800; line-height: 1.2;">Link Download Untuk Android</div>
+              <div style="font-size: 0.68rem; font-weight: 500; opacity: 0.9;">Langsung di Tab Unduhan Browser</div>
+            </div>
+          </a>
+
+          <a class="btn-gdrive-official" href="javascript:void(0)" id="finalDriveBtn" onclick="handleDriveClick('gdrive')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_Drive_logo.png" alt="Google Drive Logo" class="gdrive-icon-img" />
+            <div>
+              <div style="font-size: 0.88rem; font-weight: 800; line-height: 1.2;">Lihat Di Google Drive</div>
+              <div style="font-size: 0.68rem; font-weight: 500; opacity: 0.9;">Buka App Drive / Browser PC</div>
+            </div>
+          </a>
+        </div>
 
         <div class="mimin-note-box" style="margin-top: 24px; text-align: left;">
           <div class="mimin-note-title">
@@ -2261,6 +2351,7 @@
                 showMsg("Klaim Akses Berhasil!", true);
                 document.getElementById("portalForm").style.display = "none";
                 document.getElementById("downloadArea").style.display = "block";
+          const bGroup = document.getElementById("downloadButtonsGroup"); if (bGroup) bGroup.style.display = "flex";
                 
                 rawDriveUrl = res.driveUrl || "#";
                 lockUserExit();
@@ -2496,6 +2587,7 @@
             showMsg(successMsg, true);
             document.getElementById("portalForm").style.display = "none";
             document.getElementById("downloadArea").style.display = "block";
+          const bGroup = document.getElementById("downloadButtonsGroup"); if (bGroup) bGroup.style.display = "flex";
 
             rawDriveUrl = data.driveUrl || "#";
             
@@ -2565,29 +2657,52 @@
       });
     }
 
-    function handleDriveClick() {
+        function extractDriveId(url) {
+      if (!url) return "";
+      const trimmed = url.trim();
+      if (/^[a-zA-Z0-9_-]{20,}$/.test(trimmed)) {
+        return trimmed;
+      }
+      const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || 
+                    trimmed.match(/id=([a-zA-Z0-9_-]+)/) || 
+                    trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      return match ? match[1] : "";
+    }
+
+    function handleDriveClick(type) {
       if (!rawDriveUrl) {
         alert("Akses link sudah dibuka/di-reset. Silakan lakukan verifikasi ulang jika ingin membuka kembali.");
         return;
       }
 
-      const targetUrl = rawDriveUrl;
+      const driveId = extractDriveId(rawDriveUrl);
+      let targetUrl = rawDriveUrl;
+
+      if (type === 'android' && driveId) {
+        targetUrl = `https://drive.usercontent.google.com/download?id=${driveId}&export=download&confirm=t`;
+      } else if (type === 'gdrive' && driveId && !rawDriveUrl.includes('drive.google.com')) {
+        targetUrl = `https://drive.google.com/file/d/${driveId}/view`;
+      }
+
       rawDriveUrl = ""; 
       
       // BEBASKAN CEGAH TUTUP TAB SAAT USER SUDAH KLIK BUKA DRIVE
-      unlockUserExit(); 
+      if (typeof unlockUserExit === 'function') {
+        unlockUserExit(); 
+      }
 
       const trackPayload = {
         action: "track_click",
-        emailUser: activeEmail,
-        idGame: activeGameId,
-        ipPublic: userIp,
-        userCountry: userCountry
+        emailUser: typeof activeEmail !== "undefined" ? activeEmail : "",
+        idGame: typeof activeGameId !== "undefined" ? activeGameId : "",
+        ipPublic: typeof userIp !== "undefined" ? userIp : "",
+        userCountry: typeof userCountry !== "undefined" ? userCountry : "",
+        clickType: type || "gdrive"
       };
 
-      if (navigator.sendBeacon) {
+      if (navigator.sendBeacon && typeof SCRIPT_URL !== "undefined") {
         navigator.sendBeacon(SCRIPT_URL, JSON.stringify(trackPayload));
-      } else {
+      } else if (typeof SCRIPT_URL !== "undefined") {
         fetch(SCRIPT_URL, { 
           method: "POST", 
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -2597,12 +2712,21 @@
 
       window.open(targetUrl, '_blank', 'noopener,noreferrer');
 
-      const dlBtn = document.getElementById("finalDriveBtn");
-      if (dlBtn) {
-        dlBtn.style.display = "none";
+      const btnGroup = document.getElementById("downloadButtonsGroup");
+      if (btnGroup) {
+        btnGroup.style.display = "none";
       }
 
-      showMsg("✅ Link Google Drive telah dibuka di tab baru.", true);
+      const singleBtn = document.getElementById("finalDriveBtn");
+      if (singleBtn) {
+        singleBtn.style.display = "none";
+      }
+
+      if (type === 'android') {
+        showMsg("✅ Unduhan Android telah dipicu di tab browser Anda.", true);
+      } else {
+        showMsg("✅ Link Google Drive telah dibuka di tab baru.", true);
+      }
     }
 
     function showMsg(text, isSuccess, isPremiumOnly = false) {
