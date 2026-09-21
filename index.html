@@ -2180,21 +2180,31 @@
         return;
       }
 
-      const catVal = (document.getElementById("selectCategory")?.value || "").trim();
+      // ── LAYER 1: Ambil nilai semua input form ────────────────────────────────
+      const catVal  = (document.getElementById("selectCategory")?.value || "").trim();
       const gameVal = (document.getElementById("selectGame")?.value || "").trim();
+      const emailVal = (document.getElementById("emailUser")?.value || "").trim();
       const kodeVal = (document.getElementById("kodeAkses")?.value || "").trim();
 
-      if (isQuotaFull) {
-        // Jika Kuota Gratis 3/3 (penuh):
-        // Tombol HANYA aktif jika Kategori, Game, DAN Kode Akses terisi (meskipun kodenya asal diisi)
-        if (catVal !== "" && gameVal !== "" && kodeVal !== "") {
-          btn.disabled = false;
-        } else {
+      // ── LAYER 2: Validasi Statis (prasyarat input per tab) ───────────────────
+      const isCatValid   = catVal !== "";
+      const isGameValid  = gameVal !== "";
+      const isEmailValid = emailVal !== "" && emailVal.includes("@") && emailVal.includes(".");
+      const isKodeValid  = kodeVal.length === 10; // Tepat 10 karakter kode akses premium
+
+      // ── LAYER 3: Evaluasi Gabungan Statis + Dinamis (Kuota) per Tab ──────────
+      if (currentTab === "FREE") {
+        if (isQuotaFull) {
+          // [DINAMIS] Kuota Gratis FULL (3/3): Tombol FREE dimatikan, user diarahkan ke Tab PREMIUM
           btn.disabled = true;
+        } else {
+          // [STATIS] Kuota masih ada: Tombol ENABLE jika Kategori + Game + Email sudah diisi
+          btn.disabled = !(isCatValid && isGameValid && isEmailValid);
         }
-      } else {
-        // Kuota belum 3/3 (normal)
-        btn.disabled = false;
+      } else if (currentTab === "PREMIUM") {
+        // [STATIS] Status kuota gratis DIABAIKAN di Tab PREMIUM
+        // Tombol ENABLE jika Kategori + Game + Email + Kode Akses (10 digit) sudah diisi
+        btn.disabled = !(isCatValid && isGameValid && isEmailValid && isKodeValid);
       }
     }
 
