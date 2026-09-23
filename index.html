@@ -1494,7 +1494,8 @@
     let userIp = "Unknown";
     let userCountry = "Unknown";
     let pageLoadTime = 0;
-    let rawDriveUrl = ""; 
+    let rawDriveUrl = "";
+    let currentTipeStorage = "FILE"; 
     let activeEmail = "";
     let activeGameId = "";
     let activeToken = ""; 
@@ -2526,6 +2527,7 @@
           const bGroup = document.getElementById("downloadButtonsGroup"); if (bGroup) bGroup.style.display = "flex";
                 
                 rawDriveUrl = res.driveUrl || "#";
+                currentTipeStorage = res.tipeStorage || "FILE";
                 lockUserExit();
               }, 600);
             } else if (res.status === "FAILED" || res.status === "BLOCKED") {
@@ -2776,6 +2778,7 @@
           const bGroup = document.getElementById("downloadButtonsGroup"); if (bGroup) bGroup.style.display = "flex";
 
             rawDriveUrl = data.driveUrl || "#";
+            currentTipeStorage = data.tipeStorage || "FILE";
             
             // MAP PASSWORD ZIP DARI BACKEND
             if (data.passwordZip) {
@@ -2865,9 +2868,17 @@
       let targetUrl = rawDriveUrl;
 
       if (type === 'android' && driveId) {
-        targetUrl = `https://drive.usercontent.google.com/download?id=${driveId}&export=download&confirm=t`;
+        if (currentTipeStorage === "FOLDER") {
+          targetUrl = `https://drive.google.com/drive/folders/${driveId}`;
+        } else {
+          targetUrl = `https://drive.usercontent.google.com/download?id=${driveId}&export=download&confirm=t`;
+        }
       } else if (type === 'gdrive' && driveId && !rawDriveUrl.includes('drive.google.com')) {
-        targetUrl = `https://drive.google.com/file/d/${driveId}/view`;
+        if (currentTipeStorage === "FOLDER") {
+          targetUrl = `https://drive.google.com/drive/folders/${driveId}`;
+        } else {
+          targetUrl = `https://drive.google.com/file/d/${driveId}/view`;
+        }
       }
 
       rawDriveUrl = ""; 
