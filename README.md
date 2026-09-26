@@ -38,35 +38,20 @@ The **Rynet Portal Distribution System** orchestrates end-to-end access lifecycl
 
 The system decouples **central orchestrator logic** from **storage execution**, operating under a **Master-Worker topology**.
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                    RYNET PORTAL DISTRIBUTION SYSTEM                    │
-│                                                                        │
-│  [USER / CLIENT]                                                       │
-│      │                                                                 │
-│      ▼                                                                 │
-│  ┌─────────────────┐    Generate Token  ┌───────────────────────────┐  │
-│  │ BLOG ENTRY GATE │ ─────────────────► │ Master Central Node (GAS) │  │
-│  │ (WCaptcha JS)   │                    │ - Identity & Auth Engine  │  │
-│  └─────────────────┘                    │ - State & Policy Registry │  │
-│                                         └─────────────┬─────────────┘  │
-│  ┌─────────────────┐  Claim Request                   │                │
-│  │ PORTAL CLIENT   │ ─────────────────────────────────┤                │
-│  │ (GitHub Pages)  │                                  │ Dispatch (CMW) │
-│  └─────────────────┘                                  ▼                │
-│                                         ┌───────────────────────────┐  │
-│  ┌─────────────────┐  Access Query      │ Worker Storage Node (GAS) │  │
-│  │ CHECK DASHBOARD │ ─────────────────► │ - Isolated Storage Worker │  │
-│  │ (Status Portal) │                    │ - Local Ledger & Execution│  │
-│  └─────────────────┘                    └─────────────┬─────────────┘  │
-│                                                       │                │
-│                                         Grant / Revoke│ Drive API v2   │
-│                                                       ▼                │
-│                                         ┌───────────────────────────┐  │
-│                                         │   Google Drive Storage    │  │
-│                                         │   (Encrypted Assets)      │  │
-│                                         └───────────────────────────┘  │
-└────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    User["Client / User"] -->|1. Generate WCaptcha Token| BlogGate["Blogspot Entry Gate<br/>(WCaptcha JS)"]
+    BlogGate -->|2. Issue Token Request| MasterNode["Master Central Node (GAS)<br/>• Identity & Auth Engine<br/>• State & Policy Registry"]
+    
+    User -->|3. Redirect with Token| PortalSPA["Main Access Portal<br/>(GitHub Pages SPA)"]
+    PortalSPA -->|4. Submit Claim Request| MasterNode
+    
+    MasterNode -->|5. CMW Webhook Dispatch| WorkerNode["Worker Storage Node (GAS)<br/>• Isolated Execution Agent<br/>• Local Ledger & Sync Engine"]
+    
+    WorkerNode -->|6. Grant / Revoke Permission| DriveAPI["Google Drive Storage<br/>(Encrypted Digital Assets)"]
+    
+    User -->|7. Diagnostic Status Query| CheckSPA["User Status Dashboard<br/>(GitHub Pages SPA)"]
+    CheckSPA -->|8. Fetch Access Status| MasterNode
 ```
 
 ### CDN & DRM Architectural Analogy
@@ -105,23 +90,34 @@ The system decouples **central orchestrator logic** from **storage execution**, 
 
 The **Communication Master-Worker (CMW) Protocol** is a resilient, 2-stage asynchronous communication mechanism over HTTP POST webhooks.
 
-```
- Client Request
-       │
-       ▼
- [STAGE 1: Handshake & Health Probe]
-       ├── Master sends PING_STATUS to target Worker Node
-       ├── Retries up to 3 times with 30s timeout windows
-       └── Validates worker readiness and active operational state
-       │
-       ▼
- [STAGE 2: Signed Request Execution]
-       ├── Master initializes pending transaction record
-       ├── Computes dynamic HMAC-SHA256 signature payload
-       ├── Transmits execution instruction (GRANT/REVOKE) to Worker
-       ├── Worker validates signature & anti-replay timestamp window (60s)
-       ├── Worker executes storage permission update via Drive API
-       └── Worker returns atomic status response to Master
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Client
+    participant Master as Master Central Node
+    participant Worker as Worker Storage Node
+    participant Drive as Google Drive API
+
+    User->>Master: Submit Claim Request (Token + Identity)
+    
+    Note over Master,Worker: Stage 1: Handshake & Health Probe
+    loop Up to 3 Retries (30s Timeout)
+        Master->>Worker: HTTP POST action=PING_STATUS
+        Worker-->>Master: Status 200 OK (Node Active & Ready)
+    end
+    
+    Note over Master,Worker: Stage 2: Signed Request Execution
+    Master->>Master: Create Pending Flow Record & Compute HMAC-SHA256
+    Master->>Worker: HTTP POST action=GRANT_ACCESS (Payload + HMAC + Timestamp)
+    
+    Worker->>Worker: Validate Signature & Timestamp Skew (<= 60s Window)
+    Worker->>Drive: Execute Permission Provisioning (Viewer Role)
+    Drive-->>Worker: Return Provisioning Success
+    Worker->>Worker: Update Local Access Ledger
+    Worker-->>Master: Return Atomic Response (Status Success + Access URL)
+    
+    Master->>Master: Update Central Log Ledger (State: SUCCESS)
+    Master-->>User: Return Granted Access URL & Asset Key
 ```
 
 ### Protocol Protection Features:
@@ -136,53 +132,29 @@ The **Communication Master-Worker (CMW) Protocol** is a resilient, 2-stage async
 
 The platform enforces a **7-Layer Defense-in-Depth Pipeline**. Every request must pass all validation checkpoints sequentially before access is granted.
 
-```
-  Incoming Request
-         │
-         ▼
- ┌─────────────────────────────────────────────────────────────┐
- │ [LAYER 1] Remote Master Control Switch                      │
- │ Checks global operational mode (ACTIVE/MAINTENANCE/DISABLE) │
- └──────────────────────────────┬──────────────────────────────┘
-                                │ Pass
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │ [LAYER 2] IP Rate Defender                                  │
- │ Enforces daily token generation ceilings per client IP      │
- └──────────────────────────────┬──────────────────────────────┘
-                                │ Pass
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │ [LAYER 3] Multi-Account & Sybil Escalation Detector         │
- │ Detects multiple identities sharing device/IP fingerprints  │
- └──────────────────────────────┬──────────────────────────────┘
-                                │ Pass
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │ [LAYER 4] Token Cooldown Enforcer                           │
- │ Enforces mandatory rest windows between token requests      │
- └──────────────────────────────┬──────────────────────────────┘
-                                │ Pass
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │ [LAYER 5] Threat Intelligence & Blacklist Filter            │
- │ Screens identity against temporary and permanent ban lists  │
- └──────────────────────────────┬──────────────────────────────┘
-                                │ Pass
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │ [LAYER 6] WCaptcha Single-Use Token Validator               │
- │ Verifies cryptographic token integrity, TTL, and burn state │
- └──────────────────────────────┬──────────────────────────────┘
-                                │ Pass
-                                ▼
- ┌─────────────────────────────────────────────────────────────┐
- │ [LAYER 7] Dynamic HMAC-SHA256 Worker Handshake              │
- │ Authenticates Master-to-Worker POST payload integrity       │
- └──────────────────────────────┬──────────────────────────────┘
-                                │ Pass
-                                ▼
-                   Access Granted & Provisioned
+```mermaid
+flowchart TD
+    Req["Incoming Access Request"] --> L1{"Layer 1: Remote Control Switch"}
+    L1 -- Maintenance / Disabled --> RejectL1["Reject Request<br/>(HTTP 503 / 403)"]
+    L1 -- Active --> L2{"Layer 2: IP Rate Defender"}
+    
+    L2 -- Exceeded Limit (>6/24h) --> RejectL2["Block Client IP<br/>(24h Temp Isolation)"]
+    L2 -- Pass --> L3{"Layer 3: Sybil Multi-Account Guard"}
+    
+    L3 -- Multi-Account Abuse Detected --> RejectL3["Revoke All Access &<br/>Permanent Blacklist"]
+    L3 -- Pass --> L4{"Layer 4: Token Cooldown Enforcer"}
+    
+    L4 -- Cooldown Active (<8m Window) --> RejectL4["Reject Token Generation"]
+    L4 -- Pass --> L5{"Layer 5: Threat & Blacklist Filter"}
+    
+    L5 -- Identity Blacklisted --> RejectL5["Deny Claim Request"]
+    L5 -- Pass --> L6{"Layer 6: WCaptcha Single-Use Token"}
+    
+    L6 -- Expired / Burned Token --> RejectL6["Invalidate Claim Request"]
+    L6 -- Pass --> L7{"Layer 7: HMAC-SHA256 Worker Signature"}
+    
+    L7 -- Signature Mismatch / Stale Payload --> RejectL7["Reject Webhook Handshake<br/>(HTTP 401/403)"]
+    L7 -- Valid Handshake --> Success["Grant & Provision Digital Access"]
 ```
 
 > [!IMPORTANT]
@@ -196,20 +168,42 @@ The platform enforces a **7-Layer Defense-in-Depth Pipeline**. Every request mus
 
 The platform operates on a **Stateful Identity Lifecycle**, replacing static file distributions with controlled access windows.
 
-```
- ┌─────────┐      Claim      ┌────────┐     24h / Duration     ┌─────────┐
- │ PENDING │ ──────────────► │ ACTIVE │ ─────────────────────► │ EXPIRED │
- └─────────┘                 └────────┘                        └────┬────┘
-                                  │                                 │
-                                  │ Admin / Violation               │ Cron Sweep
-                                  ▼                                 ▼
-                             ┌──────────┐                      ┌─────────┐
-                             │ BANNED / │ ◄─────────────────── │ REVOKED │
-                             │ BLOCKED  │                      └─────────┘
-                             └──────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING : User Submits Claim Request
+    
+    PENDING --> ACTIVE : CMW Verification & Storage Grant
+    PENDING --> FAILED : Handshake Failure / Circuit Breaker
+    
+    ACTIVE --> EXPIRED : 24h Window / Ticket Expired
+    ACTIVE --> BANNED : Security Violation / Sybil Detection
+    
+    EXPIRED --> REVOKED : Autonomous Worker Cron Sweep
+    
+    REVOKED --> [*]
+    BANNED --> [*]
+    FAILED --> [*]
 ```
 
 ### Self-Healing & Cron Synchronization
+
+```mermaid
+flowchart LR
+    subgraph WorkerCron["Worker Cron Sweep Engine (Every 10-15m)"]
+        W1["Scan Local Access Ledger"] --> W2["Identify Expired Access"]
+        W2 --> W3["Invoke Drive API Permission Revoke"]
+        W3 --> W4["Batch Sync Status Report to Master"]
+    end
+    
+    subgraph MasterCron["Master Cron Sweep Engine (Every 15-30m)"]
+        M1["Process Batch Expired Reports"] --> M2["Sweep Central Access Log Ledger"]
+        M2 --> M3["Housekeeping Expired Token Cache"]
+        M3 --> M4["Process Orphaned Pending Flows"]
+    end
+    
+    W4 --> M1
+```
+
 1. **Worker-Side Cron Engine:** Runs periodically to inspect local permission states, execute direct storage permission revocations, and update local ledger states.
 2. **Master-Side Cron Engine:** Periodically sweeps central state ledgers, synchronizes license expirations, clears stale token caches, and processes orphaned transactions.
 3. **Atomic Rollback:** If storage permission assignment succeeds but local logging encounters an exception, the system triggers an emergency rollback, revoking the permission instantly to prevent untracked access leaks.
