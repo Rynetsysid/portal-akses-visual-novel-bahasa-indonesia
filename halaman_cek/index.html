@@ -1621,19 +1621,44 @@
       });
     }
 
+    /**
+     * Menerjemahkan pesan error teknis / native exception Google Drive
+     * menjadi pesan yang ramah dan mudah dipahami oleh pengguna.
+     * @param {string} msg - Pesan error asli dari backend / catch block
+     * @returns {string} Pesan yang sudah disanitasi
+     */
+    function sanitizeErrorMessage(msg) {
+      if (!msg) return "";
+      const strMsg = String(msg);
+      const lowerMsg = strMsg.toLowerCase();
+
+      // Pattern: Exception item ID / Permission Google Drive (ID / EN)
+      if (
+        lowerMsg.includes("item dengan id yang ditetapkan tidak dapat ditemukan") ||
+        lowerMsg.includes("no item with the given id could be found") ||
+        (lowerMsg.includes("exception:") && lowerMsg.includes("tidak dapat ditemukan"))
+      ) {
+        return "Email anda tidak valid, permintaan akses tidak dapat dilakukan. Silahkan cek kembali email anda.";
+      }
+
+      return strMsg;
+    }
+
     function showExtendAlert(type, msg) {
       const alertBox = document.getElementById("extendAlertBox");
       if (!alertBox) return;
+      const finalMsg = type === "error" ? sanitizeErrorMessage(msg) : msg;
       alertBox.className = "alert-box " + (type === "error" ? "alert-error" : "alert-success");
-      alertBox.innerText = msg;
+      alertBox.innerText = finalMsg;
       alertBox.style.display = "block";
     }
 
     // 6. HELPER SHOW ALERT
     function showAlert(type, msg) {
       const alertBox = document.getElementById("alertBox");
+      const finalMsg = type === "error" ? sanitizeErrorMessage(msg) : msg;
       alertBox.className = "alert-box " + (type === "error" ? "alert-error" : "alert-warning");
-      alertBox.innerText = msg;
+      alertBox.innerText = finalMsg;
       alertBox.style.display = "block";
     }
 
