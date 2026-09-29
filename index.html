@@ -2928,6 +2928,29 @@
       }
     }
 
+    /**
+     * Menerjemahkan pesan error teknis / native exception Google Drive
+     * menjadi pesan yang ramah dan mudah dipahami oleh pengguna.
+     * @param {string} msg - Pesan error asli dari backend / catch block
+     * @returns {string} Pesan yang sudah disanitasi
+     */
+    function sanitizeErrorMessage(msg) {
+      if (!msg) return "";
+      const strMsg = String(msg);
+      const lowerMsg = strMsg.toLowerCase();
+
+      // Pattern: Exception item ID / Permission Google Drive (ID / EN)
+      if (
+        lowerMsg.includes("item dengan id yang ditetapkan tidak dapat ditemukan") ||
+        lowerMsg.includes("no item with the given id could be found") ||
+        (lowerMsg.includes("exception:") && lowerMsg.includes("tidak dapat ditemukan"))
+      ) {
+        return "Email anda tidak valid, permintaan akses tidak dapat dilakukan. Silahkan cek kembali email anda.";
+      }
+
+      return strMsg;
+    }
+
     function showMsg(text, isSuccess, isPremiumOnly = false) {
       const msg = document.getElementById("portalMsg");
       if (!msg) return;
@@ -2938,7 +2961,8 @@
         msg.innerHTML = '<div style="font-size: 28px; line-height: 1; margin-bottom: 4px;">👑</div><div style="font-weight: 700; color: #78350f; font-size: 0.92rem;">Arsip Ini Khusus Untuk Akses Premium.<br>Silahkan Klaim Menggunakan Kode Akses!</div>';
         msg.className = "msg-premium-only";
       } else {
-        msg.innerHTML = text;
+        const cleanText = isSuccess ? text : sanitizeErrorMessage(text);
+        msg.innerHTML = cleanText;
         msg.className = isSuccess ? "msg-success" : "msg-error";
       }
       msg.style.display = "block";
