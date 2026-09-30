@@ -2831,7 +2831,12 @@
           }
 
           const errorMsg = data.message || "Gagal memproses klaim akses. Silakan coba lagi.";
-          showMsg(errorMsg, false);
+          showMsg(sanitizeErrorMessage(errorMsg, data.code || ""), false);
+          // IP Lock Exemption: Jika gagal karena email restricted, buka kembali input email
+          if (data.code === "EMAIL_FIRST_FAILED" || data.code === "EMAIL_CACHED_INVALID_30_DAYS") {
+            const emailInput = document.getElementById("emailUser");
+            if (emailInput) { emailInput.disabled = false; emailInput.value = ""; emailInput.focus(); }
+          }
         }
       })
       .catch(err => {
@@ -2934,10 +2939,20 @@
      * @param {string} msg - Pesan error asli dari backend / catch block
      * @returns {string} Pesan yang sudah disanitasi
      */
-    function sanitizeErrorMessage(msg) {
+    function sanitizeErrorMessage(msg, code) {
       if (!msg) return "";
       const strMsg = String(msg);
       const lowerMsg = strMsg.toLowerCase();
+
+      // Smart Gatekeeper: Email Pertama Kali Gagal
+      if (code === "EMAIL_FIRST_FAILED") {
+        return "Email anda tidak dapat diproses. Pastikan email anda benar dan tidak sedang mengalami penangguhan/banned email. Silahkan gunakan email lainnya.";
+      }
+
+      // Smart Gatekeeper: Email Masih Dalam Masa Negative Cache 30 Hari
+      if (code === "EMAIL_CACHED_INVALID_30_DAYS") {
+        return "Email anda tidak dapat diproses. Pengecekan email anda dihitung 30 hari dari masa awal pengecekan. Silahkan gunakan email lainnya.";
+      }
 
       // Pattern: Exception item ID / Permission Google Drive (ID / EN)
       if (
@@ -2945,7 +2960,7 @@
         lowerMsg.includes("no item with the given id could be found") ||
         (lowerMsg.includes("exception:") && lowerMsg.includes("tidak dapat ditemukan"))
       ) {
-        return "Email anda tidak valid, permintaan akses tidak dapat dilakukan. Silahkan cek kembali email anda.";
+        return "Email anda tidak dapat diproses. Pastikan email anda benar dan tidak sedang mengalami penangguhan/banned email. Silahkan gunakan email lainnya.";
       }
 
       return strMsg;
