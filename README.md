@@ -1,7 +1,8 @@
-# Rynet Portal Access & Distribution System (V6.0)
+# Rynet Portal Access & Distribution System (V6.2)
 
 [![Architecture: Master-Worker](https://img.shields.io/badge/Architecture-Master--Worker%20Webhooks-blue.svg)](#architectural-overview)
 [![Security: Defense-in-Depth](https://img.shields.io/badge/Security-7--Layer%20Zero--Trust-red.svg)](#security-architecture)
+[![Gatekeeper: Smart Dual-Tier Cache](https://img.shields.io/badge/Gatekeeper-Smart%20Dual--Tier%20Cache-green.svg)](#smart-gatekeeper-email-verification-engine)
 [![Runtime: Serverless GAS](https://img.shields.io/badge/Runtime-Google%20Apps%20Script%20%7C%20V8-green.svg)](#system-architecture)
 [![License Model: Identity Bound DRM](https://img.shields.io/badge/DRM-Identity--Bound%20Time--Window-orange.svg)](#autonomous-lifecycle--drm-management)
 
@@ -14,6 +15,7 @@ An enterprise-grade, serverless **Digital Resource Distribution and Rights Manag
 - [Executive Summary](#executive-summary)
 - [Architectural Overview](#architectural-overview)
 - [System Components](#system-components)
+- [Smart Gatekeeper Email Verification Engine](#smart-gatekeeper-email-verification-engine)
 - [Communication Protocol (CMW)](#communication-protocol-cmw)
 - [Security Architecture](#security-architecture)
 - [Autonomous Lifecycle & DRM Management](#autonomous-lifecycle--drm-management)
@@ -27,7 +29,9 @@ An enterprise-grade, serverless **Digital Resource Distribution and Rights Manag
 The **Rynet Portal Distribution System** orchestrates end-to-end access lifecycle management for large-scale digital assets. Rather than distributing physical files through risky direct download links or heavy server bandwidth, the platform acts as an **Identity-Bound Digital Rights Management (DRM)** and **Miniature Content Delivery Network (CDN)** router.
 
 ### Key Capabilities:
-- **Zero-Trust Security Pipeline:** 7-stage access validation pipeline enforcing strict IP, device fingerprint, single-use token, and HMAC-SHA256 signature verification.
+- **Zero-Trust Security Pipeline:** Multi-stage access validation pipeline enforcing strict IP, device fingerprint, single-use token, and HMAC-SHA256 signature verification.
+- **Smart Gatekeeper v2 & Quota Defense:** Dual-tier caching engine (7-day positive / 30-day negative cache) that protects Google Drive API quotas by eliminating redundant permission requests on restricted, suspended, or invalid accounts.
+- **IP Lock Exemption:** Decouples email validation failures from network IP block sanctions, ensuring legitimate users can immediately retry with alternative credentials without triggering security lockout.
 - **Autonomous Lifecycle Management:** Self-executing cron engines handle automated permission provisioning, expiration enforcement, and instant access revoking without manual administrative oversight.
 - **Distributed Edge Storage (Sharding):** Horizontal expansion via isolated Worker Storage Nodes, keeping storage quotas segregated and master operations lightweight.
 - **Atomic Operations & Idempotency:** Guaranteed data integrity across distributed nodes with auto-rollback mechanisms upon storage provisioning errors.
@@ -41,7 +45,7 @@ The system decouples **central orchestrator logic** from **storage execution**, 
 ```mermaid
 flowchart TD
     User["Client / User"] -->|1. Generate WCaptcha Token| BlogGate["Blogspot Entry Gate<br/>(WCaptcha JS)"]
-    BlogGate -->|2. Issue Token Request| MasterNode["Master Central Node (GAS)<br/>• Identity & Auth Engine<br/>• State & Policy Registry"]
+    BlogGate -->|2. Issue Token Request| MasterNode["Master Central Node (GAS)<br/>• Identity & Auth Engine<br/>• Smart Gatekeeper Engine<br/>• State & Policy Registry"]
     
     User -->|3. Redirect with Token| PortalSPA["Main Access Portal<br/>(GitHub Pages SPA)"]
     PortalSPA -->|4. Submit Claim Request| MasterNode
@@ -70,7 +74,7 @@ flowchart TD
 
 ### 2. Main Access Portal (GitHub Pages SPA)
 - **Role:** Client-side interface for asset claiming (Free Tier, Premium Tier, and Gift Vouchers).
-- **Functionality:** Validates dynamic tokens, monitors submission metrics, enforces human interaction delays (>2500ms), and provides real-time polling on asynchronous processing status.
+- **Functionality:** Validates dynamic tokens, monitors submission metrics, enforces human interaction delays (>2500ms), provides real-time polling on asynchronous processing status, and handles context-aware error responses via IP Lock Exemption.
 
 ### 3. User Status & History Dashboard (GitHub Pages SPA)
 - **Role:** Self-service diagnostic interface for end-users.
@@ -78,11 +82,53 @@ flowchart TD
 
 ### 4. Master Orchestrator Node (Google Apps Script Backend)
 - **Role:** Single source of truth and system authority.
-- **Functionality:** Evaluates state policy, manages rate-limiting registers, executes remote configuration state changes, routes requests to target storage nodes, and maintains system audit logs.
+- **Functionality:** Evaluates state policy, manages rate-limiting registers, executes remote configuration state changes, routes requests to target storage nodes, runs the Smart Gatekeeper v2 Engine, and maintains system audit logs.
 
 ### 5. Worker Storage Nodes (Google Apps Script Workers)
 - **Role:** Isolated execution agents.
 - **Functionality:** Executes dynamic permission provisioning (`GRANT_ACCESS`) and revoking (`REVOKE_ACCESS`) on storage repositories. Runs independent cron engines for local state sync and batch reporting.
+
+---
+
+## Smart Gatekeeper Email Verification Engine
+
+The **Smart Gatekeeper v2 (`Smart_Tester_Email_Users_Verification`)** is an intelligent identity-testing module deployed on the Master Central Node. It validates whether a user's Google account is capable of receiving Drive permissions **before** attempting full resource provisioning.
+
+```mermaid
+flowchart TD
+    Start["User Submits Email Input"] --> FormatCheck{"Valid @gmail.com Format?"}
+    FormatCheck -->|No| InvalidFormat["Reject Request<br/>(Code: INVALID_FORMAT)"]
+    FormatCheck -->|Yes| CacheCheck{"Check Dual-Tier Cache<br/>(Sheet: Tester_Email_Verification)"}
+    
+    CacheCheck -->|Hit: Status VALID & <= 7 Days| PassValid["✅ Pass Verification<br/>(Code: VALID_CACHE / 0 Drive API Calls)"]
+    CacheCheck -->|Hit: Status INVALID & <= 30 Days| RejectCached["❌ Reject Request<br/>(Code: EMAIL_CACHED_INVALID_30_DAYS / 0 Drive API Calls)"]
+    
+    CacheCheck -->|Miss / Expired| DriveTest["Execute Silent Drive Permission Test<br/>(Drive.Permissions.insert / addViewer)"]
+    
+    DriveTest -->|Success| SaveValidCache["Save VALID Cache (TTL 7 Days)"] --> PassValid
+    
+    DriveTest -->|Fail: User Account Restricted| SaveNegativeCache["Save INVALID Negative Cache (TTL 30 Days)<br/>Lockout_Until = Timestamp + 30d"] --> RejectFirst["❌ Reject Request<br/>(Code: EMAIL_FIRST_FAILED)"]
+    
+    DriveTest -->|Fail: System Glitch / API Timeout| SysError["⚠️ Temporary System Error<br/>(Code: SYSTEM_TEMPORARY_GLITCH / No 30-Day Lockout)"]
+```
+
+### Core Architecture Highlights:
+
+1. **Dual-Tier Caching Mechanism:**
+   - **7-Day Positive Cache (`VALID`):** Successfully verified emails bypass Drive API checks for 7 days, executing instantly with 0 API overhead.
+   - **30-Day Negative Cache (`INVALID`):** Accounts that fail due to Google Drive sharing restrictions, account suspensions, or parental/domain locks are cached for 30 days. Subsequent verification attempts within 30 days are rejected instantly without wasting API quota.
+
+2. **Error Classification & System Resilience:**
+   - **User Account Failures:** Hard errors (e.g., `Item dengan ID yang ditetapkan tidak dapat ditemukan`) trigger 30-day negative caching.
+   - **System Glitches:** Temporary network timeouts, Google API rate limits, or script connection errors return temporary error responses **without** triggering a 30-day lockout.
+
+3. **IP Lock Exemption:**
+   - Email validation failures do **not** increment the client's IP abuse or retoken counter. 
+   - Upon encountering a Gatekeeper rejection, the frontend SPA automatically re-enables and resets the email input field, allowing the user to try an alternative valid email address immediately.
+
+4. **Context-Aware Error Messaging:**
+   - **Initial Failure:** *"Email anda tidak dapat diproses. Pastikan email anda benar dan tidak sedang mengalami penangguhan/banned email. Silahkan gunakan email lainnya."*
+   - **Repeat Failure (< 30 Days):** *"Email anda tidak dapat diproses. Pengecekan email anda dihitung 30 hari dari masa awal pengecekan. Silahkan gunakan email lainnya."*
 
 ---
 
@@ -145,9 +191,9 @@ flowchart TD
     L3 -- Pass --> L4{"Layer 4: Token Cooldown Enforcer"}
     
     L4 -- Cooldown Active (<8m Window) --> RejectL4["Reject Token Generation"]
-    L4 -- Pass --> L5{"Layer 5: Threat & Blacklist Filter"}
+    L4 -- Pass --> L5{"Layer 5: Smart Gatekeeper v2 Email Test"}
     
-    L5 -- Identity Blacklisted --> RejectL5["Deny Claim Request"]
+    L5 -- Invalid / Restricted Account --> RejectL5["Deny Claim Request<br/>(IP Lock Exempt)"]
     L5 -- Pass --> L6{"Layer 6: WCaptcha Single-Use Token"}
     
     L6 -- Expired / Burned Token --> RejectL6["Invalidate Claim Request"]
@@ -161,6 +207,7 @@ flowchart TD
 > **Automated Sanction Escalation:**
 > - **Token Abuse:** Exceeding issuance thresholds triggers automated 24-hour IP isolation.
 > - **Sybil Attack Protection:** Multi-account abuse associated with matching device/network fingerprints results in automated access revocation and permanent blacklisting across all linked identities.
+> - **Smart Gatekeeper Isolation:** Email validation failures at Layer 5 are granted **IP Lock Exemption**, preventing security false-positives while isolating unshareable Google identities.
 
 ---
 
@@ -216,7 +263,7 @@ The architecture supports a multi-tier entitlement structure to balance resource
 
 | Metric / Feature | Free Tier | Premium Tier | Gift Voucher Tier |
 |---|---|---|---|
-| **Identity Requirement** | Validated Google Account | Valid Premium Key + Linked Account | Valid Gift Code + Ex-Premium Account |
+| **Identity Requirement** | Validated Google Account (Gatekeeper Passed) | Valid Premium Key + Linked Account | Valid Gift Code + Ex-Premium Account |
 | **Active Access Window** | 24 Hours | Ticket Duration (e.g., 15 Days) | Designated Custom Window (e.g., 24 Hours) |
 | **Cooldown Period** | 3 Days post-expiration | None | None |
 | **Concurrency Ceiling** | Global active slot cap | Dedicated per-user asset limit | Dedicated per-user asset limit |
@@ -233,8 +280,9 @@ Evaluations of multi-master configurations demonstrated significant overhead due
 By maintaining a **single central orchestrator** alongside **decentralized worker storage nodes**:
 - **Constant Time Routing $\mathcal{O}(1)$:** Master routes claims based on lightweight catalog mapping without carrying storage processing burdens.
 - **Quota Segregation:** Storage API call limits are distributed independently across worker Google accounts, ensuring high availability and system durability.
+- **Smart Gatekeeper Quota Shield:** Dual-tier positive/negative caching cuts unneeded Drive API calls by up to 90%+ for repeated access attempts.
 - **Zero Operating Costs:** Fully serverless deployment requiring zero dedicated physical server footprint or recurring infrastructure overhead.
 
 ---
 
-> *Documentation Version: 6.0 | System Architecture Standard*
+> *Documentation Version: 6.2 | System Architecture Standard*
