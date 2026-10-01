@@ -706,28 +706,36 @@
       }
     }
 
+    .download-btn-group {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-top: 14px;
+    }
+
     .btn-download-single {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       width: 100%;
-      padding: 16px 20px;
+      max-width: 360px;
+      padding: 10px 16px;
       background: #16a34a;
       color: #ffffff !important;
       text-decoration: none;
       border: none;
-      border-radius: var(--radius-md);
-      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.28);
+      border-radius: 9px;
+      box-shadow: 0 3px 10px rgba(22, 163, 74, 0.22);
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s ease;
       text-align: center;
     }
 
     .btn-download-single:hover {
       background: #15803d;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(22, 163, 74, 0.38);
+      transform: translateY(-1.5px);
+      box-shadow: 0 5px 14px rgba(22, 163, 74, 0.32);
     }
 
     .btn-download-single:active {
@@ -735,24 +743,49 @@
     }
 
     .download-title {
-      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+      font-size: 0.88rem;
       font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: 0.02em;
+      line-height: 1.15;
+      letter-spacing: 0.01em;
       text-transform: uppercase;
     }
 
     .download-subtext {
-      font-size: clamp(0.72rem, 1.8vw, 0.82rem);
+      font-size: 0.72rem;
       font-weight: 500;
       opacity: 0.92;
-      margin-top: 3px;
+      margin-top: 2px;
+      line-height: 1.2;
     }
 
     .svg-icon-dl {
-      width: clamp(22px, 3.5vw, 26px);
-      height: clamp(22px, 3.5vw, 26px);
+      width: 19px;
+      height: 19px;
       flex-shrink: 0;
+    }
+
+    /* RESPONSIVE ANDROID / MOBILE (MICRO COMPACT) */
+    @media (max-width: 639px) {
+      .btn-download-single {
+        max-width: 250px;
+        padding: 6px 10px;
+        gap: 6px;
+        border-radius: 7px;
+        box-shadow: 0 2px 6px rgba(22, 163, 74, 0.18);
+      }
+      .download-title {
+        font-size: 0.73rem;
+        line-height: 1.1;
+      }
+      .download-subtext {
+        font-size: 0.6rem;
+        margin-top: 1px;
+        line-height: 1.15;
+      }
+      .svg-icon-dl {
+        width: 14px;
+        height: 14px;
+      }
     }
 
     .download-btn {
@@ -1410,8 +1443,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
             <div style="flex: 1; text-align: center;">
-              <div class="download-title">DOWNLOAD RESOURCE</div>
-              <div class="download-subtext" id="downloadSubtext">Buka Tab Unduhan Langsung File (PC & Android)</div>
+              <div class="download-title">DOWNLOAD ARSIP</div>
+              <div class="download-subtext" id="downloadSubtext">Buka Tab Unduhan Langsung di Browser Anda</div>
             </div>
           </a>
         </div>
@@ -2854,9 +2887,9 @@
       const subtextElem = document.getElementById("downloadSubtext");
       if (subtextElem) {
         if (currentTipeStorage === "FOLDER") {
-          subtextElem.innerText = "Buka Tab Folder Google Drive (PC & Android)";
+          subtextElem.innerText = "Buka Tab Folder Google Drive di Browser Anda";
         } else {
-          subtextElem.innerText = "Buka Tab Unduhan Langsung File (PC & Android)";
+          subtextElem.innerText = "Buka Tab Unduhan Langsung di Browser Anda";
         }
       }
     }
