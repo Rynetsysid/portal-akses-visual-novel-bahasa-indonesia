@@ -706,61 +706,52 @@
       }
     }
 
-    .btn-android-direct {
+    .btn-download-single {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      flex: 1;
-      padding: 14px 18px;
+      gap: 12px;
+      width: 100%;
+      padding: 16px 20px;
       background: #16a34a;
       color: #ffffff !important;
       text-decoration: none;
-      font-weight: 700;
-      border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25);
+      border: none;
+      border-radius: var(--radius-md);
+      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.28);
       cursor: pointer;
-      transition: all 0.2s ease;
-      text-align: left;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: center;
     }
 
-    .btn-android-direct:hover {
+    .btn-download-single:hover {
       background: #15803d;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(22, 163, 74, 0.38);
     }
 
-    .btn-gdrive-official {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      flex: 1;
-      padding: 14px 18px;
-      background: #ea580c;
-      color: #ffffff !important;
-      text-decoration: none;
-      font-weight: 700;
-      border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-align: left;
+    .btn-download-single:active {
+      transform: translateY(0);
     }
 
-    .btn-gdrive-official:hover {
-      background: #c2410c;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(234, 88, 12, 0.35);
+    .download-title {
+      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
     }
 
-    .gdrive-icon-img {
-      width: 20px;
-      height: 20px;
-      object-fit: contain;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 2px;
-      border-radius: 6px;
+    .download-subtext {
+      font-size: clamp(0.72rem, 1.8vw, 0.82rem);
+      font-weight: 500;
+      opacity: 0.92;
+      margin-top: 3px;
+    }
+
+    .svg-icon-dl {
+      width: clamp(22px, 3.5vw, 26px);
+      height: clamp(22px, 3.5vw, 26px);
       flex-shrink: 0;
     }
 
@@ -1414,21 +1405,13 @@
         </p>
 
                 <div class="download-btn-group" id="downloadButtonsGroup">
-          <a class="btn-android-direct" href="javascript:void(0)" id="androidDriveBtn" onclick="handleDriveClick('android')">
-            <svg style="width:20px; height:20px; flex-shrink:0;" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.523 15.3414C17.0375 15.3414 16.6437 14.9476 16.6437 14.4621C16.6437 13.9766 17.0375 13.5828 17.523 13.5828C18.0085 13.5828 18.4023 13.9766 18.4023 14.4621C18.4023 14.9476 18.0085 15.3414 17.523 15.3414ZM6.47702 15.3414C5.99152 15.3414 5.59772 14.9476 5.59772 14.4621C5.59772 13.9766 5.99152 13.5828 6.47702 13.5828C6.96252 13.5828 7.35632 13.9766 7.35632 14.4621C7.35632 14.9476 6.96252 15.3414 6.47702 15.3414ZM17.9734 9.94828L19.4678 7.36021C19.6106 7.11293 19.5259 6.79727 19.2786 6.65449C19.0313 6.5117 18.7157 6.5964 18.5729 6.84368L17.0425 9.49419C15.5492 8.81432 13.8407 8.43103 12 8.43103C10.1593 8.43103 8.45076 8.81432 6.9575 9.49419L5.42709 6.84368C5.28431 6.5964 4.96864 6.5117 4.72136 6.65449C4.47408 6.79727 4.38938 7.11293 4.53216 7.36021L6.02656 9.94828C2.61058 11.8105 0.288281 15.2265 0 19.2241H24C23.7117 15.2265 21.3894 11.8105 17.9734 9.94828Z"/>
+          <a class="btn-download-single" href="javascript:void(0)" id="finalDriveBtn" onclick="handleDriveClick('download')">
+            <svg class="svg-icon-dl" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
-            <div>
-              <div style="font-size: 0.88rem; font-weight: 800; line-height: 1.2;">Link Download Untuk Android</div>
-              <div style="font-size: 0.68rem; font-weight: 500; opacity: 0.9;">Langsung di Tab Unduhan Browser</div>
-            </div>
-          </a>
-
-          <a class="btn-gdrive-official" href="javascript:void(0)" id="finalDriveBtn" onclick="handleDriveClick('gdrive')">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_Drive_logo.png" alt="Google Drive Logo" class="gdrive-icon-img" />
-            <div>
-              <div style="font-size: 0.88rem; font-weight: 800; line-height: 1.2;">Lihat Di Google Drive</div>
-              <div style="font-size: 0.68rem; font-weight: 500; opacity: 0.9;">Buka App Drive / Browser PC</div>
+            <div style="flex: 1; text-align: center;">
+              <div class="download-title">DOWNLOAD RESOURCE</div>
+              <div class="download-subtext" id="downloadSubtext">Buka Tab Unduhan Langsung File (PC & Android)</div>
             </div>
           </a>
         </div>
@@ -2530,6 +2513,7 @@
                 
                 rawDriveUrl = res.driveUrl || "#";
                 currentTipeStorage = res.tipeStorage || "FILE";
+                updateDownloadSubtext();
                 lockUserExit();
               }, 600);
             } else if (res.status === "FAILED" || res.status === "BLOCKED") {
@@ -2781,6 +2765,7 @@
 
             rawDriveUrl = data.driveUrl || "#";
             currentTipeStorage = data.tipeStorage || "FILE";
+            updateDownloadSubtext();
             
             // MAP PASSWORD ZIP DARI BACKEND
             if (data.passwordZip) {
@@ -2865,6 +2850,17 @@
       return match ? match[1] : "";
     }
 
+    function updateDownloadSubtext() {
+      const subtextElem = document.getElementById("downloadSubtext");
+      if (subtextElem) {
+        if (currentTipeStorage === "FOLDER") {
+          subtextElem.innerText = "Buka Tab Folder Google Drive (PC & Android)";
+        } else {
+          subtextElem.innerText = "Buka Tab Unduhan Langsung File (PC & Android)";
+        }
+      }
+    }
+
     function handleDriveClick(type) {
       if (!rawDriveUrl) {
         alert("Akses link sudah dibuka/di-reset. Silakan lakukan verifikasi ulang jika ingin membuka kembali.");
@@ -2874,17 +2870,11 @@
       const driveId = extractDriveId(rawDriveUrl);
       let targetUrl = rawDriveUrl;
 
-      if (type === 'android' && driveId) {
+      if (driveId) {
         if (currentTipeStorage === "FOLDER") {
           targetUrl = `https://drive.google.com/drive/folders/${driveId}`;
         } else {
           targetUrl = `https://drive.usercontent.google.com/download?id=${driveId}&export=download&confirm=t`;
-        }
-      } else if (type === 'gdrive' && driveId && !rawDriveUrl.includes('drive.google.com')) {
-        if (currentTipeStorage === "FOLDER") {
-          targetUrl = `https://drive.google.com/drive/folders/${driveId}`;
-        } else {
-          targetUrl = `https://drive.google.com/file/d/${driveId}/view`;
         }
       }
 
@@ -2901,7 +2891,7 @@
         idGame: typeof activeGameId !== "undefined" ? activeGameId : "",
         ipPublic: typeof userIp !== "undefined" ? userIp : "",
         userCountry: typeof userCountry !== "undefined" ? userCountry : "",
-        clickType: type || "gdrive"
+        clickType: type || "download"
       };
 
       if (navigator.sendBeacon && typeof SCRIPT_URL !== "undefined") {
@@ -2926,11 +2916,7 @@
         singleBtn.style.display = "none";
       }
 
-      if (type === 'android') {
-        showMsg("✅ Unduhan Android telah dipicu di tab browser Anda.", true);
-      } else {
-        showMsg("✅ Link Google Drive telah dibuka di tab baru.", true);
-      }
+      showMsg("✅ Tab unduhan resource telah dipicu/dibuka di browser Anda.", true);
     }
 
     /**
