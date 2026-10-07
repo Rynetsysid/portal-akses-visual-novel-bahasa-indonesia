@@ -1477,14 +1477,15 @@
     </div>
 
     <!-- CARD PENGECEKAN STATUS EMAIL (CHECKER LINK) -->
-    <div class="portal-card" style="margin-top: 20px; text-align: center; background: #fff8f6; border-color: #ffedd5;">
+    <!-- Default: disembunyikan. Ditampilkan via JS setelah token tervalidasi. -->
+    <div id="checkerCard" class="portal-card" style="display: none; margin-top: 20px; text-align: center; background: #fff8f6; border-color: #ffedd5;">
       <div style="font-size: 0.95rem; font-weight: 700; color: #9a3412; margin-bottom: 6px;">
         Sudah pernah login sebelumnya?
       </div>
       <p style="font-size: 0.85rem; color: #7c2d12; margin: 0 0 14px 0;">
         Yuk, cek status email dan riwayat akses kalian di sini.
       </p>
-      <a href="./halaman_cek/" class="portal-btn" style="display: inline-block; width: auto; padding: 10px 24px; text-decoration: none; font-size: 0.88rem; background: linear-gradient(135deg, #ea580c, #c2410c);">
+      <a href="./halaman_cek/" class="portal-btn" onclick="grantCheckerAccess()" style="display: inline-block; width: auto; padding: 10px 24px; text-decoration: none; font-size: 0.88rem; background: linear-gradient(135deg, #ea580c, #c2410c);">
         Cek Akses Terdaftar
       </a>
     </div>
@@ -1929,6 +1930,10 @@
         function showPaymentButtonsUI() {
       const area = document.getElementById("paymentButtonsArea");
       if (area) area.style.display = "block";
+
+      // Tampilkan card checker akses halaman cek (hanya untuk user ber-token valid)
+      const checkerCard = document.getElementById("checkerCard");
+      if (checkerCard) checkerCard.style.display = "block";
     }
 
     function showAndRenderServerStatus(serverConfig) {
@@ -2596,12 +2601,25 @@
       const payArea = document.getElementById("paymentButtonsArea");
       if (payArea) payArea.style.display = "none";
 
+      // Sembunyikan card checker akses karena user tidak memiliki token valid
+      const checkerCard = document.getElementById("checkerCard");
+      if (checkerCard) checkerCard.style.display = "none";
+
       if (statusBox) {
         statusBox.style.background = "#fee2e2";
         statusBox.style.borderColor = "#fecaca";
         statusBox.style.color = "#dc2626";
         statusBox.innerHTML = "🔴 <strong>Akses Terkunci:</strong> Silakan verifikasi ulang melalui tombol download di blog.";
       }
+    }
+
+    // =========================================================================
+    // CHECKER ACCESS GRANT — Tulis kunci sesi sementara sebelum navigasi ke halaman cek
+    // Dipanggil via onclick pada tombol "Cek Akses Terdaftar".
+    // Halaman cek akan memvalidasi kunci ini untuk mencegah akses link mentah.
+    // =========================================================================
+    function grantCheckerAccess() {
+      sessionStorage.setItem("ry_portal_access_key", Date.now().toString());
     }
 
     function getDevicePayload() {
