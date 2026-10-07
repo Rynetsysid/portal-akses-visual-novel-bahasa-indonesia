@@ -1069,8 +1069,68 @@
     let isDataFetched = false;
     let cdInterval = null;
 
+    // =========================================================================
+    // NAVIGATION ORIGIN GUARD
+    // Halaman ini hanya boleh diakses melalui klik tombol resmi di portal utama.
+    // Proteksi ini mencegah akses langsung via link mentah / copy-paste URL.
+    // Metode: sessionStorage key "ry_portal_access_key" yang ditulis portal utama.
+    // =========================================================================
+    function verifyNavigationOrigin() {
+      const accessKey = sessionStorage.getItem("ry_portal_access_key");
+
+      if (!accessKey) {
+        // Tidak ada kunci → akses mentah terdeteksi → tampilkan pesan ditolak
+        const container = document.querySelector(".container");
+        if (container) {
+          container.innerHTML = `
+            <div style="
+              background: #fef2f2;
+              border: 1.5px solid #fecaca;
+              border-radius: 14px;
+              padding: 36px 28px;
+              text-align: center;
+              max-width: 480px;
+              margin: 0 auto;
+              box-shadow: 0 8px 24px rgba(220,38,38,0.08);
+            ">
+              <div style="font-size: 2.6rem; margin-bottom: 12px;">🛑</div>
+              <div style="font-size: 1.1rem; font-weight: 800; color: #dc2626; margin-bottom: 10px;">
+                Akses Ditolak
+              </div>
+              <p style="font-size: 0.88rem; color: #7f1d1d; line-height: 1.6; margin: 0 0 20px 0;">
+                Halaman ini hanya dapat diakses melalui tombol resmi
+                <strong>"Cek Akses Terdaftar"</strong> di Portal Utama Rynet.<br /><br />
+                Silakan selesaikan verifikasi WCaptcha dari postingan blog terlebih dahulu,
+                lalu klik tombol tersebut untuk melanjutkan.
+              </p>
+              <a href="../" style="
+                display: inline-block;
+                padding: 10px 24px;
+                background: linear-gradient(135deg, #ea580c, #c2410c);
+                color: #fff;
+                border-radius: 8px;
+                font-size: 0.88rem;
+                font-weight: 700;
+                text-decoration: none;
+              ">← Kembali ke Portal Utama</a>
+            </div>
+          `;
+        }
+        return; // Hentikan eksekusi lebih lanjut
+      }
+
+      // Kunci ditemukan → navigasi sah. Hapus kunci agar tidak bisa dipakai ulang
+      // (mis. bookmark atau copy URL setelah masuk). Refresh di tab yang sama tetap aman
+      // karena sessionStorage bertahan selama tab tidak ditutup.
+      // Kita TIDAK hapus kuncinya di sini agar refresh tab masih bisa diakses.
+      // Kunci hanya akan hilang jika tab ditutup (perilaku default sessionStorage).
+    }
+
     // 1. OTOMATIS AMBIL IP PUBLIC PENGGUNA UNTUK SHIELD BACKEND & MONITOR INPUT EMAIL
     window.addEventListener("DOMContentLoaded", () => {
+      // Jalankan guard navigasi di baris paling pertama
+      verifyNavigationOrigin();
+
       fetch("https://api.ipify.org?format=json")
         .then(res => res.json())
         .then(data => {
