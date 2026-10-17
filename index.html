@@ -3080,14 +3080,8 @@
       let targetUrl = "";
       if (type === "android") {
         targetUrl = rawDriveUrlAndroid;
-        rawDriveUrlAndroid = ""; // Burn setelah klik (one-time)
-        const btnA = document.getElementById("btnDlAndroid");
-        if (btnA) btnA.style.display = "none";
       } else if (type === "pc") {
         targetUrl = rawDriveUrlPc;
-        rawDriveUrlPc = ""; // Burn setelah klik (one-time)
-        const btnP = document.getElementById("btnDlPc");
-        if (btnP) btnP.style.display = "none";
       } else {
         // Fallback ke URL lama jika type tidak dikenal
         if (!rawDriveUrl) {
@@ -3098,7 +3092,6 @@
         targetUrl = driveId
           ? `https://drive.usercontent.google.com/download?id=${driveId}&export=download&confirm=t`
           : rawDriveUrl;
-        rawDriveUrl = "";
       }
 
       if (!targetUrl) {
@@ -3106,14 +3099,19 @@
         return;
       }
 
-      // Jika kedua URL sudah di-burn, bebaskan exit guard
-      if (!rawDriveUrlAndroid && !rawDriveUrlPc && !rawDriveUrl) {
-        if (typeof unlockUserExit === 'function') unlockUserExit();
-      }
+      // === ATURAN EKSKLUSIF PILIH SATU: Burn kedua URL & sembunyikan semua tombol seketika ===
+      rawDriveUrlAndroid = "";
+      rawDriveUrlPc = "";
+      rawDriveUrl = "";
 
-      rawDriveUrl = ""; // Pastikan lama juga di-clear
-      
-      // BEBASKAN CEGAH TUTUP TAB SAAT USER SUDAH KLIK BUKA DRIVE
+      const btnA = document.getElementById("btnDlAndroid");
+      const btnP = document.getElementById("btnDlPc");
+      const btnGroup = document.getElementById("downloadButtonsGroup");
+      if (btnA) btnA.style.display = "none";
+      if (btnP) btnP.style.display = "none";
+      if (btnGroup) btnGroup.style.display = "none";
+
+      // Bebaskan exit guard saat user sudah memilih dan membuka link
       if (typeof unlockUserExit === 'function') {
         unlockUserExit(); 
       }
