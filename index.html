@@ -2249,6 +2249,15 @@
       }
     }
 
+    // Safety Watchdog: Pastikan modal loading lepas maksimal dalam 8 detik dalam kondisi apa pun
+    setTimeout(function() {
+      const modal = document.getElementById("loadingModal");
+      if (modal && (modal.style.display !== "none" || modal.style.opacity !== "0")) {
+        console.warn("Safety Watchdog: Memaksa lepas loading modal karena batas waktu inisialisasi tercapai.");
+        hideLoadingModal();
+      }
+    }, 8000);
+
     // =========================================================================
     // DYNAMIC CATEGORY POPULATOR & DEPENDENT DROPDOWN LOGIC (KATEGORI -> GAME)
     // =========================================================================
@@ -3057,23 +3066,7 @@
 
 
 
-    /**
-     * SMART DOWNLOAD: Render & tampilkan tombol sesuai ketersediaan link (Stacked Model)
-     * @param {boolean} hasAndroid - apakah link Android tersedia
-     * @param {boolean} hasPc - apakah link PC tersedia
-     */
-    function renderSmartDownloadButtons(hasAndroid, hasPc) {
-      const btnAndroid = document.getElementById("btnDlAndroid");
-      const btnPc      = document.getElementById("btnDlPc");
-      const btnGroup   = document.getElementById("downloadButtonsGroup");
 
-      if (btnAndroid) btnAndroid.style.display = hasAndroid ? "flex" : "none";
-      if (btnPc)      btnPc.style.display      = hasPc      ? "flex" : "none";
-
-      if (btnGroup) {
-        btnGroup.style.display = (hasAndroid || hasPc) ? "flex" : "none";
-      }
-    }
 
     function handleDriveClick(type) {
       // === SMART DOWNLOAD: Pilih URL berdasarkan platform yang diklik ===
@@ -3141,7 +3134,6 @@
       const btnA2 = document.getElementById("btnDlAndroid");
       const btnP2 = document.getElementById("btnDlPc");
       const allHidden = (!btnA2 || btnA2.style.display === "none") && (!btnP2 || btnP2.style.display === "none");
-      const btnGroup = document.getElementById("downloadButtonsGroup");
       if (btnGroup && allHidden) {
         btnGroup.style.display = "none";
       }
