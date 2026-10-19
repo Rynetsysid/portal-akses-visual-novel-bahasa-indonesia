@@ -1402,8 +1402,8 @@
           <label for="selectPlatform">Target Platform:</label>
           <select id="selectPlatform" onchange="evalSubmitButtonState()" required="">
             <option value="">-- Pilih Platform --</option>
-            <option value="ANDROID">📱 Android (JoiPlay)</option>
-            <option value="PC">💻 PC / Windows (MTool)</option>
+            <option value="ANDROID">Android (JoiPlay)</option>
+            <option value="PC">PC / Windows (MTool)</option>
           </select>
         </div>
 
@@ -2480,19 +2480,19 @@
         if (targetPlatform === "ANDROID") {
           // Hanya Android tersedia - Auto-lock ke Android
           platformArea.style.display = "block";
-          platformSelect.innerHTML = '<option value="ANDROID">📱 Android (JoiPlay) — Satu-satunya Versi</option>';
+          platformSelect.innerHTML = '<option value="ANDROID">Hanya tersedia untuk Android/JoiPlay</option>';
           platformSelect.value = "ANDROID";
           platformSelect.disabled = true;
         } else if (targetPlatform === "PC") {
           // Hanya PC tersedia - Auto-lock ke PC
           platformArea.style.display = "block";
-          platformSelect.innerHTML = '<option value="PC">💻 PC / Windows (MTool) — Satu-satunya Versi</option>';
+          platformSelect.innerHTML = '<option value="PC">Hanya tersedia untuk PC/Windows (MTool)</option>';
           platformSelect.value = "PC";
           platformSelect.disabled = true;
         } else {
           // ALL_DEVICE: Kedua platform tersedia - User memilih
           platformArea.style.display = "block";
-          platformSelect.innerHTML = '<option value="">-- Pilih Platform Target --</option><option value="ANDROID">📱 Android (JoiPlay)</option><option value="PC">💻 PC / Windows (MTool)</option>';
+          platformSelect.innerHTML = '<option value="">-- Pilih Platform Target --</option><option value="ANDROID">Android (JoiPlay)</option><option value="PC">PC / Windows (MTool)</option>';
           platformSelect.value = "";
           platformSelect.disabled = false;
         }
