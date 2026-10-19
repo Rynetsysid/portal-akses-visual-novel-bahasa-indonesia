@@ -2383,9 +2383,17 @@
       const categorySelect = document.getElementById("selectCategory");
       const gameSelect = document.getElementById("selectGame");
       const warningCard = document.getElementById("premiumWarningCard");
+      const platformArea = document.getElementById("platformSelectArea");
+      const platformSelect = document.getElementById("selectPlatform");
       const selectedCategory = categorySelect.value.trim().toUpperCase();
 
       if (warningCard) warningCard.style.display = "none";
+      if (platformArea) platformArea.style.display = "none";
+      if (platformSelect) {
+        platformSelect.value = "";
+        platformSelect.disabled = false;
+        platformSelect.innerHTML = '<option value="">-- Pilih Platform --</option><option value="ANDROID">Android (JoiPlay)</option><option value="PC">PC / Windows (MTool)</option>';
+      }
 
       if (selectedCategory !== "") {
         isFormDirty = true;
@@ -2457,7 +2465,11 @@
       if (!selectedGameId || !Array.isArray(masterGamesData)) {
         warningCard.style.display = "none";
         if (platformArea) platformArea.style.display = "none";
-        if (platformSelect) platformSelect.value = "";
+        if (platformSelect) {
+          platformSelect.value = "";
+          platformSelect.disabled = false;
+          platformSelect.innerHTML = '<option value="">-- Pilih Platform --</option><option value="ANDROID">Android (JoiPlay)</option><option value="PC">PC / Windows (MTool)</option>';
+        }
         evalSubmitButtonState();
         return;
       }
