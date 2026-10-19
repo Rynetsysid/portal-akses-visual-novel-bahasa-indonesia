@@ -1288,6 +1288,31 @@
         text-align: left;
       }
     }
+
+    /* PLATFORM SELECTOR SEGMENTED BUTTON AREA */
+    #platformSelectArea label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    /* Platform lock badge (auto-select info) */
+    .platform-locked-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1.5px solid #bbf7d0;
+      background: #f0fdf4;
+      color: #15803d;
+    }
   </style>
 </head>
 <body>
@@ -1369,6 +1394,16 @@
           <label for="selectGame">Pilih Game / Visual Novel:</label>
           <select id="selectGame" disabled onchange="onGameChange()" required="">
             <option value="">-- Pilih Kategori Terlebih Dahulu --</option>
+          </select>
+        </div>
+
+        <!-- 3. PILIH PLATFORM (SMART DOWNLOAD: AUTO-HIDE JIKA HANYA 1 PLATFORM) -->
+        <div class="portal-field" id="platformSelectArea" style="display: none;">
+          <label for="selectPlatform">Target Platform:</label>
+          <select id="selectPlatform" onchange="evalSubmitButtonState()" required="">
+            <option value="">-- Pilih Platform --</option>
+            <option value="ANDROID">📱 Android (JoiPlay)</option>
+            <option value="PC">💻 PC / Windows (MTool)</option>
           </select>
         </div>
 
@@ -2218,7 +2253,7 @@
         }
       });
 
-      const selects = ["selectCategory", "selectGame"];
+      const selects = ["selectCategory", "selectGame", "selectPlatform"];
       selects.forEach(id => {
         const elem = document.getElementById(id);
         if (elem) {
@@ -2310,16 +2345,23 @@
       }
 
       // ── LAYER 1: Ambil nilai semua input form ────────────────────────────────
-      const catVal  = (document.getElementById("selectCategory")?.value || "").trim();
-      const gameVal = (document.getElementById("selectGame")?.value || "").trim();
-      const emailVal = (document.getElementById("emailUser")?.value || "").trim();
-      const kodeVal = (document.getElementById("kodeAkses")?.value || "").trim();
+      const catVal      = (document.getElementById("selectCategory")?.value || "").trim();
+      const gameVal     = (document.getElementById("selectGame")?.value || "").trim();
+      const emailVal    = (document.getElementById("emailUser")?.value || "").trim();
+      const kodeVal     = (document.getElementById("kodeAkses")?.value || "").trim();
+      const platformArea = document.getElementById("platformSelectArea");
+      const platformVal = (document.getElementById("selectPlatform")?.value || "").trim();
+      const isPlatformAreaVisible = platformArea && platformArea.style.display !== "none";
 
       // ── LAYER 2: Validasi Statis (prasyarat input per tab) ───────────────────
-      const isCatValid   = catVal !== "";
-      const isGameValid  = gameVal !== "";
-      const isEmailValid = emailVal !== "" && emailVal.includes("@") && emailVal.includes(".");
-      const isKodeValid  = kodeVal.length === 10; // Tepat 10 karakter kode akses premium
+      const isCatValid      = catVal !== "";
+      const isGameValid     = gameVal !== "";
+      const isEmailValid    = emailVal !== "" && emailVal.includes("@") && emailVal.includes(".");
+      const isKodeValid     = kodeVal.length === 10; // Tepat 10 karakter kode akses premium
+      // Platform wajib dipilih jika area platform tampil (dan tidak di-lock/disabled)
+      const platformSelect = document.getElementById("selectPlatform");
+      const isPlatformLocked = platformSelect && platformSelect.disabled;
+      const isPlatformValid = !isPlatformAreaVisible || isPlatformLocked || platformVal !== "";
 
       // ── LAYER 3: Evaluasi Gabungan Statis + Dinamis (Kuota) per Tab ──────────
       if (currentTab === "FREE") {
@@ -2327,13 +2369,13 @@
           // [DINAMIS] Kuota Gratis FULL (3/3): Tombol FREE dimatikan, user diarahkan ke Tab PREMIUM
           btn.disabled = true;
         } else {
-          // [STATIS] Kuota masih ada: Tombol ENABLE jika Kategori + Game + Email sudah diisi
-          btn.disabled = !(isCatValid && isGameValid && isEmailValid);
+          // [STATIS] Kuota masih ada: Tombol ENABLE jika Kategori + Game + Platform + Email sudah diisi
+          btn.disabled = !(isCatValid && isGameValid && isPlatformValid && isEmailValid);
         }
       } else if (currentTab === "PREMIUM") {
         // [STATIS] Status kuota gratis DIABAIKAN di Tab PREMIUM
-        // Tombol ENABLE jika Kategori + Game + Email + Kode Akses (10 digit) sudah diisi
-        btn.disabled = !(isCatValid && isGameValid && isEmailValid && isKodeValid);
+        // Tombol ENABLE jika Kategori + Game + Platform + Email + Kode Akses (10 digit) sudah diisi
+        btn.disabled = !(isCatValid && isGameValid && isPlatformValid && isEmailValid && isKodeValid);
       }
     }
 
@@ -2403,6 +2445,9 @@
     function onGameChange() {
       const gameSelect = document.getElementById("selectGame");
       const warningCard = document.getElementById("premiumWarningCard");
+      const platformArea = document.getElementById("platformSelectArea");
+      const platformSelect = document.getElementById("selectPlatform");
+
       if (!gameSelect || !warningCard) {
         evalSubmitButtonState();
         return;
@@ -2411,6 +2456,8 @@
       const selectedGameId = gameSelect.value.trim();
       if (!selectedGameId || !Array.isArray(masterGamesData)) {
         warningCard.style.display = "none";
+        if (platformArea) platformArea.style.display = "none";
+        if (platformSelect) platformSelect.value = "";
         evalSubmitButtonState();
         return;
       }
@@ -2419,12 +2466,36 @@
 
       const gameObj = masterGamesData.find(g => String(g.id || "").trim() === selectedGameId);
       const aksesLevel = gameObj ? String(gameObj.accessLevel || gameObj.aksesLevel || gameObj.akses || gameObj.access || gameObj.akses_level || gameObj.access_level || "").toUpperCase() : "";
+      const targetPlatform = gameObj ? String(gameObj.targetPlatform || "ALL_DEVICE").toUpperCase() : "ALL_DEVICE";
 
       // TAMPILKAN CARD WARN HANYA JIKA GAME BERLABEL PREMIUM_ONLY
       if (aksesLevel === "PREMIUM_ONLY") {
         warningCard.style.display = "block";
       } else {
         warningCard.style.display = "none";
+      }
+
+      // [SMART DOWNLOAD] Kelola dropdown platform berdasarkan TARGET_PLATFORM game
+      if (platformArea && platformSelect) {
+        if (targetPlatform === "ANDROID") {
+          // Hanya Android tersedia - Auto-lock ke Android
+          platformArea.style.display = "block";
+          platformSelect.innerHTML = '<option value="ANDROID">📱 Android (JoiPlay) — Satu-satunya Versi</option>';
+          platformSelect.value = "ANDROID";
+          platformSelect.disabled = true;
+        } else if (targetPlatform === "PC") {
+          // Hanya PC tersedia - Auto-lock ke PC
+          platformArea.style.display = "block";
+          platformSelect.innerHTML = '<option value="PC">💻 PC / Windows (MTool) — Satu-satunya Versi</option>';
+          platformSelect.value = "PC";
+          platformSelect.disabled = true;
+        } else {
+          // ALL_DEVICE: Kedua platform tersedia - User memilih
+          platformArea.style.display = "block";
+          platformSelect.innerHTML = '<option value="">-- Pilih Platform Target --</option><option value="ANDROID">📱 Android (JoiPlay)</option><option value="PC">💻 PC / Windows (MTool)</option>';
+          platformSelect.value = "";
+          platformSelect.disabled = false;
+        }
       }
 
       evalSubmitButtonState();
@@ -2840,6 +2911,10 @@
         console.warn("Device info fallback:", e);
       }
 
+      // [SMART DOWNLOAD] Ambil nilai platform yang dipilih user
+      const platformSelectElem = document.getElementById("selectPlatform");
+      const selectedPlatform = platformSelectElem ? platformSelectElem.value.trim().toUpperCase() : "";
+
       const payload = {
         action: "claim_access",
         token: activeToken,
@@ -2848,6 +2923,7 @@
         tipeAkses: currentTab,
         emailUser: email,
         idGame: gameId,
+        platformTarget: selectedPlatform, // [SMART DOWNLOAD] Platform yang dipilih user: ANDROID | PC | ""
         ipPublic: userIp,
         userCountry: userCountry,
         userDevice: devInfo.device,
