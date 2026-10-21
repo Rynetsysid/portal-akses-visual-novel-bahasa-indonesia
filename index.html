@@ -2478,6 +2478,10 @@
 
       const gameObj = masterGamesData.find(g => String(g.id || "").trim() === selectedGameId);
       const aksesLevel = gameObj ? String(gameObj.accessLevel || gameObj.aksesLevel || gameObj.akses || gameObj.access || gameObj.akses_level || gameObj.access_level || "").toUpperCase() : "";
+
+      // [SMART DOWNLOAD] Gunakan effectivePlatformMode dari backend (berbasis ISI LINK NYATA)
+      // Fallback ke targetPlatform lama jika effectivePlatformMode belum tersedia (backward compat)
+      const effectiveMode = gameObj ? String(gameObj.effectivePlatformMode || "").toUpperCase() : "";
       const targetPlatform = gameObj ? String(gameObj.targetPlatform || "ALL_DEVICE").toUpperCase() : "ALL_DEVICE";
 
       // TAMPILKAN CARD WARN HANYA JIKA GAME BERLABEL PREMIUM_ONLY
@@ -2487,22 +2491,33 @@
         warningCard.style.display = "none";
       }
 
-      // [SMART DOWNLOAD] Kelola dropdown platform berdasarkan TARGET_PLATFORM game
+      // [SMART DOWNLOAD] Kelola dropdown platform berdasarkan effectivePlatformMode
       if (platformArea && platformSelect) {
-        if (targetPlatform === "ANDROID") {
+        if (effectiveMode === "ALL_DEVICE_LOCKED" || (effectiveMode === "" && targetPlatform === "ALL_DEVICE" && gameObj && gameObj.hasAllDevice)) {
+          // 1 File Universal: Auto-lock ke "Mendukung Android & PC" - user tidak perlu memilih
+          platformArea.style.display = "block";
+          platformSelect.innerHTML = '<option value="ALL_DEVICE">Mendukung Android & PC (Universal)</option>';
+          platformSelect.value = "ALL_DEVICE";
+          platformSelect.disabled = true;
+        } else if (effectiveMode === "ANDROID_ONLY" || (effectiveMode === "" && targetPlatform === "ANDROID")) {
           // Hanya Android tersedia - Auto-lock ke Android
           platformArea.style.display = "block";
           platformSelect.innerHTML = '<option value="ANDROID">Hanya tersedia untuk Android</option>';
           platformSelect.value = "ANDROID";
           platformSelect.disabled = true;
-        } else if (targetPlatform === "PC") {
+        } else if (effectiveMode === "PC_ONLY" || (effectiveMode === "" && targetPlatform === "PC")) {
           // Hanya PC tersedia - Auto-lock ke PC
           platformArea.style.display = "block";
-          platformSelect.innerHTML = '<option value="PC">Hanya tersedia untuk PC/Windows</option>';
+          platformSelect.innerHTML = '<option value="PC">Hanya tersedia untuk PC / Windows</option>';
           platformSelect.value = "PC";
           platformSelect.disabled = true;
+        } else if (effectiveMode === "NO_LINK") {
+          // Semua link kosong (admin belum setup) - sembunyikan dropdown
+          platformArea.style.display = "none";
+          platformSelect.value = "";
+          platformSelect.disabled = true;
         } else {
-          // ALL_DEVICE: Kedua platform tersedia - User memilih
+          // SPLIT_CHOICE atau fallback ALL_DEVICE lama tanpa hasAllDevice: user memilih Android / PC
           platformArea.style.display = "block";
           platformSelect.innerHTML = '<option value="">-- Pilih Platform Target --</option><option value="ANDROID">Android</option><option value="PC">PC / Windows</option>';
           platformSelect.value = "";
